@@ -10,10 +10,10 @@ Herba Mystica are considered one of most useful items for shiny hunting as they 
 RaidCalc is a simple tool to find such optimal seeds. It's built on top of logic obtained from [RaidCrawler](https://github.com/LegoFigure11/RaidCrawler) and [PKHeX](https://github.com/kwsch/PKHeX). Original code was written in C#, wasn't optimized and had no multithreading. RaidCalc is basically a C++ port with extra optimizations and multithreading. Single-threaded performance has been improved by ~92%. Total improvement (with threads) brought execution time from 2.5 hours down to just over 3 minutes on my test machine.
 
 You can find seeds for 8, 9 and 10 Herba Mystica Raids here:
-[Scarlet Seeds](RaidCalc/herba_seeds_scarlet.txt)
-[Violet Seeds](RaidCalc/herba_seeds_violet.txt)
+- [Scarlet Seeds](RaidCalc/herba_seeds_scarlet.txt)
+- [Violet Seeds](RaidCalc/herba_seeds_violet.txt)
 
-TODO:
+### TODO:
 - searching for other interesting drops
 - searching for shiny raids
 
