@@ -12,8 +12,5 @@ RaidCalc is a simple tool to find such optimal seeds. It's built on top of logic
 All seeds are for 6 star raids (maximum story progression required):
 - Herba Mystica (8, 9 and 10 drops): [Scarlet Seeds](RaidCalc/herba_seeds_scarlet.txt)/[Violet Seeds](RaidCalc/herba_seeds_violet.txt)
 - Ability Patches (5 drops): [Scarlet Seeds](RaidCalc/ability_patch_seeds_scarlet.txt)/[Violet Seeds](RaidCalc/ability_patch_seeds_violet.txt)
-
-### TODO:
-- searching for other interesting drops
-- searching for shiny raids
+- Shiny 6IV: [Scarlet Seeds](RaidCalc/shiny_6iv_seeds_scarlet.txt)/[Violet Seeds](RaidCalc/shiny_6iv_seeds_violet.txt)
 

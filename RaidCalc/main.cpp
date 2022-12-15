@@ -6,16 +6,18 @@
 #include <windows.h>
 #include "Xoroshiro128Plus.hpp"
 #include "EncounterTera9.hpp"
+#include "PokemonNames.hpp"
 
 #define THREAD_COUNT	4
 #define SEED_COUNT		0x100000000
 #define DROP_THRESHOLD	8
 #define GAME			GameViolet
+#define SHINY_MODE
 
 struct RaidResult
 {
 	uint32_t seed;
-	uint32_t drops;
+	uint32_t result;
 };
 
 struct ThreadData
@@ -179,6 +181,40 @@ DWORD WINAPI rewards_thread(LPVOID Parameter)
 	return 0;
 }
 
+DWORD WINAPI shiny_thread(LPVOID Parameter)
+{
+	ThreadData *data = (ThreadData *)Parameter;
+	for (uint64_t seed = data->range_min; seed < data->range_max; ++seed)
+	{
+		Xoroshiro128Plus gen(seed);
+		uint32_t EC = (uint32_t)gen.next_int();
+		uint32_t TIDSID = (uint32_t)gen.next_int();
+		uint32_t PID = (uint32_t)gen.next_int();
+		bool is_shiny = (((PID >> 16) ^ (PID & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
+		if (!is_shiny)
+			continue;
+		EncounterTera9 *enc = get_encounter((uint32_t)seed, 4);
+		int32_t ivs[] = { -1, -1, -1, -1, -1, -1 };
+		for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
+		{
+			int32_t index;
+			do
+			{
+				index = (int32_t)gen.next_int(6);
+			} while (ivs[index] != -1);
+			ivs[index] = 31;
+		}
+		for (size_t i = 0; i < _countof(ivs); ++i)
+		{
+			if (ivs[i] == -1)
+				ivs[i] = (int32_t)gen.next_int(32);
+		}
+		if (ivs[0] + ivs[1] + ivs[2] + ivs[3] + ivs[4] + ivs[5] == 186)
+			data->results.push_back({ (uint32_t)seed, enc->species });
+	}
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	std::vector<uint8_t> encounter_data = read_file("encounter_gem_paldea.pkl");
@@ -219,7 +255,11 @@ int main(int argc, char *argv[])
 		auto &data = thread_data[i];
 		data.range_min = (SEED_COUNT / THREAD_COUNT) * i;
 		data.range_max = (SEED_COUNT / THREAD_COUNT) * (i + 1);
+		#ifdef SHINY_MODE
+		handles[i] = CreateThread(NULL, 0, shiny_thread, &data, 0, NULL);
+		#else
 		handles[i] = CreateThread(NULL, 0, rewards_thread, &data, 0, NULL);
+		#endif
 		if (!handles[i])
 		{
 			printf("Failed to create thread #%u!\n", i);
@@ -244,7 +284,13 @@ int main(int argc, char *argv[])
 	{
 		auto &data = thread_data[i];
 		for (auto &result : data.results)
-			printf("seed=%08X drops=%u\n", result.seed, result.drops);
+		{
+			#ifdef SHINY_MODE
+			printf("seed=%08X %s\n", result.seed, pokemon_names[result.result]);
+			#else
+			printf("seed=%08X drops=%u\n", result.seed, result.result);
+			#endif
+		}
 	}
 	return 0;
 }

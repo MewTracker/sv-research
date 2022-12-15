@@ -143,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EncounterTera9.hpp" />
+    <ClInclude Include="PokemonNames.hpp" />
     <ClInclude Include="RaidRewards.hpp" />
     <ClInclude Include="Xoroshiro128Plus.hpp" />
   </ItemGroup>

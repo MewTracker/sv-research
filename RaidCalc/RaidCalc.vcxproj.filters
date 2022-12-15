@@ -29,6 +29,9 @@
     <ClInclude Include="RaidRewards.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PokemonNames.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="RaidFixedRewards.inc.hpp">
