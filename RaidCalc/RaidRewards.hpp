@@ -36,5 +36,5 @@ struct RaidLotteryRewards
     RaidLotteryRewardItemInfo items[30];
 };
 
-#include "RaidFixedRewards.inc"
-#include "RaidLotteryRewards.inc"
+#include "RaidFixedRewards.inc.hpp"
+#include "RaidLotteryRewards.inc.hpp"

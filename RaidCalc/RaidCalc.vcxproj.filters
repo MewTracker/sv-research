@@ -31,10 +31,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="RaidFixedRewards.inc">
+    <None Include="RaidFixedRewards.inc.hpp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="RaidLotteryRewards.inc">
+    <None Include="RaidLotteryRewards.inc.hpp">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

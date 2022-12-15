@@ -8,12 +8,14 @@
 #include "EncounterTera9.hpp"
 
 #define THREAD_COUNT	4
+#define SEED_COUNT		0x100000000
+#define DROP_THRESHOLD	8
 #define GAME			GameViolet
 
 struct RaidResult
 {
 	uint32_t seed;
-	uint32_t herbs;
+	uint32_t drops;
 };
 
 struct ThreadData
@@ -25,6 +27,7 @@ struct ThreadData
 
 std::vector<std::vector<EncounterTera9>> encounters;
 std::vector<std::vector<uint8_t>> fast_encounter_lookup;
+std::vector<int8_t> target_drops;
 
 static std::vector<uint8_t> read_file(const char *filename)
 {
@@ -42,11 +45,6 @@ static std::vector<uint8_t> read_file(const char *filename)
 	if (bytes_read != size)
 		return std::vector<uint8_t>();
 	return buffer;
-}
-
-static bool is_herba(int32_t item_id)
-{
-	return item_id >= 1904 && item_id <= 1908;
 }
 
 static const RaidFixedRewards *get_fixed_drop_table(uint64_t table_name)
@@ -142,13 +140,12 @@ static int32_t get_reward_count(int32_t random, int32_t stars)
 static uint32_t get_rewards(uint32_t seed, int progress, int raid_boost)
 {
 	EncounterTera9 *enc = get_encounter(seed, progress);
-	uint32_t herba_counter = 0;
+	uint32_t drop_counter = 0;
 	for (auto &item : enc->fixed_drops->items)
 	{
 		if (item.category == 0 && item.item_id == 0)
 			continue;
-		if (is_herba(item.item_id_final))
-			++herba_counter;
+		drop_counter += target_drops[item.item_id_final];
 	}
 	int32_t rate_total = enc->lottery_drops->rate_total;
 	Xoroshiro128Plus gen(seed);
@@ -161,14 +158,13 @@ static uint32_t get_rewards(uint32_t seed, int progress, int raid_boost)
 			auto &item = enc->lottery_drops->items[j];
 			if (roll < item.rate)
 			{
-				if (is_herba(item.item_id_final))
-					++herba_counter;
+				drop_counter += target_drops[item.item_id_final];
 				break;
 			}
 			roll -= item.rate;
 		}
 	}
-	return herba_counter;
+	return drop_counter;
 }
 
 DWORD WINAPI rewards_thread(LPVOID Parameter)
@@ -176,9 +172,9 @@ DWORD WINAPI rewards_thread(LPVOID Parameter)
 	ThreadData *data = (ThreadData *)Parameter;
 	for (uint64_t seed = data->range_min; seed < data->range_max; ++seed)
 	{
-		uint32_t herbs = get_rewards((uint32_t)seed, 4, 0);
-		if (herbs > 7)
-			data->results.push_back({ (uint32_t)seed, herbs });
+		uint32_t drops = get_rewards((uint32_t)seed, 4, 0);
+		if (drops >= DROP_THRESHOLD)
+			data->results.push_back({ (uint32_t)seed, drops });
 	}
 	return 0;
 }
@@ -205,8 +201,14 @@ int main(int argc, char *argv[])
 		encounters[enc.stars].push_back(enc);
 	}
 	compute_fast_encounter_lookups();
+	target_drops.resize(20000 + 1);
+	// Herba Mystica
+	for (size_t i = 1904; i <= 1908; ++i)
+		target_drops[i] = 1;
+	// Ability Patches
+	//target_drops[1606] = 1;
 
-	static_assert((0x100000000 % THREAD_COUNT) == 0, "Thread count must be a power of 2");
+	static_assert((SEED_COUNT % THREAD_COUNT) == 0, "Thread count must be a power of 2");
 	LARGE_INTEGER frequency, start_time, end_time, elapsed_microseconds;
 	QueryPerformanceFrequency(&frequency);
 	QueryPerformanceCounter(&start_time);
@@ -215,8 +217,8 @@ int main(int argc, char *argv[])
 	for (uint32_t i = 0; i < THREAD_COUNT; ++i)
 	{
 		auto &data = thread_data[i];
-		data.range_min = (0x100000000 / THREAD_COUNT) * i;
-		data.range_max = (0x100000000 / THREAD_COUNT) * (i + 1);
+		data.range_min = (SEED_COUNT / THREAD_COUNT) * i;
+		data.range_max = (SEED_COUNT / THREAD_COUNT) * (i + 1);
 		handles[i] = CreateThread(NULL, 0, rewards_thread, &data, 0, NULL);
 		if (!handles[i])
 		{
@@ -242,7 +244,7 @@ int main(int argc, char *argv[])
 	{
 		auto &data = thread_data[i];
 		for (auto &result : data.results)
-			printf("seed=%08X herbs=%u\n", result.seed, result.herbs);
+			printf("seed=%08X drops=%u\n", result.seed, result.drops);
 	}
 	return 0;
 }

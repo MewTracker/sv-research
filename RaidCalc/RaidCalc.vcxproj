@@ -147,8 +147,8 @@
     <ClInclude Include="Xoroshiro128Plus.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="RaidFixedRewards.inc" />
-    <None Include="RaidLotteryRewards.inc" />
+    <None Include="RaidFixedRewards.inc.hpp" />
+    <None Include="RaidLotteryRewards.inc.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
