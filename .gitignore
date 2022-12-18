@@ -1,5 +1,7 @@
 .vs/
 .idea/
+/**/Debug/
+/**/Release/
 *.FileListAbsolute.txt
 *.bin
 *.cache

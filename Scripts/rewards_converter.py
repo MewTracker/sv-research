@@ -39,7 +39,7 @@ if __name__ == "__main__":
     for record in fixed:
         fixed_cpp += get_record(record, '', get_fixed_reward_items)
     fixed_cpp += '};\n'
-    with open(os.path.join(base_dir, '..', 'RaidCalc', 'RaidFixedRewards.inc'), 'w') as f:
+    with open(os.path.join(base_dir, '..', 'RaidCalc', 'RaidFixedRewards.inc.hpp'), 'w') as f:
         f.write(fixed_cpp)
 
     with open(os.path.join(base_dir, 'raid_lottery_reward_item_array.json'), 'r') as f:
@@ -51,5 +51,5 @@ if __name__ == "__main__":
             rate_total += record['RewardItem%02d' % i]['Rate']
         lottery_cpp += get_record(record, ' %d,' % rate_total, get_lottery_reward_items)
     lottery_cpp += '};\n'
-    with open(os.path.join(base_dir, '..', 'RaidCalc', 'RaidLotteryRewards.inc'), 'w') as f:
+    with open(os.path.join(base_dir, '..', 'RaidCalc', 'RaidLotteryRewards.inc.hpp'), 'w') as f:
         f.write(lottery_cpp)
