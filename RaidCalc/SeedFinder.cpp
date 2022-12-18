@@ -1,3 +1,4 @@
+#include <QFile>
 #include <windows.h>
 #include <xmmintrin.h>
 #include <cassert>
@@ -30,8 +31,8 @@ SeedFinder::SeedFinder() :
 
 bool SeedFinder::initialize()
 {
-	std::vector<uint8_t> encounter_data = read_file("encounter_gem_paldea.pkl");
-	std::vector<uint8_t> reward_map = read_file("reward_map");
+	std::vector<uint8_t> encounter_data = read_file(":/RaidCalc/encounter_gem_paldea.pkl");
+	std::vector<uint8_t> reward_map = read_file(":/RaidCalc/reward_map");
 	if (encounter_data.empty() || reward_map.empty())
 		return false;
 	size_t encounter_count = encounter_data.size() / 0x18;
@@ -55,18 +56,13 @@ bool SeedFinder::initialize()
 
 std::vector<uint8_t> SeedFinder::read_file(const char *filename)
 {
-	FILE *f = nullptr;
-	fopen_s(&f, filename, "rb");
-	if (!f)
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly))
 		return std::vector<uint8_t>();
-	fseek(f, 0, SEEK_END);
-	long size = ftell(f);
-	fseek(f, 0, SEEK_SET);
 	std::vector<uint8_t> buffer;
-	buffer.resize(size);
-	size_t bytes_read = fread(buffer.data(), 1, size, f);
-	fclose(f);
-	if (bytes_read != size)
+	buffer.resize(file.size());
+	QDataStream stream(&file);
+	if (stream.readRawData((char *)buffer.data(), buffer.size()) != buffer.size())
 		return std::vector<uint8_t>();
 	return buffer;
 }
@@ -135,7 +131,7 @@ EncounterTera9* SeedFinder::get_encounter(uint32_t seed, int stage)
 
 int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars)
 {
-	static const int32_t slots[8][5] =
+	static const int32_t reward_slots[8][5] =
 	{
 		{ 0, 0, 0, 0, 0 },
 		{ 4, 5, 6, 7, 8 },
@@ -146,7 +142,7 @@ int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars)
 		{ 7, 8, 9, 10, 11 },
 		{ 7, 8, 9, 10, 11 },
 	};
-	assert(stars > 0 && stars < _countof(slots));
+	assert(stars > 0 && stars < _countof(reward_slots));
 	static const int8_t random_lookup[] =
 	{
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -161,7 +157,7 @@ int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars)
 		4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
 	};
 	assert(random < _countof(random_lookup));
-	return slots[stars][random_lookup[random]];
+	return reward_slots[stars][random_lookup[random]];
 }
 
 uint32_t SeedFinder::get_rewards(uint32_t seed, int progress, int raid_boost)
