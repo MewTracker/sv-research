@@ -1,0 +1,46 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v3
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        msbuild-architecture: x64
+        vs-version: '[17,]'
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.3.2'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+    
+    - name: Set up Qt registry entries
+      run: |
+        reg add HKEY_CURRENT_USER\SOFTWARE\Digia\Versions /v DefaultQtVersion /d 6.3.2_msvc2019_64
+        reg add HKEY_CURRENT_USER\SOFTWARE\Digia\Versions\6.3.2_msvc2019_64 /v InstallDir /d $env:Qt6_DIR
+
+    - name: Set up QtMsBuild for RaidCalc
+      run: Expand-Archive -Force Deps\QtMsBuild.zip RaidCalc
+
+    - name: Build RaidCalc
+      run: msbuild SVTools.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
+
+    - name: Run windeployqt
+      run: windeployqt --release --no-svg --no-translations --no-system-d3d-compiler --no-opengl-sw x64\Release
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: RaidCalc
+        path: |
+          x64\Release\**
+          !x64\Release\imageformats
