@@ -1,5 +1,6 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
+#include <set>
 #include <vector>
 #include <algorithm>
 #include "RaidCalc.h"
@@ -14,17 +15,15 @@ RaidCalc::RaidCalc(QWidget* parent)
         QMessageBox::critical(this, "Error", "Failed to initialize seed finder.");
         QTimer::singleShot(0, qApp, &QCoreApplication::quit);
     }
-    std::vector<std::pair<std::string, int>> species_data;
-    for (int i = 1; i < _countof(pokemon_names); ++i)
-        species_data.push_back({ pokemon_names[i], i });
+    std::set<uint32_t> encounterable_species;
+    finder.visit_encounters([&](const EncounterTera9& enc) { encounterable_species.insert(enc.species); });
+    std::vector<std::pair<std::string, uint32_t>> species_data;
+    for (auto& species : encounterable_species)
+        species_data.push_back({ pokemon_names[species], species });
     std::sort(species_data.begin(), species_data.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
-    species_lookup.push_back(0);
-    ui.comboBoxSpecies->addItem("Any");
+    ui.comboBoxSpecies->addItem("Any", 0U);
     for (auto& pair : species_data)
-    {
-        species_lookup.push_back(pair.second);
-        ui.comboBoxSpecies->addItem(pair.first.c_str());
-    }
+        ui.comboBoxSpecies->addItem(pair.first.c_str(), pair.second);
     itemFilters = new ItemFilterDialog(this);
     ui.tableSeeds->setModel(&seedModel);
     finder_timer = new QTimer(this);
@@ -122,7 +121,7 @@ void RaidCalc::on_buttonFindSeeds_clicked()
         QMessageBox::critical(this, "Error", "Max seed cannot be smaller than min seed.");
         return;
     }
-    finder.species = species_lookup[ui.comboBoxSpecies->currentIndex()];
+    finder.species = ui.comboBoxSpecies->currentData().toUInt();
     finder.shiny = ui.comboBoxShiny->currentIndex();
     finder.tera_type = ui.comboBoxTeraType->currentIndex();
     finder.ability = ui.comboBoxAbility->currentIndex();
@@ -132,9 +131,20 @@ void RaidCalc::on_buttonFindSeeds_clicked()
         finder.min_iv[i] = min_iv_widgets[i]->value();
     for (size_t i = 0; i < _countof(max_iv_widgets); ++i)
         finder.max_iv[i] = max_iv_widgets[i]->value();
-    finder.use_item_filters = ui.checkboxItemFilters->isChecked();
+    finder.item_filters_active = ui.checkboxItemFilters->isChecked();
     finder.drop_threshold = ui.spinBoxMinItemsSum->value();
     itemFilters->update_seed_finder(finder);
+    if (!finder.use_filters())
+    {
+        if (finder.max_seed - finder.min_seed + 1ULL > MaxSeeds)
+        {
+            QMessageBox::critical(this, "Error", QString("No filters set. Search aborted because it would exceed maximum allowed number of results (%1).").arg(MaxSeeds));
+            return;
+        }
+        auto result = QMessageBox::question(this, "Warning", "No filters set, this may result in a huge result set. Do you want to continue anyway?");
+        if (result != QMessageBox::Yes)
+            return;
+    }
     toggle_ui(false);
     if (!finder.find_seeds())
     {

@@ -23,6 +23,8 @@ public slots:
     void on_finder_timer_timeout();
 
 private:
+    static const uint64_t MaxSeeds = 10000000ULL;
+
     bool hex_to_uint32(const QString& hex_string, uint32_t& result);
     bool hex_to_uint32(const char* hex_string, uint32_t& result);
     void toggle_ui(bool enabled);
@@ -35,5 +37,4 @@ private:
     QTimer* finder_timer;
     SeedTableModel seedModel;
     SeedFinder finder;
-    std::vector<int> species_lookup;
 };

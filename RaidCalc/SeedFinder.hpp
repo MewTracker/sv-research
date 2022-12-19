@@ -8,6 +8,8 @@
 class SeedFinder
 {
 public:
+	using EncounterVisitor = void(const EncounterTera9& enc);
+
 	struct SeedInfo
 	{
 		uint32_t seed;
@@ -26,6 +28,10 @@ public:
 	bool is_search_done();
 	void set_drop_filter(int item_id, bool value);
 	SeedInfo get_seed_info(uint32_t seed) const;
+	void visit_encounters(std::function<EncounterVisitor> visitor) const;
+	bool use_pokemon_filters() const;
+	bool use_item_filters() const;
+	bool use_filters() const;
 
 	// Config
 	uint32_t thread_count;
@@ -47,7 +53,7 @@ public:
 	int8_t max_iv[6];
 
 	// Query - Items
-	bool use_item_filters;
+	bool item_filters_active;
 	int32_t drop_threshold;
 
 	// Results
@@ -74,7 +80,6 @@ private:
 	const EncounterTera9* get_encounter(uint32_t seed, int stage) const;
 	int32_t get_reward_count(int32_t random, int32_t stars) const;
 	uint32_t get_rewards(uint32_t seed, int progress, int raid_boost) const;
-	bool use_pokemon_filters() const;
 	bool check_pokemon(uint32_t seed) const;
 	bool check_rewards(uint32_t seed) const;
 
@@ -88,6 +93,7 @@ private:
 	static DWORD WINAPI pokemon_thread_wrapper(LPVOID Parameter);
 	static DWORD WINAPI find_seeds_thread_wrapper(LPVOID Parameter);
 
+	int32_t item_filters_count;
 	alignas(16) int8_t min_iv_vec[16];
 	alignas(16) int8_t max_iv_vec[16];
 	std::vector<std::vector<EncounterTera9>> encounters;

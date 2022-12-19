@@ -4,7 +4,6 @@
 #include <cassert>
 #include <memory>
 #include "Xoroshiro128Plus.hpp"
-#include "PokemonNames.hpp"
 #include "SeedFinder.hpp"
 
 SeedFinder::SeedFinder() :
@@ -20,8 +19,9 @@ SeedFinder::SeedFinder() :
 	nature(0),
 	gender(0),
 	shiny(0),
-	use_item_filters(false),
-	drop_threshold(0)
+	item_filters_active(false),
+	drop_threshold(0),
+	item_filters_count(0)
 {
 	memset(min_iv, 0, sizeof(min_iv));
 	memset(max_iv, 0, sizeof(max_iv));
@@ -291,9 +291,9 @@ void SeedFinder::find_seeds_thread()
 	uint64_t seed_count = max_seed - min_seed + 1ULL;
 	uint64_t seed_chunk = seed_count / thread_count;
 	LPTHREAD_START_ROUTINE proc = NULL;
-	if (use_pokemon_filters() && use_item_filters)
+	if (use_pokemon_filters() && use_item_filters())
 		proc = combo_thread_wrapper;
-	else if (use_item_filters)
+	else if (use_item_filters())
 		proc = rewards_thread_wrapper;
 	else
 		proc = pokemon_thread_wrapper;
@@ -343,8 +343,6 @@ DWORD WINAPI SeedFinder::find_seeds_thread_wrapper(LPVOID Parameter)
 bool SeedFinder::find_seeds()
 {
 	seeds.clear();
-	if (!use_pokemon_filters() && !use_item_filters)
-		return false;
 	memcpy(min_iv_vec, min_iv, sizeof(min_iv));
 	memcpy(max_iv_vec, max_iv, sizeof(max_iv));
 	hFinderThread = CreateThread(NULL, 0, find_seeds_thread_wrapper, this, 0, NULL);
@@ -367,7 +365,19 @@ bool SeedFinder::is_search_done()
 
 void SeedFinder::set_drop_filter(int item_id, bool value)
 {
-	target_drops[item_id] = value ? 1 : 0;
+	auto& drop_value = target_drops[item_id];
+	if (value)
+	{
+		if (!drop_value)
+			++item_filters_count;
+		drop_value = 1;
+	}
+	else
+	{
+		if (drop_value)
+			--item_filters_count;
+		drop_value = 0;
+	}
 }
 
 bool SeedFinder::use_pokemon_filters() const
@@ -381,6 +391,16 @@ bool SeedFinder::use_pokemon_filters() const
 		if (iv != 31)
 			return true;
 	return false;
+}
+
+bool SeedFinder::use_item_filters() const
+{
+	return item_filters_active && item_filters_count > 0;
+}
+
+bool SeedFinder::use_filters() const
+{
+	return use_pokemon_filters() || use_item_filters();
 }
 
 SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
@@ -410,9 +430,16 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 			ivs[i] = (int8_t)gen.next_int(32);
 	}
 	memcpy(info.iv, ivs, sizeof(info.iv));
-	if (use_item_filters)
+	if (use_item_filters())
 		info.drops = get_rewards(seed, StoryProgress, RaidBoost);
 	else
 		info.drops = 0;
 	return info;
+}
+
+void SeedFinder::visit_encounters(std::function<EncounterVisitor> visitor) const
+{
+	for (auto& enc_vector : encounters)
+		for (auto& enc : enc_vector)
+			visitor(enc);
 }
