@@ -5,7 +5,7 @@
 #include "RaidCalc.h"
 #include "PokemonNames.hpp"
 
-RaidCalc::RaidCalc(QWidget *parent)
+RaidCalc::RaidCalc(QWidget* parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
@@ -26,10 +26,27 @@ RaidCalc::RaidCalc(QWidget *parent)
         ui.comboBoxSpecies->addItem(pair.first.c_str());
     }
     itemFilters = new ItemFilterDialog(this);
-    seedModel = new QStandardItemModel(this);
-    ui.tableSeeds->setModel(seedModel);
+    ui.tableSeeds->setModel(&seedModel);
     finder_timer = new QTimer(this);
     connect(finder_timer, &QTimer::timeout, this, &RaidCalc::on_finder_timer_timeout);
+    SYSTEM_INFO sys_info;
+    GetSystemInfo(&sys_info);
+    for (uint32_t i = 0; i < sys_info.dwNumberOfProcessors - 1; ++i)
+        ui.comboBoxThreads->addItem(QString::number(i + 1));
+    ui.comboBoxThreads->setCurrentIndex(ui.comboBoxThreads->count() - 1);
+
+    min_iv_widgets[0] = ui.spinBoxMinHP;
+    min_iv_widgets[1] = ui.spinBoxMinAtk;
+    min_iv_widgets[2] = ui.spinBoxMinDef;
+    min_iv_widgets[3] = ui.spinBoxMinSpA;
+    min_iv_widgets[4] = ui.spinBoxMinSpD;
+    min_iv_widgets[5] = ui.spinBoxMinSpe;
+    max_iv_widgets[0] = ui.spinBoxMaxHP;
+    max_iv_widgets[1] = ui.spinBoxMaxAtk;
+    max_iv_widgets[2] = ui.spinBoxMaxDef;
+    max_iv_widgets[3] = ui.spinBoxMaxSpA;
+    max_iv_widgets[4] = ui.spinBoxMaxSpD;
+    max_iv_widgets[5] = ui.spinBoxMaxSpe;
 
     // TODO: Implement filters
     ui.labelTeraType->setVisible(false);
@@ -62,11 +79,6 @@ bool RaidCalc::hex_to_uint32(const char* hex_string, uint32_t& result)
     return true;
 }
 
-QString RaidCalc::format_uint32(uint32_t value)
-{
-    return QString("%1").arg(value, 8, 16, QLatin1Char('0'));
-}
-
 QStandardItem* RaidCalc::readonly_item(QString text)
 {
     QStandardItem* item = new QStandardItem(text);
@@ -86,13 +98,15 @@ void RaidCalc::toggle_ui(bool enabled)
     if (!enabled)
     {
         itemFilters->hide();
-        seedModel->clear();
+        seedModel.clear();
     }
 }
 
 void RaidCalc::on_buttonFindSeeds_clicked()
 {
     finder.game = (Game)ui.comboBoxGame->currentIndex();
+    finder.stars = ui.comboBoxStars->currentIndex() + 1;
+    finder.thread_count = ui.comboBoxThreads->currentIndex() + 1;
     if (!hex_to_uint32(ui.editMinSeed->text(), finder.min_seed))
     {
         QMessageBox::critical(this, "Error", "Bad min seed value.");
@@ -108,33 +122,16 @@ void RaidCalc::on_buttonFindSeeds_clicked()
         QMessageBox::critical(this, "Error", "Max seed cannot be smaller than min seed.");
         return;
     }
-    finder.stars = ui.comboBoxStars->currentIndex() + 1;
     finder.species = species_lookup[ui.comboBoxSpecies->currentIndex()];
     finder.shiny = ui.comboBoxShiny->currentIndex();
     finder.tera_type = ui.comboBoxTeraType->currentIndex();
     finder.ability = ui.comboBoxAbility->currentIndex();
     finder.nature = ui.comboBoxNature->currentIndex();
     finder.gender = ui.comboBoxGender->currentIndex();
-    QSpinBox* min_widgets[] = {
-        ui.spinBoxMinHP,
-        ui.spinBoxMinAtk,
-        ui.spinBoxMinDef,
-        ui.spinBoxMinSpA,
-        ui.spinBoxMinSpD,
-        ui.spinBoxMinSpe,
-    };
-    for (size_t i = 0; i < _countof(min_widgets); ++i)
-        finder.min_iv[i] = min_widgets[i]->value();
-    QSpinBox* max_widgets[] = {
-        ui.spinBoxMaxHP,
-        ui.spinBoxMaxAtk,
-        ui.spinBoxMaxDef,
-        ui.spinBoxMaxSpA,
-        ui.spinBoxMaxSpD,
-        ui.spinBoxMaxSpe,
-    };
-    for (size_t i = 0; i < _countof(max_widgets); ++i)
-        finder.max_iv[i] = max_widgets[i]->value();
+    for (size_t i = 0; i < _countof(min_iv_widgets); ++i)
+        finder.min_iv[i] = min_iv_widgets[i]->value();
+    for (size_t i = 0; i < _countof(max_iv_widgets); ++i)
+        finder.max_iv[i] = max_iv_widgets[i]->value();
     finder.use_item_filters = ui.checkboxItemFilters->isChecked();
     finder.drop_threshold = ui.spinBoxMinItemsSum->value();
     itemFilters->update_seed_finder(finder);
@@ -153,6 +150,24 @@ void RaidCalc::on_buttonEditFilters_clicked()
     itemFilters->show();
 }
 
+void RaidCalc::on_buttonResetPokemonFilters_clicked()
+{
+    ui.comboBoxSpecies->setCurrentIndex(0);
+    ui.comboBoxShiny->setCurrentIndex(0);
+    for (auto& widget : min_iv_widgets)
+        widget->setValue(0);
+    for (auto& widget : max_iv_widgets)
+        widget->setValue(31);
+}
+
+void RaidCalc::on_buttonMaxIV_clicked()
+{
+    for (auto& widget : min_iv_widgets)
+        widget->setValue(31);
+    for (auto& widget : max_iv_widgets)
+        widget->setValue(31);
+}
+
 void RaidCalc::on_finder_timer_timeout()
 {
     if (!finder.is_search_done())
@@ -160,21 +175,6 @@ void RaidCalc::on_finder_timer_timeout()
     finder_timer->stop();
     QString msg = QString("Found %1 seeds in %2ms.").arg(QString::number(finder.seeds.size()), QString::number(finder.time_taken.milliseconds()));
     QMessageBox::information(this, "Success", msg);
-    QStringList headers;
-    headers << "Seed" << "Species" << "Shiny" << "EC" << "PID" << "HP" << "Atk" << "Def" << "SpA" << "SpD" << "Spe" << "Drops";
-    seedModel->insertRows(0, finder.seeds.size());
-    seedModel->setHorizontalHeaderLabels(headers);
-    for (size_t i = 0; i < finder.seeds.size(); ++i)
-    {
-        SeedFinder::SeedInfo info = finder.get_seed_info(finder.seeds[i]);
-        seedModel->setItem(i, 0, readonly_item(format_uint32(info.seed)));
-        seedModel->setItem(i, 1, readonly_item(pokemon_names[info.species]));
-        seedModel->setItem(i, 2, readonly_item(info.shiny ? "Yes" : "No"));
-        seedModel->setItem(i, 3, readonly_item(format_uint32(info.ec)));
-        seedModel->setItem(i, 4, readonly_item(format_uint32(info.pid)));
-        for (int index = 0; index < _countof(info.iv); ++index)
-            seedModel->setItem(i, 5 + index, readonly_item(QString::number(info.iv[index])));
-        seedModel->setItem(i, 11, readonly_item(QString::number(info.drops)));
-    }
+    seedModel.populateModel(finder);
     toggle_ui(true);
 }

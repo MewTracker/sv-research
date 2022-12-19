@@ -7,9 +7,9 @@
 #include "PokemonNames.hpp"
 #include "SeedFinder.hpp"
 
-SeedFinder::SeedFinder() : 
+SeedFinder::SeedFinder() :
 	hFinderThread(NULL),
-	thread_count(4),		// TODO: Should be configurable
+	thread_count(1),
 	game(GameScarlet),
 	min_seed(0),
 	max_seed(0),
@@ -54,7 +54,7 @@ bool SeedFinder::initialize()
 	return true;
 }
 
-std::vector<uint8_t> SeedFinder::read_file(const char *filename)
+std::vector<uint8_t> SeedFinder::read_file(const char *filename) const
 {
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))
@@ -67,7 +67,7 @@ std::vector<uint8_t> SeedFinder::read_file(const char *filename)
 	return buffer;
 }
 
-const RaidFixedRewards* SeedFinder::get_fixed_drop_table(uint64_t table_name)
+const RaidFixedRewards* SeedFinder::get_fixed_drop_table(uint64_t table_name) const
 {
 	for (auto &table : fixed_rewards)
 		if (table.table_name == table_name)
@@ -75,24 +75,13 @@ const RaidFixedRewards* SeedFinder::get_fixed_drop_table(uint64_t table_name)
 	return nullptr;
 }
 
-const RaidLotteryRewards* SeedFinder::get_lottery_drop_table(uint64_t table_name)
+const RaidLotteryRewards* SeedFinder::get_lottery_drop_table(uint64_t table_name) const
 {
 	for (auto &table : lottery_rewards)
 		if (table.table_name == table_name)
 			return &table;
 	return nullptr;
 }
-
-int16_t SeedFinder::get_rate_total_base(int32_t version, size_t star)
-{
-	static const int16_t rates[2][7] =
-	{
-		{ 0, 5800, 5300, 7400, 8800, 9100, 6500 },
-		{ 0, 5800, 5300, 7400, 8700, 9100, 6500 },
-	};
-	assert(star > 0 && star < _countof(rates[0]));
-	return rates[version][star];
-};
 
 void SeedFinder::compute_fast_encounter_lookups()
 {
@@ -121,7 +110,18 @@ void SeedFinder::compute_fast_encounter_lookups()
 	}
 }
 
-EncounterTera9* SeedFinder::get_encounter(uint32_t seed, int stage)
+FORCEINLINE int16_t SeedFinder::get_rate_total_base(int32_t version, size_t star) const
+{
+	static const int16_t rates[2][7] =
+	{
+		{ 0, 5800, 5300, 7400, 8800, 9100, 6500 },
+		{ 0, 5800, 5300, 7400, 8700, 9100, 6500 },
+	};
+	assert(star > 0 && star < _countof(rates[0]));
+	return rates[version][star];
+};
+
+FORCEINLINE const EncounterTera9* SeedFinder::get_encounter(uint32_t seed, int stage) const
 {
 	Xoroshiro128Plus gen(seed);
 	uint64_t total = get_rate_total_base(game, stars);
@@ -129,7 +129,7 @@ EncounterTera9* SeedFinder::get_encounter(uint32_t seed, int stage)
 	return &encounters[stars][fast_encounter_lookup[game][stars][speciesroll]];
 }
 
-int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars)
+FORCEINLINE int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars) const
 {
 	static const int32_t reward_slots[8][5] =
 	{
@@ -160,9 +160,9 @@ int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars)
 	return reward_slots[stars][random_lookup[random]];
 }
 
-uint32_t SeedFinder::get_rewards(uint32_t seed, int progress, int raid_boost)
+uint32_t SeedFinder::get_rewards(uint32_t seed, int progress, int raid_boost) const
 {
-	EncounterTera9 *enc = get_encounter(seed, progress);
+	const EncounterTera9 *enc = get_encounter(seed, progress);
 	uint32_t drop_counter = 0;
 	for (auto &item : enc->fixed_drops->items)
 	{
@@ -190,7 +190,7 @@ uint32_t SeedFinder::get_rewards(uint32_t seed, int progress, int raid_boost)
 	return drop_counter;
 }
 
-bool SeedFinder::check_pokemon(uint32_t seed)
+FORCEINLINE bool SeedFinder::check_pokemon(uint32_t seed) const
 {
 	Xoroshiro128Plus gen(seed);
 	uint32_t EC = (uint32_t)gen.next_int();
@@ -200,7 +200,7 @@ bool SeedFinder::check_pokemon(uint32_t seed)
 	bool cond_shiny[] = { is_shiny, true, false };
 	if (is_shiny != cond_shiny[shiny])
 		return false;
-	EncounterTera9* enc = get_encounter(seed, StoryProgress);
+	const EncounterTera9* enc = get_encounter(seed, StoryProgress);
 	if (species && enc->species != species)
 		return false;
 	int8_t ivs[16] = { -1, -1, -1, -1, -1, -1 };
@@ -226,7 +226,7 @@ bool SeedFinder::check_pokemon(uint32_t seed)
 	return true;
 }
 
-bool SeedFinder::check_rewards(uint32_t seed)
+FORCEINLINE bool SeedFinder::check_rewards(uint32_t seed) const
 {
 	uint32_t drops = get_rewards(seed, StoryProgress, RaidBoost);
 	if (drops < drop_threshold)
@@ -308,13 +308,19 @@ void SeedFinder::find_seeds_thread()
 		if (!handles[i])
 		{
 			if (i > 0)
+			{
 				WaitForMultipleObjects(i, handles.get(), TRUE, INFINITE);
+				for (int32_t j = 0; j < i; ++j)
+					CloseHandle(handles[j]);
+			}
 			time_taken.stop();
 			return;
 		}
 	}
 	DWORD result = WaitForMultipleObjects(thread_count, handles.get(), TRUE, INFINITE);
 	time_taken.stop();
+	for (uint32_t i = 0; i < thread_count; ++i)
+		CloseHandle(handles[i]);
 	bool success = result >= WAIT_OBJECT_0 && result < WAIT_OBJECT_0 + thread_count;
 	if (!success)
 		return;
@@ -362,7 +368,7 @@ void SeedFinder::set_drop_filter(int item_id, bool value)
 	target_drops[item_id] = value ? 1 : 0;
 }
 
-bool SeedFinder::use_pokemon_filters()
+bool SeedFinder::use_pokemon_filters() const
 {
 	if (species != 0 || shiny != 0)
 		return true;
@@ -375,7 +381,7 @@ bool SeedFinder::use_pokemon_filters()
 	return false;
 }
 
-SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed)
+SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 {
 	SeedInfo info;
 	info.seed = seed;
@@ -384,7 +390,7 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed)
 	uint32_t TIDSID = (uint32_t)gen.next_int();
 	info.pid = (uint32_t)gen.next_int();
 	info.shiny = (((info.pid >> 16) ^ (info.pid & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
-	EncounterTera9* enc = get_encounter(seed, StoryProgress);
+	const EncounterTera9* enc = get_encounter(seed, StoryProgress);
 	info.species = enc->species;
 	int8_t ivs[6] = { -1, -1, -1, -1, -1, -1 };
 	for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)

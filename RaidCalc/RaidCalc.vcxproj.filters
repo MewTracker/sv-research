@@ -82,5 +82,8 @@
     <QtMoc Include="ItemFilterDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="SeedTableModel.hpp">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

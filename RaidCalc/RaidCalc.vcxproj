@@ -103,6 +103,7 @@
     <ClInclude Include="RaidLotteryRewards.inc.hpp" />
     <ClInclude Include="RaidRewards.hpp" />
     <ClInclude Include="SeedFinder.hpp" />
+    <QtMoc Include="SeedTableModel.hpp" />
     <ClInclude Include="Stopwatch.hpp" />
     <ClInclude Include="Xoroshiro128Plus.hpp" />
   </ItemGroup>

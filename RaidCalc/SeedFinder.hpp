@@ -25,7 +25,7 @@ public:
 	bool find_seeds();
 	bool is_search_done();
 	void set_drop_filter(int item_id, bool value);
-	SeedInfo get_seed_info(uint32_t seed);
+	SeedInfo get_seed_info(uint32_t seed) const;
 
 	// Config
 	uint32_t thread_count;
@@ -66,17 +66,17 @@ private:
 		std::vector<uint32_t> results;
 	};
 
-	std::vector<uint8_t> read_file(const char* filename);
-	const RaidFixedRewards* get_fixed_drop_table(uint64_t table_name);
-	const RaidLotteryRewards* get_lottery_drop_table(uint64_t table_name);
-	int16_t get_rate_total_base(int32_t version, size_t star);
+	std::vector<uint8_t> read_file(const char* filename) const;
+	const RaidFixedRewards* get_fixed_drop_table(uint64_t table_name) const;
+	const RaidLotteryRewards* get_lottery_drop_table(uint64_t table_name) const;
+	int16_t get_rate_total_base(int32_t version, size_t star) const;
 	void compute_fast_encounter_lookups();
-	EncounterTera9* get_encounter(uint32_t seed, int stage);
-	int32_t get_reward_count(int32_t random, int32_t stars);
-	uint32_t get_rewards(uint32_t seed, int progress, int raid_boost);
-	bool use_pokemon_filters();
-	bool check_pokemon(uint32_t seed);
-	bool check_rewards(uint32_t seed);
+	const EncounterTera9* get_encounter(uint32_t seed, int stage) const;
+	int32_t get_reward_count(int32_t random, int32_t stars) const;
+	uint32_t get_rewards(uint32_t seed, int progress, int raid_boost) const;
+	bool use_pokemon_filters() const;
+	bool check_pokemon(uint32_t seed) const;
+	bool check_rewards(uint32_t seed) const;
 
 	void combo_thread(ThreadData& data);
 	void rewards_thread(ThreadData& data);

@@ -14,7 +14,7 @@
    <string>RaidCalc</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
     <item>
      <layout class="QHBoxLayout" name="parametersHorizontalLayout">
       <item>
@@ -29,57 +29,10 @@
          <string>Basic Parameters</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="1">
-          <widget class="QComboBox" name="comboBoxGame">
-           <item>
-            <property name="text">
-             <string>Scarlet</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Violet</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="editMinSeed">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>00000000</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="labelGame">
-           <property name="text">
-            <string>Game:</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="labelStars">
            <property name="text">
             <string>Stars:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0" colspan="2">
-          <widget class="QPushButton" name="buttonFindSeeds">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>60</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Find Seeds</string>
            </property>
           </widget>
          </item>
@@ -120,21 +73,33 @@
            </item>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="labelMaxSeed">
-           <property name="text">
-            <string>Max seed:</string>
+         <item row="5" column="0" colspan="2">
+          <widget class="QPushButton" name="buttonFindSeeds">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>60</height>
+            </size>
            </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="labelMinSeed">
            <property name="text">
-            <string>Min seed:</string>
+            <string>Find Seeds</string>
            </property>
           </widget>
          </item>
          <item row="3" column="1">
+          <widget class="QLineEdit" name="editMinSeed">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>00000000</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
           <widget class="QLineEdit" name="editMaxSeed">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -147,21 +112,50 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="labelThreads">
+           <property name="text">
+            <string>Threads:</string>
+           </property>
+          </widget>
+         </item>
          <item row="4" column="0">
-          <spacer name="spacer1">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
+          <widget class="QLabel" name="labelMaxSeed">
+           <property name="text">
+            <string>Max seed:</string>
            </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Preferred</enum>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="labelGame">
+           <property name="text">
+            <string>Game:</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="labelMinSeed">
+           <property name="text">
+            <string>Min seed:</string>
            </property>
-          </spacer>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="comboBoxThreads"/>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="comboBoxGame">
+           <item>
+            <property name="text">
+             <string>Scarlet</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Violet</string>
+            </property>
+           </item>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -382,13 +376,6 @@
            </property>
           </widget>
          </item>
-         <item row="9" column="0" colspan="6">
-          <widget class="QPushButton" name="buttonResetPokemonFilters">
-           <property name="text">
-            <string>Reset Filters</string>
-           </property>
-          </widget>
-         </item>
          <item row="4" column="0">
           <widget class="QLabel" name="labelTeraType">
            <property name="text">
@@ -489,6 +476,20 @@
            </property>
           </widget>
          </item>
+         <item row="9" column="0" colspan="2">
+          <widget class="QPushButton" name="buttonResetPokemonFilters">
+           <property name="text">
+            <string>Reset Filters</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="2" colspan="4">
+          <widget class="QPushButton" name="buttonMaxIV">
+           <property name="text">
+            <string>Max IV</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -497,13 +498,38 @@
         <property name="title">
          <string>Item Filters</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="4" column="0" colspan="2">
-          <widget class="QPushButton" name="buttonEditFilters">
+         <item row="0" column="0">
+          <widget class="QLabel" name="labelMinItemsSum">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
-            <string>Edit Filters</string>
+            <string>Min items sum:</string>
            </property>
           </widget>
+         </item>
+         <item row="3" column="0">
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
          <item row="0" column="1">
           <widget class="QSpinBox" name="spinBoxMinItemsSum">
@@ -515,35 +541,19 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="labelMinItemsSum">
-           <property name="text">
-            <string>Min items sum:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2">
+         <item row="2" column="0" colspan="2">
           <widget class="QCheckBox" name="checkboxItemFilters">
            <property name="text">
             <string>Activate Filters</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
+         <item row="4" column="0" colspan="2">
+          <widget class="QPushButton" name="buttonEditFilters">
+           <property name="text">
+            <string>Edit Filters</string>
            </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Preferred</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -552,6 +562,9 @@
        <spacer name="spacer3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
