@@ -124,6 +124,8 @@ FORCEINLINE int16_t SeedFinder::get_rate_total_base(int32_t version, size_t star
 FORCEINLINE const EncounterTera9* SeedFinder::get_encounter(uint32_t seed, int stage) const
 {
 	Xoroshiro128Plus gen(seed);
+	if (stars < 6)
+		gen.next_int(100); // difficulty roll
 	uint64_t total = get_rate_total_base(game, stars);
 	uint64_t speciesroll = gen.next_int(total);
 	return &encounters[stars][fast_encounter_lookup[game][stars][speciesroll]];
