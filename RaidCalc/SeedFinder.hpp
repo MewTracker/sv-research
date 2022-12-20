@@ -74,8 +74,9 @@ private:
 
 	std::vector<uint8_t> read_file(const char* filename) const;
 	const RaidFixedRewards* get_fixed_drop_table(uint64_t table_name) const;
-	const RaidLotteryRewards* get_lottery_drop_table(uint64_t table_name) const;
+	const RaidLotteryRewards* get_lottery_drop_table(uint64_t table_name, const uint8_t*& fast_lookup) const;
 	int16_t get_rate_total_base(int32_t version, size_t star) const;
+	void compute_fast_lottery_lookups();
 	void compute_fast_encounter_lookups();
 	const EncounterTera9* get_encounter(uint32_t seed, int stage) const;
 	int32_t get_reward_count(int32_t random, int32_t stars) const;
@@ -97,6 +98,7 @@ private:
 	alignas(16) int8_t min_iv_vec[16];
 	alignas(16) int8_t max_iv_vec[16];
 	std::vector<std::vector<EncounterTera9>> encounters;
+	std::vector<std::vector<uint8_t>> fast_lottery_lookup;
 	std::vector<std::vector<uint8_t>> fast_encounter_lookup[2];
 	std::vector<int8_t> target_drops;
 	HANDLE hFinderThread;

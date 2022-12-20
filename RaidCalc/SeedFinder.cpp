@@ -39,13 +39,14 @@ bool SeedFinder::initialize()
 	size_t rewards_count = reward_map.size() / 0x10;
 	if (encounter_count != rewards_count)
 		return false;
+	compute_fast_lottery_lookups();
 	encounters.resize(7);
 	uint64_t* rewards = (uint64_t*)reward_map.data();
 	for (size_t i = 0; i < encounter_count; ++i, rewards += 2)
 	{
 		auto enc = EncounterTera9(encounter_data.data() + i * 0x18);
 		enc.fixed_drops = get_fixed_drop_table(rewards[0]);
-		enc.lottery_drops = get_lottery_drop_table(rewards[1]);
+		enc.lottery_drops = get_lottery_drop_table(rewards[1], enc.lottery_lookup);
 		assert(enc.stars > 0 && enc.stars < 7);
 		encounters[enc.stars].push_back(enc);
 	}
@@ -75,12 +76,41 @@ const RaidFixedRewards* SeedFinder::get_fixed_drop_table(uint64_t table_name) co
 	return nullptr;
 }
 
-const RaidLotteryRewards* SeedFinder::get_lottery_drop_table(uint64_t table_name) const
+const RaidLotteryRewards* SeedFinder::get_lottery_drop_table(uint64_t table_name, const uint8_t*& fast_lookup) const
 {
-	for (auto &table : lottery_rewards)
+	for (size_t i = 0; i < _countof(lottery_rewards); ++i)
+	{
+		auto& table = lottery_rewards[i];
 		if (table.table_name == table_name)
+		{
+			fast_lookup = fast_lottery_lookup[i].data();
 			return &table;
+		}
+	}
 	return nullptr;
+}
+
+void SeedFinder::compute_fast_lottery_lookups()
+{
+	fast_lottery_lookup.resize(_countof(lottery_rewards));
+	for (size_t i = 0; i < _countof(lottery_rewards); ++i)
+	{
+		auto& record = lottery_rewards[i];
+		for (int32_t roll = 0; roll < record.rate_total; ++roll)
+		{
+			int32_t tmp_roll = roll;
+			for (uint8_t j = 0; j < _countof(record.items); ++j)
+			{
+				auto& item = record.items[j];
+				if (tmp_roll < item.rate)
+				{
+					fast_lottery_lookup[i].push_back(j);
+					break;
+				}
+				tmp_roll -= item.rate;
+			}
+		}
+	}
 }
 
 void SeedFinder::compute_fast_encounter_lookups()
@@ -162,32 +192,30 @@ FORCEINLINE int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars) 
 	return reward_slots[stars][random_lookup[random]];
 }
 
-uint32_t SeedFinder::get_rewards(uint32_t seed, int progress, int raid_boost) const
+FORCEINLINE uint32_t SeedFinder::get_rewards(uint32_t seed, int progress, int raid_boost) const
 {
-	const EncounterTera9 *enc = get_encounter(seed, progress);
 	uint32_t drop_counter = 0;
-	for (auto &item : enc->fixed_drops->items)
-	{
-		if (item.category == 0 && item.item_id == 0)
-			continue;
-		drop_counter += target_drops[item.item_id_final];
-	}
-	int32_t rate_total = enc->lottery_drops->rate_total;
+	const EncounterTera9 *enc = get_encounter(seed, progress);
+
+	auto& fixed_items = enc->fixed_drops->items;
+	#define add_fixed_drop(n) drop_counter += fixed_items[n].num & target_drops[fixed_items[n].item_id]
+	add_fixed_drop(0);
+	add_fixed_drop(1);
+	add_fixed_drop(2);
+	add_fixed_drop(3);
+	add_fixed_drop(4);
+	add_fixed_drop(5);
+	add_fixed_drop(6);
+	#undef add_fixed_drop
+
 	Xoroshiro128Plus gen(seed);
+	int32_t rate_total = enc->lottery_drops->rate_total;
 	int32_t count = get_reward_count((int32_t)gen.next_int(100), enc->stars) + raid_boost;
 	for (int32_t i = 0; i < count; ++i)
 	{
 		int32_t roll = (int32_t)gen.next_int((uint64_t)rate_total);
-		for (size_t j = 0; j < _countof(enc->lottery_drops->items); ++j)
-		{
-			auto &item = enc->lottery_drops->items[j];
-			if (roll < item.rate)
-			{
-				drop_counter += target_drops[item.item_id_final];
-				break;
-			}
-			roll -= item.rate;
-		}
+		auto& item = enc->lottery_drops->items[enc->lottery_lookup[roll]];
+		drop_counter += item.num & target_drops[item.item_id];
 	}
 	return drop_counter;
 }
@@ -370,7 +398,7 @@ void SeedFinder::set_drop_filter(int item_id, bool value)
 	{
 		if (!drop_value)
 			++item_filters_count;
-		drop_value = 1;
+		drop_value = -1;
 	}
 	else
 	{

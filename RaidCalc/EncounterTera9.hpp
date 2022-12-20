@@ -55,7 +55,7 @@ enum class GemType : int8_t
 class EncounterTera9
 {
 public:
-	EncounterTera9(uint8_t *data) : fixed_drops(nullptr), lottery_drops(nullptr)
+	EncounterTera9(uint8_t *data) : fixed_drops(nullptr), lottery_drops(nullptr), lottery_lookup(nullptr)
 	{
 		species = *(uint16_t *)data;
 		form = data[0x02];
@@ -92,6 +92,7 @@ public:
 
 	const RaidFixedRewards *fixed_drops;
 	const RaidLotteryRewards *lottery_drops;
+	const uint8_t* lottery_lookup;
 
 private:
 	AbilityPermission get_ability(uint8_t value)
