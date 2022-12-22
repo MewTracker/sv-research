@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include "ui_SeedViewerDialog.h"
-#include "SeedFinder.hpp"
+#include "SeedFinder.h"
 
 class SeedViewerDialog : public QDialog
 {

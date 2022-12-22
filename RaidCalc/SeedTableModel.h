@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QAbstractTableModel>
-#include "SeedFinder.hpp"
-#include "PokemonNames.hpp"
+#include "SeedFinder.h"
+#include "PokemonNames.h"
 #include "Utils.h"
 
 class SeedTableModel : public QAbstractTableModel

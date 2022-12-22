@@ -3,7 +3,7 @@
 #include <QDialog>
 #include <QStandardItemModel>
 #include "ui_ItemFilterDialog.h"
-#include "SeedFinder.hpp"
+#include "SeedFinder.h"
 
 class ItemFilterDialog : public QDialog
 {

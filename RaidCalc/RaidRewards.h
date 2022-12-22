@@ -30,8 +30,8 @@ struct RaidLotteryRewards
     RaidLotteryRewardItemInfo items[19];
 };
 
-#include "RaidFixedRewards.inc.hpp"
-#include "RaidLotteryRewards.inc.hpp"
+#include "RaidFixedRewards.inc.h"
+#include "RaidLotteryRewards.inc.h"
 
 struct RewardInfo
 {

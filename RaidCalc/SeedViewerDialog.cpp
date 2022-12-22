@@ -1,5 +1,5 @@
 #include "SeedViewerDialog.h"
-#include "PokemonNames.hpp"
+#include "PokemonNames.h"
 #include "Utils.h"
 
 SeedViewerDialog::SeedViewerDialog(QWidget* parent)

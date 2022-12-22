@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "RaidRewards.hpp"
+#include "RaidRewards.h"
 #include "PersonalInfo9SV.h"
 
 enum Game

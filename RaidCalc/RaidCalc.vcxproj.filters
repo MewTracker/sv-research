@@ -53,32 +53,32 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SeedViewerDialog.cpp">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EncounterTera9.hpp">
+    <ClInclude Include="EncounterTera9.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PokemonNames.hpp">
+    <ClInclude Include="PokemonNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RaidFixedRewards.inc.hpp">
+    <ClInclude Include="RaidFixedRewards.inc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RaidLotteryRewards.inc.hpp">
+    <ClInclude Include="RaidLotteryRewards.inc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RaidRewards.hpp">
+    <ClInclude Include="RaidRewards.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Xoroshiro128Plus.hpp">
+    <ClInclude Include="Xoroshiro128Plus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SeedFinder.hpp">
+    <ClInclude Include="SeedFinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Stopwatch.hpp">
+    <ClInclude Include="Stopwatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PersonalInfo9SV.h">
@@ -106,7 +106,7 @@
     <QtMoc Include="ItemFilterDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="SeedTableModel.hpp">
+    <QtMoc Include="SeedTableModel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="SeedViewerDialog.h">

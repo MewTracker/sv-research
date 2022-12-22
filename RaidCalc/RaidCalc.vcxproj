@@ -106,20 +106,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Benchmarks.h" />
-    <ClInclude Include="EncounterTera9.hpp" />
+    <ClInclude Include="EncounterTera9.h" />
     <QtMoc Include="ItemFilterDialog.h" />
     <ClInclude Include="PersonalInfo9SV.h" />
     <ClInclude Include="PersonalTable9SV.h" />
-    <ClInclude Include="PokemonNames.hpp" />
-    <ClInclude Include="RaidFixedRewards.inc.hpp" />
-    <ClInclude Include="RaidLotteryRewards.inc.hpp" />
-    <ClInclude Include="RaidRewards.hpp" />
-    <ClInclude Include="SeedFinder.hpp" />
-    <QtMoc Include="SeedTableModel.hpp" />
+    <ClInclude Include="PokemonNames.h" />
+    <ClInclude Include="RaidFixedRewards.inc.h" />
+    <ClInclude Include="RaidLotteryRewards.inc.h" />
+    <ClInclude Include="RaidRewards.h" />
+    <ClInclude Include="SeedFinder.h" />
+    <QtMoc Include="SeedTableModel.h" />
     <QtMoc Include="SeedViewerDialog.h" />
-    <ClInclude Include="Stopwatch.hpp" />
+    <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="Xoroshiro128Plus.hpp" />
+    <ClInclude Include="Xoroshiro128Plus.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

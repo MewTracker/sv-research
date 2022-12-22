@@ -2,7 +2,7 @@
 #include <xmmintrin.h>
 #include <cassert>
 #include <memory>
-#include "SeedFinder.hpp"
+#include "SeedFinder.h"
 #include "PersonalTable9SV.h"
 #include "Utils.h"
 

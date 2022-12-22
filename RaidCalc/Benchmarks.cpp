@@ -1,6 +1,6 @@
 #include <QtGlobal>
 #include "Benchmarks.h"
-#include "Stopwatch.hpp"
+#include "Stopwatch.h"
 
 #if defined(ENABLE_BENCHMARKS)
 

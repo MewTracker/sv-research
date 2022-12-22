@@ -1,5 +1,5 @@
 #include "ItemFilterDialog.h"
-#include "RaidRewards.hpp"
+#include "RaidRewards.h"
 
 ItemFilterDialog::ItemFilterDialog(QWidget *parent)
 	: QDialog(parent)

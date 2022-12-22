@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include "RaidCalc.h"
-#include "PokemonNames.hpp"
+#include "PokemonNames.h"
 #include "Benchmarks.h"
 
 RaidCalc::RaidCalc(QWidget* parent)

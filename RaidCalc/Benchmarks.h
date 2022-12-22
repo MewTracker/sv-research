@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SeedFinder.hpp"
+#include "SeedFinder.h"
 
 //#define ENABLE_BENCHMARKS
 

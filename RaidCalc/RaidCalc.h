@@ -5,8 +5,8 @@
 #include "ui_RaidCalc.h"
 #include "ItemFilterDialog.h"
 #include "SeedViewerDialog.h"
-#include "SeedFinder.hpp"
-#include "SeedTableModel.hpp"
+#include "SeedFinder.h"
+#include "SeedTableModel.h"
 
 class RaidCalc : public QMainWindow
 {

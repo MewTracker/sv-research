@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <vector>
 #include <functional>
-#include "Stopwatch.hpp"
-#include "EncounterTera9.hpp"
-#include "Xoroshiro128Plus.hpp"
+#include "Stopwatch.h"
+#include "EncounterTera9.h"
+#include "Xoroshiro128Plus.h"
 
 class SeedFinder
 {
