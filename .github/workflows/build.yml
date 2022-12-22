@@ -44,4 +44,4 @@ jobs:
         path: |
           x64\Release\**
           !x64\Release\imageformats
-          !*.map
+          !x64\Release\*.map
