@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "RaidRewards.hpp"
+#include "PersonalInfo9SV.h"
 
 enum Game
 {
@@ -90,9 +91,10 @@ public:
 	uint8_t rand_rate;
 	int16_t rand_rate_min[2];
 
-	const RaidFixedRewards *fixed_drops;
-	const RaidLotteryRewards *lottery_drops;
+	const RaidFixedRewards* fixed_drops;
+	const RaidLotteryRewards* lottery_drops;
 	const uint8_t* lottery_lookup;
+	PersonalInfo9SV* personal_info;
 
 private:
 	AbilityPermission get_ability(uint8_t value)

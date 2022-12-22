@@ -46,6 +46,15 @@
     <ClCompile Include="ItemFilterDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Benchmarks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SeedViewerDialog.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EncounterTera9.hpp">
@@ -72,9 +81,24 @@
     <ClInclude Include="Stopwatch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PersonalInfo9SV.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PersonalTable9SV.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Benchmarks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ItemFilterDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="SeedViewerDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -83,6 +107,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="SeedTableModel.hpp">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="SeedViewerDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

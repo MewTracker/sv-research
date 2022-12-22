@@ -59,6 +59,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <GenerateMapFile>true</GenerateMapFile>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -86,25 +91,34 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Benchmarks.cpp" />
     <ClCompile Include="ItemFilterDialog.cpp" />
     <ClCompile Include="SeedFinder.cpp" />
+    <ClCompile Include="SeedViewerDialog.cpp" />
+    <ClCompile Include="Utils.cpp" />
     <QtRcc Include="RaidCalc.qrc" />
     <QtUic Include="ItemFilterDialog.ui" />
     <QtUic Include="RaidCalc.ui" />
     <QtMoc Include="RaidCalc.h" />
     <ClCompile Include="RaidCalc.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="SeedViewerDialog.ui" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Benchmarks.h" />
     <ClInclude Include="EncounterTera9.hpp" />
     <QtMoc Include="ItemFilterDialog.h" />
+    <ClInclude Include="PersonalInfo9SV.h" />
+    <ClInclude Include="PersonalTable9SV.h" />
     <ClInclude Include="PokemonNames.hpp" />
     <ClInclude Include="RaidFixedRewards.inc.hpp" />
     <ClInclude Include="RaidLotteryRewards.inc.hpp" />
     <ClInclude Include="RaidRewards.hpp" />
     <ClInclude Include="SeedFinder.hpp" />
     <QtMoc Include="SeedTableModel.hpp" />
+    <QtMoc Include="SeedViewerDialog.h" />
     <ClInclude Include="Stopwatch.hpp" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="Xoroshiro128Plus.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

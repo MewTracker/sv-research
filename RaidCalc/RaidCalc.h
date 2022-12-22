@@ -4,6 +4,7 @@
 #include <QTimer>
 #include "ui_RaidCalc.h"
 #include "ItemFilterDialog.h"
+#include "SeedViewerDialog.h"
 #include "SeedFinder.hpp"
 #include "SeedTableModel.hpp"
 
@@ -21,12 +22,13 @@ public slots:
     void on_buttonResetPokemonFilters_clicked();
     void on_buttonMaxIV_clicked();
     void on_finder_timer_timeout();
+    void on_actionSeedViewer_triggered(bool checked = false);
+    void on_tableSeeds_doubleClicked(const QModelIndex& index);
 
 private:
     static const uint64_t MaxSeeds = 10000000ULL;
+    static const uint64_t SeedCountWarningThreshold = 100000;
 
-    bool hex_to_uint32(const QString& hex_string, uint32_t& result);
-    bool hex_to_uint32(const char* hex_string, uint32_t& result);
     void toggle_ui(bool enabled);
     QStandardItem* readonly_item(QString text);
 
@@ -34,7 +36,10 @@ private:
     QSpinBox* min_iv_widgets[6];
     QSpinBox* max_iv_widgets[6];
     ItemFilterDialog* itemFilters;
+    SeedViewerDialog* seedViewer;
     QTimer* finder_timer;
     SeedTableModel seedModel;
     SeedFinder finder;
+    Game resultGame;
+    int resultStars;
 };

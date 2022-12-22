@@ -5,12 +5,13 @@
 #include <algorithm>
 #include "RaidCalc.h"
 #include "PokemonNames.hpp"
+#include "Benchmarks.h"
 
 RaidCalc::RaidCalc(QWidget* parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
-    if (!finder.initialize())
+    if (!SeedFinder::initialize())
     {
         QMessageBox::critical(this, "Error", "Failed to initialize seed finder.");
         QTimer::singleShot(0, qApp, &QCoreApplication::quit);
@@ -25,6 +26,7 @@ RaidCalc::RaidCalc(QWidget* parent)
     for (auto& pair : species_data)
         ui.comboBoxSpecies->addItem(pair.first.c_str(), pair.second);
     itemFilters = new ItemFilterDialog(this);
+    seedViewer = new SeedViewerDialog(this);
     ui.tableSeeds->setModel(&seedModel);
     finder_timer = new QTimer(this);
     connect(finder_timer, &QTimer::timeout, this, &RaidCalc::on_finder_timer_timeout);
@@ -56,26 +58,13 @@ RaidCalc::RaidCalc(QWidget* parent)
     ui.comboBoxAbility->setVisible(false);
     ui.comboBoxNature->setVisible(false);
     ui.comboBoxGender->setVisible(false);
+
+    do_benchmarks(finder);
 }
 
 RaidCalc::~RaidCalc()
 {
 
-}
-
-bool RaidCalc::hex_to_uint32(const QString& hex_string, uint32_t& result)
-{
-    return hex_to_uint32(hex_string.toStdString().c_str(), result);
-}
-
-bool RaidCalc::hex_to_uint32(const char* hex_string, uint32_t& result)
-{
-    char* end_ptr = nullptr;
-    errno = 0;
-    result = strtoul(hex_string, &end_ptr, 16);
-    if ((size_t)(end_ptr - hex_string) != strlen(hex_string) || errno == ERANGE)
-        return false;
-    return true;
 }
 
 QStandardItem* RaidCalc::readonly_item(QString text)
@@ -94,9 +83,11 @@ void RaidCalc::toggle_ui(bool enabled)
     for (auto widget : ui.itemGroup->findChildren<QWidget*>())
         widget->setEnabled(enabled);
     ui.tableSeeds->setEnabled(enabled);
+    ui.actionSeedViewer->setEnabled(enabled);
     if (!enabled)
     {
         itemFilters->hide();
+        seedViewer->hide();
         seedModel.clear();
     }
 }
@@ -136,14 +127,18 @@ void RaidCalc::on_buttonFindSeeds_clicked()
     itemFilters->update_seed_finder(finder);
     if (!finder.use_filters())
     {
-        if (finder.max_seed - finder.min_seed + 1ULL > MaxSeeds)
+        uint64_t seed_count = finder.max_seed - finder.min_seed + 1ULL;
+        if (seed_count > MaxSeeds)
         {
             QMessageBox::critical(this, "Error", QString("No filters set. Search aborted because it would exceed maximum allowed number of results (%1).").arg(MaxSeeds));
             return;
         }
-        auto result = QMessageBox::question(this, "Warning", "No filters set, this may result in a huge result set. Do you want to continue anyway?");
-        if (result != QMessageBox::Yes)
-            return;
+        if (seed_count > SeedCountWarningThreshold)
+        {
+            auto result = QMessageBox::question(this, "Warning", "No filters set, this may result in a huge result set. Do you want to continue anyway?");
+            if (result != QMessageBox::Yes)
+                return;
+        }
     }
     toggle_ui(false);
     if (!finder.find_seeds())
@@ -186,5 +181,18 @@ void RaidCalc::on_finder_timer_timeout()
     QString msg = QString("Found %1 seeds in %2ms.").arg(QString::number(finder.seeds.size()), QString::number(finder.time_taken.milliseconds()));
     QMessageBox::information(this, "Success", msg);
     seedModel.populateModel(finder);
+    resultGame = finder.game;
+    resultStars = finder.stars;
     toggle_ui(true);
+}
+
+void RaidCalc::on_actionSeedViewer_triggered(bool checked)
+{
+    seedViewer->show();
+}
+
+void RaidCalc::on_tableSeeds_doubleClicked(const QModelIndex& index)
+{
+    seedViewer->display_seed(resultGame, resultStars, seedModel.get_seed(index.row()));
+    seedViewer->show();
 }

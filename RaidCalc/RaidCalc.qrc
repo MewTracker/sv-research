@@ -2,5 +2,6 @@
     <qresource prefix="/RaidCalc">
         <file>encounter_gem_paldea.pkl</file>
         <file>reward_map</file>
+        <file>personal_sv</file>
     </qresource>
 </RCC>

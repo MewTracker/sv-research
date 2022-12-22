@@ -3,6 +3,7 @@
 #include <QAbstractTableModel>
 #include "SeedFinder.hpp"
 #include "PokemonNames.hpp"
+#include "Utils.h"
 
 class SeedTableModel : public QAbstractTableModel
 {
@@ -27,6 +28,11 @@ public:
 		for (uint32_t seed : finder.seeds)
 			seed_data.push_back(finder.get_seed_info(seed));
 		endInsertRows();
+	}
+
+	uint32_t get_seed(int row)
+	{
+		return seed_data[row].seed;
 	}
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override
@@ -94,11 +100,6 @@ public:
 		default:
 			return QVariant();
 		}
-	}
-
-	static QString format_uint32(uint32_t value)
-	{
-		return QString("%1").arg(value, 8, 16, QLatin1Char('0')).toUpper();
 	}
 
 protected:
