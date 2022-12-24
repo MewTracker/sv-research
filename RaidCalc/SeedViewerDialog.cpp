@@ -26,17 +26,29 @@ void SeedViewerDialog::on_comboBoxRaidType_currentIndexChanged(int index)
 	refresh_ui();
 }
 
+void SeedViewerDialog::on_comboBoxStory_currentIndexChanged(int index)
+{
+	refresh_ui();
+}
+
+void SeedViewerDialog::on_spinBoxRaidBoost_valueChanged(int value)
+{
+	refresh_ui();
+}
+
 void SeedViewerDialog::on_editSeed_textChanged(const QString& text)
 {
 	is_seed_valid = hex_to_uint32(text, current_seed);
 	refresh_ui();
 }
 
-void SeedViewerDialog::display_seed(Game game, int stars, uint32_t seed)
+void SeedViewerDialog::display_seed(SeedFinder::BasicParams params, uint32_t seed)
 {
 	refresh_supressed = true;
-	ui.comboBoxGame->setCurrentIndex((int)game);
-	ui.comboBoxRaidType->setCurrentIndex(stars == 6 ? 1 : 0);
+	ui.comboBoxGame->setCurrentIndex((int)params.game);
+	ui.comboBoxRaidType->setCurrentIndex(params.stars == 6 ? 1 : 0);
+	ui.comboBoxStory->setCurrentIndex(params.story_progress);
+	ui.spinBoxRaidBoost->setValue(params.raid_boost);
 	ui.editSeed->setText(format_uint32(seed));
 	refresh_supressed = false;
 	refresh_ui();
@@ -70,7 +82,9 @@ void SeedViewerDialog::refresh_ui()
 		return;
 	}
 	finder.game = (Game)ui.comboBoxGame->currentIndex();
-	finder.stars = ui.comboBoxRaidType->currentIndex() == 1 ? 6 : SeedFinder::get_star_count(current_seed);
+	finder.story_progress = ui.comboBoxStory->currentIndex();
+	finder.raid_boost = ui.spinBoxRaidBoost->value();
+	finder.stars = ui.comboBoxRaidType->currentIndex() == 1 ? 6 : SeedFinder::get_star_count(current_seed, finder.story_progress);
 	SeedFinder::SeedInfo info = finder.get_seed_info(current_seed);
 	ui.infoSpecies->setText(pokemon_names[info.species]);
 	ui.infoDifficulty->setText(QString("%1 star%2").arg(QString::number(info.stars), info.stars > 1 ? "s" : ""));
@@ -92,7 +106,7 @@ void SeedViewerDialog::refresh_ui()
 	for (size_t i = 0; i < _countof(moves); ++i)
 		moves[i]->setText(move_names[info.moves[i]]);
 	ui.listRewards->clear();
-	auto rewards = finder.get_all_rewards(current_seed, SeedFinder::StoryProgress, SeedFinder::RaidBoost);
+	auto rewards = finder.get_all_rewards(current_seed);
 	for (auto &reward : rewards)
 	{
 		QString item_name("Invalid item");

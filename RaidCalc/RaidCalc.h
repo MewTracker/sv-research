@@ -30,7 +30,8 @@ private:
     static const uint64_t SeedCountWarningThreshold = 100000;
 
     void toggle_ui(bool enabled);
-    QStandardItem* readonly_item(QString text);
+    void add_sorted_options(QComboBox* combo, const char** names, uint32_t name_count, uint32_t offset = 1);
+    void add_sorted_options(QComboBox* combo, std::vector<std::pair<std::string, uint32_t>>& options);
 
     Ui::RaidCalcClass ui;
     QSpinBox* min_iv_widgets[6];
@@ -40,6 +41,5 @@ private:
     QTimer* finder_timer;
     SeedTableModel seedModel;
     SeedFinder finder;
-    Game resultGame;
-    int resultStars;
+    SeedFinder::BasicParams resultParams;
 };

@@ -18,4 +18,6 @@ public:
 private:
 	static __declspec(noinline) void do_pokemon_bench(SeedFinder& finder);
 	static __declspec(noinline) void do_rewards_bench(SeedFinder& finder);
+	static __declspec(noinline) void do_tests(SeedFinder& finder);
+	static __declspec(noinline) void generate_test_data(SeedFinder& finder, int progress, int raid_boost, bool is6 = false);
 };

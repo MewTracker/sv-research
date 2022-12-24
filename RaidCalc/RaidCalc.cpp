@@ -21,10 +21,10 @@ RaidCalc::RaidCalc(QWidget* parent)
     std::vector<std::pair<std::string, uint32_t>> species_data;
     for (auto& species : encounterable_species)
         species_data.push_back({ pokemon_names[species], species });
-    std::sort(species_data.begin(), species_data.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
-    ui.comboBoxSpecies->addItem("Any", 0U);
-    for (auto& pair : species_data)
-        ui.comboBoxSpecies->addItem(pair.first.c_str(), pair.second);
+    add_sorted_options(ui.comboBoxSpecies, species_data);
+    add_sorted_options(ui.comboBoxTeraType, type_names, _countof(type_names));
+    add_sorted_options(ui.comboBoxAbility, ability_names + 1, _countof(ability_names) - 1);
+    add_sorted_options(ui.comboBoxNature, nature_names, _countof(nature_names));
     itemFilters = new ItemFilterDialog(this);
     seedViewer = new SeedViewerDialog(this);
     ui.tableSeeds->setModel(&seedModel);
@@ -49,16 +49,6 @@ RaidCalc::RaidCalc(QWidget* parent)
     max_iv_widgets[4] = ui.spinBoxMaxSpD;
     max_iv_widgets[5] = ui.spinBoxMaxSpe;
 
-    // TODO: Implement filters
-    ui.labelTeraType->setVisible(false);
-    ui.labelAbility->setVisible(false);
-    ui.labelNature->setVisible(false);
-    ui.labelGender->setVisible(false);
-    ui.comboBoxTeraType->setVisible(false);
-    ui.comboBoxAbility->setVisible(false);
-    ui.comboBoxNature->setVisible(false);
-    ui.comboBoxGender->setVisible(false);
-
     do_benchmarks(finder);
 }
 
@@ -67,11 +57,20 @@ RaidCalc::~RaidCalc()
 
 }
 
-QStandardItem* RaidCalc::readonly_item(QString text)
+void RaidCalc::add_sorted_options(QComboBox* combo, const char** names, uint32_t name_count, uint32_t offset)
 {
-    QStandardItem* item = new QStandardItem(text);
-    item->setEditable(false);
-    return item;
+    std::vector<std::pair<std::string, uint32_t>> options;
+    for (uint32_t i = 0; i < name_count; ++i)
+        options.push_back({ names[i], i + offset });
+    add_sorted_options(combo, options);
+}
+
+void RaidCalc::add_sorted_options(QComboBox* combo, std::vector<std::pair<std::string, uint32_t>>& options)
+{
+    std::sort(options.begin(), options.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+    combo->addItem("Any", 0U);
+    for (auto& pair : options)
+        combo->addItem(pair.first.c_str(), pair.second);
 }
 
 void RaidCalc::toggle_ui(bool enabled)
@@ -96,6 +95,8 @@ void RaidCalc::on_buttonFindSeeds_clicked()
 {
     finder.game = (Game)ui.comboBoxGame->currentIndex();
     finder.stars = ui.comboBoxStars->currentIndex() + 1;
+    finder.story_progress = ui.comboBoxStory->currentIndex();
+    finder.raid_boost = ui.spinBoxRaidBoost->value();
     finder.thread_count = ui.comboBoxThreads->currentIndex() + 1;
     if (!hex_to_uint32(ui.editMinSeed->text(), finder.min_seed))
     {
@@ -114,9 +115,9 @@ void RaidCalc::on_buttonFindSeeds_clicked()
     }
     finder.species = ui.comboBoxSpecies->currentData().toUInt();
     finder.shiny = ui.comboBoxShiny->currentIndex();
-    finder.tera_type = ui.comboBoxTeraType->currentIndex();
-    finder.ability = ui.comboBoxAbility->currentIndex();
-    finder.nature = ui.comboBoxNature->currentIndex();
+    finder.tera_type = ui.comboBoxTeraType->currentData().toUInt();
+    finder.ability = ui.comboBoxAbility->currentData().toUInt();
+    finder.nature = ui.comboBoxNature->currentData().toUInt();
     finder.gender = ui.comboBoxGender->currentIndex();
     for (size_t i = 0; i < _countof(min_iv_widgets); ++i)
         finder.min_iv[i] = min_iv_widgets[i]->value();
@@ -159,6 +160,10 @@ void RaidCalc::on_buttonResetPokemonFilters_clicked()
 {
     ui.comboBoxSpecies->setCurrentIndex(0);
     ui.comboBoxShiny->setCurrentIndex(0);
+    ui.comboBoxTeraType->setCurrentIndex(0);
+    ui.comboBoxAbility->setCurrentIndex(0);
+    ui.comboBoxNature->setCurrentIndex(0);
+    ui.comboBoxGender->setCurrentIndex(0);
     for (auto& widget : min_iv_widgets)
         widget->setValue(0);
     for (auto& widget : max_iv_widgets)
@@ -181,8 +186,7 @@ void RaidCalc::on_finder_timer_timeout()
     QString msg = QString("Found %1 seeds in %2ms.").arg(QString::number(finder.seeds.size()), QString::number(finder.time_taken.milliseconds()));
     QMessageBox::information(this, "Success", msg);
     seedModel.populateModel(finder);
-    resultGame = finder.game;
-    resultStars = finder.stars;
+    resultParams = finder.get_basic_params();
     toggle_ui(true);
 }
 
@@ -193,6 +197,6 @@ void RaidCalc::on_actionSeedViewer_triggered(bool checked)
 
 void RaidCalc::on_tableSeeds_doubleClicked(const QModelIndex& index)
 {
-    seedViewer->display_seed(resultGame, resultStars, seedModel.get_seed(index.row()));
+    seedViewer->display_seed(resultParams, seedModel.get_seed(index.row()));
     seedViewer->show();
 }

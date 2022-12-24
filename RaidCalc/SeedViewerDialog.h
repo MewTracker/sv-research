@@ -12,11 +12,13 @@ public:
 	SeedViewerDialog(QWidget* parent);
 	~SeedViewerDialog();
 
-	void display_seed(Game game, int stars, uint32_t seed);
+	void display_seed(SeedFinder::BasicParams params, uint32_t seed);
 
 public slots:
 	void on_comboBoxGame_currentIndexChanged(int index);
 	void on_comboBoxRaidType_currentIndexChanged(int index);
+	void on_comboBoxStory_currentIndexChanged(int index);
+	void on_spinBoxRaidBoost_valueChanged(int value);
 	void on_editSeed_textChanged(const QString& text);
 
 private:

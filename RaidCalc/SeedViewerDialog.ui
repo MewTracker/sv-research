@@ -26,13 +26,55 @@
       <string>Raid parameters</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="2">
-       <widget class="QComboBox" name="comboBoxGame">
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelStory">
+        <property name="text">
+         <string>Story progress:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QComboBox" name="comboBoxStory">
+        <item>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="editSeed">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="maximumSize">
          <size>
@@ -40,16 +82,12 @@
           <height>16777215</height>
          </size>
         </property>
-        <item>
-         <property name="text">
-          <string>Scarlet</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Violet</string>
-         </property>
-        </item>
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
        </widget>
       </item>
       <item row="1" column="2">
@@ -78,48 +116,6 @@
         </item>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="editSeed">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="baseSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="labelSeed">
-        <property name="text">
-         <string>Seed:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="labelGame">
-        <property name="text">
-         <string>Game:</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0" colspan="2">
        <widget class="QLabel" name="labelRaidType">
         <property name="text">
@@ -127,7 +123,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
+      <item row="5" column="2">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -139,6 +135,60 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="labelGame">
+        <property name="text">
+         <string>Game:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="labelSeed">
+        <property name="text">
+         <string>Seed:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="comboBoxGame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <item>
+         <property name="text">
+          <string>Scarlet</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Violet</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelRaidBoost">
+        <property name="text">
+         <string>Raid boost:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QSpinBox" name="spinBoxRaidBoost">
+        <property name="maximum">
+         <number>3</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

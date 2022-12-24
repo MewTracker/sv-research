@@ -3,7 +3,7 @@
 #include <cassert>
 #include <memory>
 #include "SeedFinder.h"
-#include "PersonalTable9SV.h"
+#include "PokemonNames.h"
 #include "Utils.h"
 
 std::vector<std::vector<EncounterTera9>> SeedFinder::encounters;
@@ -32,6 +32,7 @@ SeedFinder::SeedFinder() :
 	memset(min_iv_vec, 0, sizeof(min_iv_vec));
 	memset(max_iv_vec, 0, sizeof(max_iv_vec));
 	target_drops.resize(20000 + 1);
+	target_species.resize(_countof(pokemon_names));
 }
 
 bool SeedFinder::initialize()
@@ -133,96 +134,22 @@ void SeedFinder::compute_fast_encounter_lookups()
 	}
 }
 
-FORCEINLINE int16_t SeedFinder::get_rate_total_base(int32_t version, size_t star)
+const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 {
-	static const int16_t rates[2][7] =
-	{
-		{ 0, 5800, 5300, 7400, 8800, 9100, 6500 },
-		{ 0, 5800, 5300, 7400, 8700, 9100, 6500 },
-	};
-	assert(star > 0 && star < _countof(rates[0]));
-	return rates[version][star];
-};
-
-FORCEINLINE const EncounterTera9* SeedFinder::get_encounter(uint32_t seed, int stage) const
-{
-	Xoroshiro128Plus gen(seed);
-	if (stars < 6)
-	{
-		if (get_star_count(gen) != stars)
-			return nullptr;
-	}
-	uint64_t total = get_rate_total_base(game, stars);
-	uint64_t speciesroll = gen.next_int(total);
-	return &encounters[stars][fast_encounter_lookup[game][stars][speciesroll]];
+	if (stars == 6)
+		return get_encounter<true>(seed);
+	return get_encounter<false>(seed);
 }
 
-FORCEINLINE int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars) const
-{
-	static const int32_t reward_slots[8][5] =
-	{
-		{ 0, 0, 0, 0, 0 },
-		{ 4, 5, 6, 7, 8 },
-		{ 4, 5, 6, 7, 8 },
-		{ 5, 6, 7, 8, 9 },
-		{ 5, 6, 7, 8, 9 },
-		{ 6, 7, 8, 9, 10 },
-		{ 7, 8, 9, 10, 11 },
-		{ 7, 8, 9, 10, 11 },
-	};
-	assert(stars > 0 && stars < _countof(reward_slots));
-	static const int8_t random_lookup[] =
-	{
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-		2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-		2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-		3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	};
-	assert(random < _countof(random_lookup));
-	return reward_slots[stars][random_lookup[random]];
-}
-
-FORCEINLINE uint32_t SeedFinder::get_rewards(const EncounterTera9* enc, uint32_t seed, int raid_boost) const
-{
-	uint32_t drop_counter = 0;
-
-	auto& fixed_items = enc->fixed_drops->items;
-	#define add_fixed_drop(n) drop_counter += fixed_items[n].num & target_drops[fixed_items[n].item_id]
-	add_fixed_drop(0);
-	add_fixed_drop(1);
-	add_fixed_drop(2);
-	add_fixed_drop(3);
-	add_fixed_drop(4);
-	add_fixed_drop(5);
-	add_fixed_drop(6);
-	#undef add_fixed_drop
-
-	Xoroshiro128Plus gen(seed);
-	int32_t rate_total = enc->lottery_drops->rate_total;
-	int32_t count = get_reward_count((int32_t)gen.next_int(100), enc->stars) + raid_boost;
-	for (int32_t i = 0; i < count; ++i)
-	{
-		int32_t roll = (int32_t)gen.next_int((uint64_t)rate_total);
-		auto& item = enc->lottery_drops->items[enc->lottery_lookup[roll]];
-		drop_counter += item.num & target_drops[item.item_id];
-	}
-	return drop_counter;
-}
-
-std::vector<SeedFinder::Reward> SeedFinder::get_all_rewards(uint32_t seed, int progress, int raid_boost) const
+std::vector<SeedFinder::Reward> SeedFinder::get_all_rewards(uint32_t seed) const
 {
 	std::vector<SeedFinder::Reward> rewards;
-	const EncounterTera9* enc = get_encounter(seed, progress);
+	const EncounterTera9* enc = get_encounter(seed);
 
 	auto& fixed_items = enc->fixed_drops->items;
 	for (auto& item : enc->fixed_drops->items)
-		rewards.push_back({ item.item_id, item.num });
+		if (item.item_id)
+			rewards.push_back({ item.item_id, item.num });
 	Xoroshiro128Plus gen(seed);
 
 	int32_t rate_total = enc->lottery_drops->rate_total;
@@ -231,110 +158,11 @@ std::vector<SeedFinder::Reward> SeedFinder::get_all_rewards(uint32_t seed, int p
 	{
 		int32_t roll = (int32_t)gen.next_int((uint64_t)rate_total);
 		auto& item = enc->lottery_drops->items[enc->lottery_lookup[roll]];
-		rewards.push_back({ item.item_id, item.num });
+		if (item.item_id)
+			rewards.push_back({ item.item_id, item.num });
 	}
 
 	return rewards;
-}
-
-FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t seed) const
-{
-	if (species && enc->species != species)
-		return false;
-	Xoroshiro128Plus gen(seed);
-	uint32_t EC = (uint32_t)gen.next_int();
-	uint32_t TIDSID = (uint32_t)gen.next_int();
-	uint32_t PID = (uint32_t)gen.next_int();
-	bool is_shiny = (((PID >> 16) ^ (PID & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
-	bool cond_shiny[] = { is_shiny, true, false };
-	if (is_shiny != cond_shiny[shiny])
-		return false;
-	int8_t ivs[16] = { -1, -1, -1, -1, -1, -1 };
-	for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
-	{
-		int32_t index;
-		do
-		{
-			index = (int32_t)gen.next_int(6);
-		} while (ivs[index] != -1);
-		ivs[index] = 31;
-	}
-	for (size_t i = 0; i < 6; ++i)
-	{
-		if (ivs[i] == -1)
-			ivs[i] = (int8_t)gen.next_int(32);
-	}
-	__m128i min_result = _mm_cmplt_epi8(*(__m128i*)ivs, *(__m128i*)min_iv_vec);
-	__m128i max_result = _mm_cmpgt_epi8(*(__m128i*)ivs, *(__m128i*)max_iv_vec);
-	int result = _mm_testz_si128(min_result, min_result) + _mm_testz_si128(max_result, max_result);
-	if (result != 2)
-		return false;
-	return true;
-}
-
-FORCEINLINE bool SeedFinder::check_rewards(const EncounterTera9* enc, uint32_t seed) const
-{
-	uint32_t drops = get_rewards(enc, seed, RaidBoost);
-	if (drops < drop_threshold)
-		return false;
-	return true;
-}
-
-void SeedFinder::combo_thread(ThreadData& data)
-{
-	for (uint64_t seed = data.range_min; seed < data.range_max; ++seed)
-	{
-		const EncounterTera9* enc = get_encounter(seed, StoryProgress);
-		if (!enc)
-			continue;
-		if (check_pokemon(enc, seed) && check_rewards(enc, seed))
-			data.results.push_back(seed);
-	}
-}
-
-DWORD WINAPI SeedFinder::combo_thread_wrapper(LPVOID Parameter)
-{
-	ThreadData* data = (ThreadData*)Parameter;
-	data->finder->combo_thread(*data);
-	return 0;
-}
-
-void SeedFinder::rewards_thread(ThreadData& data)
-{
-	for (uint64_t seed = data.range_min; seed < data.range_max; ++seed)
-	{
-		const EncounterTera9* enc = get_encounter(seed, StoryProgress);
-		if (!enc)
-			continue;
-		if (check_rewards(enc, seed))
-			data.results.push_back(seed);
-	}
-}
-
-DWORD WINAPI SeedFinder::rewards_thread_wrapper(LPVOID Parameter)
-{
-	ThreadData* data = (ThreadData*)Parameter;
-	data->finder->rewards_thread(*data);
-	return 0;
-}
-
-void SeedFinder::pokemon_thread(ThreadData& data)
-{
-	for (uint64_t seed = data.range_min; seed < data.range_max; ++seed)
-	{
-		const EncounterTera9* enc = get_encounter(seed, StoryProgress);
-		if (!enc)
-			continue;
-		if (check_pokemon(enc, seed))
-			data.results.push_back(seed);
-	}
-}
-
-DWORD WINAPI SeedFinder::pokemon_thread_wrapper(LPVOID Parameter)
-{
-	ThreadData* data = (ThreadData*)Parameter;
-	data->finder->pokemon_thread(*data);
-	return 0;
 }
 
 void SeedFinder::find_seeds_thread()
@@ -343,13 +171,48 @@ void SeedFinder::find_seeds_thread()
 	auto thread_data = std::make_unique<ThreadData[]>(thread_count);
 	uint64_t seed_count = max_seed - min_seed + 1ULL;
 	uint64_t seed_chunk = seed_count / thread_count;
-	LPTHREAD_START_ROUTINE proc = NULL;
-	if (use_pokemon_filters() && use_item_filters())
-		proc = combo_thread_wrapper;
-	else if (use_item_filters())
-		proc = rewards_thread_wrapper;
-	else
-		proc = pokemon_thread_wrapper;
+	bool f_is6 = stars == 6;
+	bool f_species = species != 0;
+	bool f_shiny = shiny != 0;
+	bool f_advanced = use_advanced_filters();
+	bool f_rewards = use_item_filters();
+	static const LPTHREAD_START_ROUTINE workers[] =
+	{
+		worker_thread_wrapper<false, false, false, false, false>,
+		worker_thread_wrapper<false, false, false, false, true>,
+		worker_thread_wrapper<false, false, false, true, false>,
+		worker_thread_wrapper<false, false, false, true, true>,
+		worker_thread_wrapper<false, false, true, false, false>,
+		worker_thread_wrapper<false, false, true, false, true>,
+		worker_thread_wrapper<false, false, true, true, false>,
+		worker_thread_wrapper<false, false, true, true, true>,
+		worker_thread_wrapper<false, true, false, false, false>,
+		worker_thread_wrapper<false, true, false, false, true>,
+		worker_thread_wrapper<false, true, false, true, false>,
+		worker_thread_wrapper<false, true, false, true, true>,
+		worker_thread_wrapper<false, true, true, false, false>,
+		worker_thread_wrapper<false, true, true, false, true>,
+		worker_thread_wrapper<false, true, true, true, false>,
+		worker_thread_wrapper<false, true, true, true, true>,
+		worker_thread_wrapper<true, false, false, false, false>,
+		worker_thread_wrapper<true, false, false, false, true>,
+		worker_thread_wrapper<true, false, false, true, false>,
+		worker_thread_wrapper<true, false, false, true, true>,
+		worker_thread_wrapper<true, false, true, false, false>,
+		worker_thread_wrapper<true, false, true, false, true>,
+		worker_thread_wrapper<true, false, true, true, false>,
+		worker_thread_wrapper<true, false, true, true, true>,
+		worker_thread_wrapper<true, true, false, false, false>,
+		worker_thread_wrapper<true, true, false, false, true>,
+		worker_thread_wrapper<true, true, false, true, false>,
+		worker_thread_wrapper<true, true, false, true, true>,
+		worker_thread_wrapper<true, true, true, false, false>,
+		worker_thread_wrapper<true, true, true, false, true>,
+		worker_thread_wrapper<true, true, true, true, false>,
+		worker_thread_wrapper<true, true, true, true, true>,
+	};
+	int worker_index = ((int)f_is6 << 4) | ((int)f_species << 3) | ((int)f_shiny << 2) | ((int)f_advanced << 1) | ((int)f_rewards << 0);
+	LPTHREAD_START_ROUTINE proc = workers[worker_index];
 	time_taken.start();
 	for (uint32_t i = 0; i < thread_count; ++i)
 	{
@@ -398,6 +261,15 @@ bool SeedFinder::find_seeds()
 	seeds.clear();
 	memcpy(min_iv_vec, min_iv, sizeof(min_iv));
 	memcpy(max_iv_vec, max_iv, sizeof(max_iv));
+	if (species != 0)
+	{
+		memset(target_species.data(), 0, target_species.size());
+		target_species[species] = 1;
+	}
+	else
+	{
+		memset(target_species.data(), 1, target_species.size());
+	}
 	hFinderThread = CreateThread(NULL, 0, find_seeds_thread_wrapper, this, 0, NULL);
 	if (!hFinderThread)
 		return false;
@@ -433,9 +305,16 @@ void SeedFinder::set_drop_filter(int item_id, bool value)
 	}
 }
 
+bool SeedFinder::use_advanced_filters() const
+{
+	return tera_type != 0 || ability != 0 || nature != 0 || gender != 0;
+}
+
 bool SeedFinder::use_pokemon_filters() const
 {
 	if (species != 0 || shiny != 0)
+		return true;
+	if (use_advanced_filters())
 		return true;
 	for (auto iv : min_iv)
 		if (iv != 0)
@@ -460,14 +339,14 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 {
 	SeedInfo info;
 	info.seed = seed;
-	info.stars = stars < 6 ? get_star_count(seed) : 6;
-	info.tera_type = (uint8_t)Xoroshiro128Plus(seed).next_int(18);
+	info.stars = stars < 6 ? get_star_count(seed, story_progress) : 6;
+	info.tera_type = (uint8_t)get_tera_type(seed);
 	Xoroshiro128Plus gen(seed);
 	info.ec = (uint32_t)gen.next_int();
 	uint32_t TIDSID = (uint32_t)gen.next_int();
 	info.pid = (uint32_t)gen.next_int();
 	info.shiny = (((info.pid >> 16) ^ (info.pid & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
-	const EncounterTera9* enc = get_encounter(seed, StoryProgress);
+	const EncounterTera9* enc = get_encounter(seed);
 	info.species = enc->species;
 	int8_t ivs[6] = { -1, -1, -1, -1, -1, -1 };
 	for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
@@ -485,75 +364,12 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 			ivs[i] = (int8_t)gen.next_int(32);
 	}
 	memcpy(info.iv, ivs, sizeof(info.iv));
-	int abil;
-	switch (enc->ability)
-	{
-	case AbilityPermission::Any12H:
-		abil = (int)gen.next_int(3) << 1;
-		break;
-	case AbilityPermission::Any12:
-		abil = (int)gen.next_int(2) << 1;
-		break;
-	default:
-		abil = (int)enc->ability;
-		break;
-	}
-	abil >>= 1;
-	switch (abil)
-	{
-	case 0:
-		info.ability = enc->personal_info->ability1;
-		break;
-	case 1:
-		info.ability = enc->personal_info->ability2;
-		break;
-	case 2:
-		info.ability = enc->personal_info->abilityH;
-		break;
-	default:
-		__assume(0);
-	}
-	switch (enc->personal_info->gender)
-	{
-	case GenderRatioGenderless:
-		info.gender = 2;
-		break;
-	case GenderRatioFemale:
-		info.gender = 1;
-		break;
-	case GenderRatioMale:
-		info.gender = 0;
-		break;
-	default:
-	{
-		uint32_t rand100 = (uint32_t)gen.next_int(100);
-		switch (enc->personal_info->gender)
-		{
-		case 0x1F:
-			info.gender = rand100 < 12 ? 1 : 0;
-			break;
-		case 0x3F:
-			info.gender = rand100 < 25 ? 1 : 0;
-			break;
-		case 0x7F:
-			info.gender = rand100 < 50 ? 1 : 0;
-			break;
-		case 0xBF:
-			info.gender = rand100 < 75 ? 1 : 0;
-			break;
-		case 0xE1:
-			info.gender = rand100 < 89 ? 1 : 0;
-			break;
-		default:
-			__assume(0);
-		}
-		break;
-	}
-	}
-	info.nature = info.species == 849 ? get_toxtricity_nature(gen, enc->form) : (int8_t)gen.next_int(25);
+	info.ability = (uint16_t)get_ability(gen, enc->ability, *enc->personal_info);
+	info.gender = (uint8_t)get_gender(gen, enc->personal_info->gender);
+	info.nature = (uint8_t)get_nature(gen, info.species, enc->form);
 	memcpy(info.moves, enc->moves, sizeof(info.moves));
 	if (use_item_filters())
-		info.drops = get_rewards(enc, seed, RaidBoost);
+		info.drops = get_rewards(enc, seed);
 	else
 		info.drops = 0;
 	return info;
@@ -572,33 +388,33 @@ int32_t SeedFinder::get_toxtricity_nature(Xoroshiro128Plus& gen, uint8_t form)
 	return form_record.table[gen.next_int(form_record.size)];
 }
 
-void SeedFinder::visit_encounters(std::function<EncounterVisitor> visitor) const
+void SeedFinder::visit_encounters(std::function<EncounterVisitor> visitor)
 {
 	for (auto& enc_vector : encounters)
 		for (auto& enc : enc_vector)
 			visitor(enc);
 }
 
-int SeedFinder::get_star_count(uint32_t seed)
+int SeedFinder::get_star_count(uint32_t seed, int32_t progress)
 {
 	Xoroshiro128Plus gen(seed);
-	return get_star_count(gen);
+	return get_star_count(gen, progress);
 }
 
-FORCEINLINE int SeedFinder::get_star_count(Xoroshiro128Plus& gen)
+SeedFinder::BasicParams SeedFinder::get_basic_params() const
 {
-	static const int8_t star_count_lookup[] =
-	{
-		3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		3, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-		4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-		4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-		4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-		4, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-		5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-		5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	};
-	return star_count_lookup[gen.next_int(100)];
+	BasicParams params;
+	params.game = game;
+	params.stars = stars;
+	params.story_progress = story_progress;
+	params.raid_boost = raid_boost;
+	return params;
+}
+
+void SeedFinder::set_basic_params(const BasicParams& params)
+{
+	game = params.game;
+	stars = params.stars;
+	story_progress = params.story_progress;
+	raid_boost = params.raid_boost;
 }

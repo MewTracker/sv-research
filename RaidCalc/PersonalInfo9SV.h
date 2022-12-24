@@ -41,9 +41,9 @@ public:
         exp_growth = data[0x0F];
         egg_group1 = data[0x10];
         egg_group2 = data[0x11];
-        ability1 = *(uint16_t*)&data[0x12];
-        ability2 = *(uint16_t*)&data[0x14];
-        abilityH = *(uint16_t*)&data[0x16];
+        ability[0] = *(uint16_t*)&data[0x12];
+        ability[1] = *(uint16_t*)&data[0x14];
+        ability[2] = *(uint16_t*)&data[0x16];
         form_stats_index = *(uint16_t*)&data[0x18];
         form_count = data[0x1A];
         color = data[0x1B];
@@ -102,9 +102,7 @@ public:
     uint8_t exp_growth;
     int32_t egg_group1;
     int32_t egg_group2;
-    int32_t ability1;
-    int32_t ability2;
-    int32_t abilityH;
+    uint32_t ability[3];
     int32_t form_stats_index;
     uint8_t form_count;
     int32_t color;
