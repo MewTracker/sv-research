@@ -3,7 +3,7 @@
 
 This repository contains notes and tools developed during my research of Pokémon Scarlet/Violet games for Nintendo Switch.
 
-## 1. Raids and Herba Mystica farming
+## 1. Raids and Herba Mystica farming (legacy)
 
 Herba Mystica are considered one of most useful items for shiny hunting as they can be used to make Sparkling Power Level 3 sandwitches. They can be obtained as random drops from 5 and 6 star raids. Raids in SV are generated from 32-bit PRNG seeds (Xoroshiro128+, standard for Pokémon games). With only 2^32 possible values it's feasible to check them all for optimal drops. Those seeds can later be injected via [PKHeX](https://github.com/kwsch/PKHeX) or cheat codes. CFW is required for those operations but raids can be hosted, so other people without hacked consoles can benefit from them as well.
 
@@ -13,4 +13,16 @@ All seeds are for 6 star raids (maximum story progression required):
 - Herba Mystica (8, 9 and 10 drops): [Scarlet Seeds](Seeds/herba_seeds_scarlet.txt)/[Violet Seeds](Seeds/herba_seeds_violet.txt)
 - Ability Patches (5 drops): [Scarlet Seeds](Seeds/ability_patch_seeds_scarlet.txt)/[Violet Seeds](Seeds/ability_patch_seeds_violet.txt)
 - Shiny 6IV: [Scarlet Seeds](Seeds/shiny_6iv_seeds_scarlet.txt)/[Violet Seeds](Seeds/shiny_6iv_seeds_violet.txt)
+
+## 2. RaidCalc
+
+Easy to use seed finder:
+- blazing fast performance - much faster than any PKHeX-based utility
+- filtering by Pokémon parameters (species, shininess, IV ranges, tera type, ability, nature, gender)
+- filtering by raid reward count (you can filter for specific rewards)
+- filtering by raid difficulty
+- configurable game version, story progression and raid boost
+- seed viewer
+
+![Screenshot](Assets/screenshot.png)
 
