@@ -7,6 +7,8 @@
 #include "SeedViewerDialog.h"
 #include "SeedFinder.h"
 #include "SeedTableModel.h"
+#include "SettingsDialog.h"
+#include "AboutDialog.h"
 
 class RaidCalc : public QMainWindow
 {
@@ -23,21 +25,34 @@ public slots:
     void on_buttonMaxIV_clicked();
     void on_finder_timer_timeout();
     void on_actionSeedViewer_triggered(bool checked = false);
+    void on_actionSettings_triggered(bool checked = false);
+    void on_actionAbout_triggered(bool checked = false);
     void on_tableSeeds_doubleClicked(const QModelIndex& index);
+    void on_comboBoxStory_currentIndexChanged(int index);
+    void on_comboBoxStars_currentIndexChanged(int index);
 
 private:
     static const uint64_t MaxSeeds = 10000000ULL;
     static const uint64_t SeedCountWarningThreshold = 100000;
 
+    struct StarsRange
+    {
+        uint8_t min_stars;
+        uint8_t max_stars;
+    };
+
     void toggle_ui(bool enabled);
     void add_sorted_options(QComboBox* combo, const char** names, uint32_t name_count, uint32_t offset = 1);
     void add_sorted_options(QComboBox* combo, std::vector<std::pair<std::string, uint32_t>>& options);
+    const StarsRange& get_allowed_stars(int progress);
 
     Ui::RaidCalcClass ui;
     QSpinBox* min_iv_widgets[6];
     QSpinBox* max_iv_widgets[6];
     ItemFilterDialog* itemFilters;
     SeedViewerDialog* seedViewer;
+    SettingsDialog* settings;
+    AboutDialog* about;
     QTimer* finder_timer;
     SeedTableModel seedModel;
     SeedFinder finder;

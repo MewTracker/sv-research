@@ -85,7 +85,7 @@ __declspec(noinline) void Benchmarks::do_pokemon_bench(SeedFinder& finder)
     for (int i = 0; i < 10; ++i)
     {
         stopwatch.start();
-        finder.worker_thread<true, true, true, false, false>(data);
+        finder.worker_thread<true, true, true, true, false, false>(data);
         stopwatch.stop();
         data.results.clear();
         if (i > 3)
@@ -108,7 +108,7 @@ __declspec(noinline) void Benchmarks::do_rewards_bench(SeedFinder& finder)
     for (int i = 0; i < 10; ++i)
     {
         stopwatch.start();
-        finder.worker_thread<true, false, false, false, true>(data);
+        finder.worker_thread<true, false, false, false, false, true>(data);
         stopwatch.stop();
         data.results.clear();
         if (i > 3)

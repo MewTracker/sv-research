@@ -174,44 +174,77 @@ void SeedFinder::find_seeds_thread()
 	bool f_is6 = stars == 6;
 	bool f_species = species != 0;
 	bool f_shiny = shiny != 0;
+	bool f_iv = use_iv_filters();
 	bool f_advanced = use_advanced_filters();
 	bool f_rewards = use_item_filters();
 	static const LPTHREAD_START_ROUTINE workers[] =
 	{
-		worker_thread_wrapper<false, false, false, false, false>,
-		worker_thread_wrapper<false, false, false, false, true>,
-		worker_thread_wrapper<false, false, false, true, false>,
-		worker_thread_wrapper<false, false, false, true, true>,
-		worker_thread_wrapper<false, false, true, false, false>,
-		worker_thread_wrapper<false, false, true, false, true>,
-		worker_thread_wrapper<false, false, true, true, false>,
-		worker_thread_wrapper<false, false, true, true, true>,
-		worker_thread_wrapper<false, true, false, false, false>,
-		worker_thread_wrapper<false, true, false, false, true>,
-		worker_thread_wrapper<false, true, false, true, false>,
-		worker_thread_wrapper<false, true, false, true, true>,
-		worker_thread_wrapper<false, true, true, false, false>,
-		worker_thread_wrapper<false, true, true, false, true>,
-		worker_thread_wrapper<false, true, true, true, false>,
-		worker_thread_wrapper<false, true, true, true, true>,
-		worker_thread_wrapper<true, false, false, false, false>,
-		worker_thread_wrapper<true, false, false, false, true>,
-		worker_thread_wrapper<true, false, false, true, false>,
-		worker_thread_wrapper<true, false, false, true, true>,
-		worker_thread_wrapper<true, false, true, false, false>,
-		worker_thread_wrapper<true, false, true, false, true>,
-		worker_thread_wrapper<true, false, true, true, false>,
-		worker_thread_wrapper<true, false, true, true, true>,
-		worker_thread_wrapper<true, true, false, false, false>,
-		worker_thread_wrapper<true, true, false, false, true>,
-		worker_thread_wrapper<true, true, false, true, false>,
-		worker_thread_wrapper<true, true, false, true, true>,
-		worker_thread_wrapper<true, true, true, false, false>,
-		worker_thread_wrapper<true, true, true, false, true>,
-		worker_thread_wrapper<true, true, true, true, false>,
-		worker_thread_wrapper<true, true, true, true, true>,
+		worker_thread_wrapper<false, false, false, false, false, false>,
+		worker_thread_wrapper<false, false, false, false, false, true>,
+		worker_thread_wrapper<false, false, false, false, true, false>,
+		worker_thread_wrapper<false, false, false, false, true, true>,
+		worker_thread_wrapper<false, false, false, true, false, false>,
+		worker_thread_wrapper<false, false, false, true, false, true>,
+		worker_thread_wrapper<false, false, false, true, true, false>,
+		worker_thread_wrapper<false, false, false, true, true, true>,
+		worker_thread_wrapper<false, false, true, false, false, false>,
+		worker_thread_wrapper<false, false, true, false, false, true>,
+		worker_thread_wrapper<false, false, true, false, true, false>,
+		worker_thread_wrapper<false, false, true, false, true, true>,
+		worker_thread_wrapper<false, false, true, true, false, false>,
+		worker_thread_wrapper<false, false, true, true, false, true>,
+		worker_thread_wrapper<false, false, true, true, true, false>,
+		worker_thread_wrapper<false, false, true, true, true, true>,
+		worker_thread_wrapper<false, true, false, false, false, false>,
+		worker_thread_wrapper<false, true, false, false, false, true>,
+		worker_thread_wrapper<false, true, false, false, true, false>,
+		worker_thread_wrapper<false, true, false, false, true, true>,
+		worker_thread_wrapper<false, true, false, true, false, false>,
+		worker_thread_wrapper<false, true, false, true, false, true>,
+		worker_thread_wrapper<false, true, false, true, true, false>,
+		worker_thread_wrapper<false, true, false, true, true, true>,
+		worker_thread_wrapper<false, true, true, false, false, false>,
+		worker_thread_wrapper<false, true, true, false, false, true>,
+		worker_thread_wrapper<false, true, true, false, true, false>,
+		worker_thread_wrapper<false, true, true, false, true, true>,
+		worker_thread_wrapper<false, true, true, true, false, false>,
+		worker_thread_wrapper<false, true, true, true, false, true>,
+		worker_thread_wrapper<false, true, true, true, true, false>,
+		worker_thread_wrapper<false, true, true, true, true, true>,
+		worker_thread_wrapper<true, false, false, false, false, false>,
+		worker_thread_wrapper<true, false, false, false, false, true>,
+		worker_thread_wrapper<true, false, false, false, true, false>,
+		worker_thread_wrapper<true, false, false, false, true, true>,
+		worker_thread_wrapper<true, false, false, true, false, false>,
+		worker_thread_wrapper<true, false, false, true, false, true>,
+		worker_thread_wrapper<true, false, false, true, true, false>,
+		worker_thread_wrapper<true, false, false, true, true, true>,
+		worker_thread_wrapper<true, false, true, false, false, false>,
+		worker_thread_wrapper<true, false, true, false, false, true>,
+		worker_thread_wrapper<true, false, true, false, true, false>,
+		worker_thread_wrapper<true, false, true, false, true, true>,
+		worker_thread_wrapper<true, false, true, true, false, false>,
+		worker_thread_wrapper<true, false, true, true, false, true>,
+		worker_thread_wrapper<true, false, true, true, true, false>,
+		worker_thread_wrapper<true, false, true, true, true, true>,
+		worker_thread_wrapper<true, true, false, false, false, false>,
+		worker_thread_wrapper<true, true, false, false, false, true>,
+		worker_thread_wrapper<true, true, false, false, true, false>,
+		worker_thread_wrapper<true, true, false, false, true, true>,
+		worker_thread_wrapper<true, true, false, true, false, false>,
+		worker_thread_wrapper<true, true, false, true, false, true>,
+		worker_thread_wrapper<true, true, false, true, true, false>,
+		worker_thread_wrapper<true, true, false, true, true, true>,
+		worker_thread_wrapper<true, true, true, false, false, false>,
+		worker_thread_wrapper<true, true, true, false, false, true>,
+		worker_thread_wrapper<true, true, true, false, true, false>,
+		worker_thread_wrapper<true, true, true, false, true, true>,
+		worker_thread_wrapper<true, true, true, true, false, false>,
+		worker_thread_wrapper<true, true, true, true, false, true>,
+		worker_thread_wrapper<true, true, true, true, true, false>,
+		worker_thread_wrapper<true, true, true, true, true, true>,
 	};
-	int worker_index = ((int)f_is6 << 4) | ((int)f_species << 3) | ((int)f_shiny << 2) | ((int)f_advanced << 1) | ((int)f_rewards << 0);
+	int worker_index = ((int)f_is6 << 5) | ((int)f_species << 4) | ((int)f_shiny << 3) | ((int)f_iv << 2) | ((int)f_advanced << 1) | ((int)f_rewards << 0);
 	LPTHREAD_START_ROUTINE proc = workers[worker_index];
 	time_taken.start();
 	for (uint32_t i = 0; i < thread_count; ++i)
@@ -310,18 +343,23 @@ bool SeedFinder::use_advanced_filters() const
 	return tera_type != 0 || ability != 0 || nature != 0 || gender != 0;
 }
 
-bool SeedFinder::use_pokemon_filters() const
+bool SeedFinder::use_iv_filters() const
 {
-	if (species != 0 || shiny != 0)
-		return true;
-	if (use_advanced_filters())
-		return true;
 	for (auto iv : min_iv)
 		if (iv != 0)
 			return true;
 	for (auto iv : max_iv)
 		if (iv != 31)
 			return true;
+	return false;
+}
+
+bool SeedFinder::use_pokemon_filters() const
+{
+	if (species != 0 || shiny != 0)
+		return true;
+	if (use_iv_filters() || use_advanced_filters())
+		return true;
 	return false;
 }
 

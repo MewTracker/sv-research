@@ -109,15 +109,16 @@ private:
 	template<bool f_is6>
 	FORCEINLINE const EncounterTera9* get_encounter(uint32_t seed) const;
 
-	template<bool f_species, bool f_shiny, bool f_advanced>
+	template<bool f_species, bool f_shiny, bool f_iv, bool f_advanced>
 	FORCEINLINE bool check_pokemon(const EncounterTera9* enc, uint32_t seed) const;
 
-	template<bool f_is6, bool f_species, bool f_shiny, bool f_advanced, bool f_rewards>
+	template<bool f_is6, bool f_species, bool f_shiny, bool f_iv, bool f_advanced, bool f_rewards>
 	void worker_thread(ThreadData& data);
 
-	template<bool f_is6, bool f_species, bool f_shiny, bool f_advanced, bool f_rewards>
+	template<bool f_is6, bool f_species, bool f_shiny, bool f_iv, bool f_advanced, bool f_rewards>
 	static DWORD WINAPI worker_thread_wrapper(LPVOID Parameter);
 
+	bool use_iv_filters() const;
 	bool use_pokemon_filters() const;
 	bool use_item_filters() const;
 	bool use_advanced_filters() const;
@@ -414,7 +415,7 @@ FORCEINLINE const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 	return &encounters[stars][fast_encounter_lookup[game][stars][speciesroll]];
 }
 
-template<bool f_species, bool f_shiny, bool f_advanced>
+template<bool f_species, bool f_shiny, bool f_iv, bool f_advanced>
 FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t seed) const
 {
 	if constexpr (f_species)
@@ -434,25 +435,33 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 			return false;
 	}
 	int8_t ivs[16] = { -1, -1, -1, -1, -1, -1 };
-	for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
+	if constexpr (f_iv || f_advanced)
 	{
-		int32_t index;
-		do
+		for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
 		{
-			index = (int32_t)gen.next_int(6);
-		} while (ivs[index] != -1);
-		ivs[index] = 31;
+			int32_t index;
+			do
+			{
+				index = (int32_t)gen.next_int(6);
+			} while (ivs[index] != -1);
+			ivs[index] = 31;
+		}
+		for (size_t i = 0; i < 6; ++i)
+		{
+			if (ivs[i] == -1)
+				ivs[i] = (int8_t)gen.next_int(32);
+		}
 	}
-	for (size_t i = 0; i < 6; ++i)
+	if constexpr (f_iv)
 	{
-		if (ivs[i] == -1)
-			ivs[i] = (int8_t)gen.next_int(32);
+		__m128i min_result = _mm_cmplt_epi8(*(__m128i*)ivs, *(__m128i*)min_iv_vec);
+		__m128i max_result = _mm_cmpgt_epi8(*(__m128i*)ivs, *(__m128i*)max_iv_vec);
+		int result = _mm_testz_si128(min_result, min_result) + _mm_testz_si128(max_result, max_result);
+		if (result != 2)
+			return false;
 	}
-	__m128i min_result = _mm_cmplt_epi8(*(__m128i*)ivs, *(__m128i*)min_iv_vec);
-	__m128i max_result = _mm_cmpgt_epi8(*(__m128i*)ivs, *(__m128i*)max_iv_vec);
-	int result = _mm_testz_si128(min_result, min_result) + _mm_testz_si128(max_result, max_result);
-	if (result != 2)
-		return false;
+	if constexpr (!f_advanced)
+		return true;
 	if (tera_type)
 	{
 		if (get_tera_type(seed) != tera_type - 1)
@@ -503,7 +512,7 @@ FORCEINLINE bool SeedFinder::check_rewards(const EncounterTera9* enc, uint32_t s
 	return drops >= drop_threshold;
 }
 
-template<bool f_is6, bool f_species, bool f_shiny, bool f_advanced, bool f_rewards>
+template<bool f_is6, bool f_species, bool f_shiny, bool f_iv, bool f_advanced, bool f_rewards>
 void SeedFinder::worker_thread(ThreadData& data)
 {
 	for (uint64_t seed = data.range_min; seed < data.range_max; ++seed)
@@ -514,9 +523,9 @@ void SeedFinder::worker_thread(ThreadData& data)
 			if (!enc)
 				continue;
 		}
-		if constexpr (f_species || f_shiny || f_advanced)
+		if constexpr (f_species || f_shiny || f_iv || f_advanced)
 		{
-			if (!check_pokemon<f_species, f_shiny, f_rewards>(enc, seed))
+			if (!check_pokemon<f_species, f_shiny, f_iv, f_advanced>(enc, seed))
 				continue;
 		}
 		if constexpr (f_rewards)
@@ -528,10 +537,10 @@ void SeedFinder::worker_thread(ThreadData& data)
 	}
 }
 
-template<bool f_is6, bool f_species, bool f_shiny, bool f_advanced, bool f_rewards>
+template<bool f_is6, bool f_species, bool f_shiny, bool f_iv, bool f_advanced, bool f_rewards>
 static DWORD WINAPI SeedFinder::worker_thread_wrapper(LPVOID Parameter)
 {
 	ThreadData* data = (ThreadData*)Parameter;
-	data->finder->worker_thread<f_is6, f_species, f_shiny, f_advanced, f_rewards>(*data);
+	data->finder->worker_thread<f_is6, f_species, f_shiny, f_iv, f_advanced, f_rewards>(*data);
 	return 0;
 }

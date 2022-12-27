@@ -25,9 +25,11 @@ RaidCalc::RaidCalc(QWidget* parent)
     add_sorted_options(ui.comboBoxTeraType, type_names, _countof(type_names));
     add_sorted_options(ui.comboBoxAbility, ability_names + 1, _countof(ability_names) - 1);
     add_sorted_options(ui.comboBoxNature, nature_names, _countof(nature_names));
+    ui.tableSeeds->setModel(&seedModel);
     itemFilters = new ItemFilterDialog(this);
     seedViewer = new SeedViewerDialog(this);
-    ui.tableSeeds->setModel(&seedModel);
+    settings = new SettingsDialog(this, ui.tableSeeds);
+    about = new AboutDialog(this);
     finder_timer = new QTimer(this);
     connect(finder_timer, &QTimer::timeout, this, &RaidCalc::on_finder_timer_timeout);
     SYSTEM_INFO sys_info;
@@ -82,7 +84,7 @@ void RaidCalc::toggle_ui(bool enabled)
     for (auto widget : ui.itemGroup->findChildren<QWidget*>())
         widget->setEnabled(enabled);
     ui.tableSeeds->setEnabled(enabled);
-    ui.actionSeedViewer->setEnabled(enabled);
+    ui.menuBar->setEnabled(enabled);
     if (!enabled)
     {
         itemFilters->hide();
@@ -195,8 +197,66 @@ void RaidCalc::on_actionSeedViewer_triggered(bool checked)
     seedViewer->show();
 }
 
+void RaidCalc::on_actionSettings_triggered(bool checked)
+{
+    settings->open();
+}
+
+void RaidCalc::on_actionAbout_triggered(bool checked)
+{
+    about->open();
+}
+
 void RaidCalc::on_tableSeeds_doubleClicked(const QModelIndex& index)
 {
     seedViewer->display_seed(resultParams, seedModel.get_seed(index.row()));
     seedViewer->show();
+}
+
+const RaidCalc::StarsRange& RaidCalc::get_allowed_stars(int progress)
+{
+    static const StarsRange allowed_stars[5] =
+    {
+        { 1, 2 },
+        { 1, 3 },
+        { 1, 4 },
+        { 3, 5 },
+        { 3, 6 },
+    };
+    return allowed_stars[progress];
+}
+
+void RaidCalc::on_comboBoxStory_currentIndexChanged(int index)
+{
+    auto& range = get_allowed_stars(index);
+    int stars = ui.comboBoxStars->currentIndex() + 1;
+    if (stars < range.min_stars)
+    {
+        ui.comboBoxStars->setCurrentIndex(range.min_stars - 1);
+        QApplication::beep();
+    }
+    if (stars > range.max_stars)
+    {
+        ui.comboBoxStars->setCurrentIndex(range.max_stars - 1);
+        QApplication::beep();
+    }
+}
+
+void RaidCalc::on_comboBoxStars_currentIndexChanged(int index)
+{
+    int stars = index + 1;
+    int progress = ui.comboBoxStory->currentIndex();
+    auto& range = get_allowed_stars(progress);
+    if (stars >= range.min_stars && stars <= range.max_stars)
+        return;
+    for (int i = 0; i < 5; ++i)
+    {
+        auto& candidate = get_allowed_stars(i);
+        if (stars >= candidate.min_stars && stars <= candidate.max_stars)
+        {
+            ui.comboBoxStory->setCurrentIndex(i);
+            break;
+        }
+    }
+    QApplication::beep();
 }

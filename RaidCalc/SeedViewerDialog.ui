@@ -37,27 +37,27 @@
        <widget class="QComboBox" name="comboBoxStory">
         <item>
          <property name="text">
-          <string>0</string>
+          <string>None</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>1</string>
+          <string>3* unlocked</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>2</string>
+          <string>4* unlocked</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>3</string>
+          <string>5* unlocked</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>4</string>
+          <string>6* unlocked</string>
          </property>
         </item>
        </widget>

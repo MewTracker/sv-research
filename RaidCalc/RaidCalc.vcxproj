@@ -91,20 +91,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="Benchmarks.cpp" />
     <ClCompile Include="ItemFilterDialog.cpp" />
     <ClCompile Include="SeedFinder.cpp" />
     <ClCompile Include="SeedViewerDialog.cpp" />
+    <ClCompile Include="SettingsDialog.cpp" />
     <ClCompile Include="Utils.cpp" />
     <QtRcc Include="RaidCalc.qrc" />
+    <QtUic Include="AboutDialog.ui" />
     <QtUic Include="ItemFilterDialog.ui" />
     <QtUic Include="RaidCalc.ui" />
     <QtMoc Include="RaidCalc.h" />
     <ClCompile Include="RaidCalc.cpp" />
     <ClCompile Include="main.cpp" />
     <QtUic Include="SeedViewerDialog.ui" />
+    <QtUic Include="SettingsDialog.ui" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="AboutDialog.h" />
     <ClInclude Include="Benchmarks.h" />
     <ClInclude Include="EncounterTera9.h" />
     <QtMoc Include="ItemFilterDialog.h" />
@@ -117,6 +122,7 @@
     <ClInclude Include="SeedFinder.h" />
     <QtMoc Include="SeedTableModel.h" />
     <QtMoc Include="SeedViewerDialog.h" />
+    <QtMoc Include="SettingsDialog.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Xoroshiro128Plus.h" />

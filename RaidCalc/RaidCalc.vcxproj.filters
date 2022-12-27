@@ -55,6 +55,12 @@
     <ClCompile Include="SeedViewerDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AboutDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EncounterTera9.h">
@@ -101,6 +107,12 @@
     <QtUic Include="SeedViewerDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="AboutDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="SettingsDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ItemFilterDialog.h">
@@ -110,6 +122,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="SeedViewerDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="AboutDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="SettingsDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

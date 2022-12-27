@@ -23,11 +23,27 @@ void SeedViewerDialog::on_comboBoxGame_currentIndexChanged(int index)
 
 void SeedViewerDialog::on_comboBoxRaidType_currentIndexChanged(int index)
 {
+	if (!refresh_supressed)
+	{
+		if (index == 1 && ui.comboBoxStory->currentIndex() != 4)
+		{
+			ui.comboBoxStory->setCurrentIndex(4);
+			QApplication::beep();
+		}
+	}
 	refresh_ui();
 }
 
 void SeedViewerDialog::on_comboBoxStory_currentIndexChanged(int index)
 {
+	if (!refresh_supressed)
+	{
+		if (index != 4 && ui.comboBoxRaidType->currentIndex() == 1)
+		{
+			ui.comboBoxRaidType->setCurrentIndex(0);
+			QApplication::beep();
+		}
+	}
 	refresh_ui();
 }
 
