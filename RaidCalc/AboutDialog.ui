@@ -31,10 +31,13 @@
    <item>
     <widget class="QLabel" name="label3">
      <property name="text">
-      <string>&lt;a href=\&quot;https://github.com/MewTracker/sv-research\&quot;&gt;GitHub&lt;/a&gt;</string>
+      <string>&lt;a href=&quot;https://github.com/MewTracker/sv-research&quot;&gt;GitHub&lt;/a&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
      </property>
      <property name="textInteractionFlags">
       <set>Qt::TextBrowserInteraction</set>
