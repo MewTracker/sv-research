@@ -63,6 +63,14 @@
     <Link>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>RAIDCALC_VERSION=R"($(RAIDCALC_VERSION))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>RAIDCALC_VERSION=R"($(RAIDCALC_VERSION))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>

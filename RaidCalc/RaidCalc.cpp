@@ -11,6 +11,8 @@ RaidCalc::RaidCalc(QWidget* parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
+    if (RAIDCALC_VERSION[0] != '\0')
+        setWindowTitle(windowTitle() + " " + RAIDCALC_VERSION);
     if (!SeedFinder::initialize())
     {
         QMessageBox::critical(this, "Error", "Failed to initialize seed finder.");

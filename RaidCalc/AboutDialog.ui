@@ -15,21 +15,21 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label1">
+    <widget class="QLabel" name="labelVersion">
      <property name="text">
-      <string>RaidCalc v2.0.0</string>
+      <string>RaidCalc</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label2">
+    <widget class="QLabel" name="labelCopy">
      <property name="text">
       <string>© 2022 MewTracker</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label3">
+    <widget class="QLabel" name="labelLink">
      <property name="text">
       <string>&lt;a href=&quot;https://github.com/MewTracker/sv-research&quot;&gt;GitHub&lt;/a&gt;</string>
      </property>
