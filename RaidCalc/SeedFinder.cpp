@@ -3,12 +3,15 @@
 #include <cassert>
 #include <memory>
 #include "SeedFinder.h"
-#include "PokemonNames.h"
 #include "Utils.h"
 
-std::vector<std::vector<EncounterTera9>> SeedFinder::encounters;
+SeedFinder::EncounterLists SeedFinder::encounters;
+SeedFinder::EncounterListsEvents SeedFinder::encounters_dist;
+SeedFinder::EncounterListsEvents SeedFinder::encounters_might;
 std::vector<std::vector<uint8_t>> SeedFinder::fast_lottery_lookup;
 std::vector<std::vector<uint8_t>> SeedFinder::fast_encounter_lookup[2];
+std::vector<uint8_t> SeedFinder::fast_encounter_lookup_dist[2];
+std::vector<uint8_t> SeedFinder::fast_encounter_lookup_might[2];
 
 SeedFinder::SeedFinder() :
 	hFinderThread(NULL),
@@ -16,6 +19,7 @@ SeedFinder::SeedFinder() :
 	game(GameScarlet),
 	min_seed(0),
 	max_seed(0),
+	event_id(-1),
 	stars(0),
 	species(0),
 	tera_type(0),
@@ -37,11 +41,11 @@ SeedFinder::SeedFinder() :
 
 bool SeedFinder::initialize()
 {
-	std::vector<uint8_t> encounter_data = get_resource_file(":/RaidCalc/encounter_gem_paldea.pkl");
-	std::vector<uint8_t> reward_map = get_resource_file(":/RaidCalc/reward_map");
+	std::vector<uint8_t> encounter_data = get_resource_file(":/resources/encounter_gem_paldea.pkl");
+	std::vector<uint8_t> reward_map = get_resource_file(":/resources/reward_map");
 	if (encounter_data.empty() || reward_map.empty())
 		return false;
-	size_t encounter_count = encounter_data.size() / 0x18;
+	size_t encounter_count = encounter_data.size() / EncounterTera9::SizeGem;
 	size_t rewards_count = reward_map.size() / 0x10;
 	if (encounter_count != rewards_count)
 		return false;
@@ -51,7 +55,7 @@ bool SeedFinder::initialize()
 	PersonalTable9SV& table = PersonalTable9SV::instance();
 	for (size_t i = 0; i < encounter_count; ++i, rewards += 2)
 	{
-		auto enc = EncounterTera9(encounter_data.data() + i * 0x18);
+		auto enc = EncounterTera9(encounter_data.data() + i * EncounterTera9::SizeGem, EncounterType::Gem);
 		enc.fixed_drops = get_fixed_drop_table(rewards[0]);
 		enc.lottery_drops = get_lottery_drop_table(rewards[1], enc.lottery_lookup);
 		enc.personal_info = &table.get_form_entry(enc.species, enc.form);
@@ -59,7 +63,32 @@ bool SeedFinder::initialize()
 		encounters[enc.stars].push_back(enc);
 	}
 	compute_fast_encounter_lookups();
+	initialize_event_encounters(":/resources/encounter_dist_paldea.pklex", EncounterTera9::SizeDist, EncounterType::Dist, encounters_dist);
+	initialize_event_encounters(":/resources/encounter_might_paldea.pklex", EncounterTera9::SizeMight, EncounterType::Might, encounters_might);
 	return true;
+}
+
+void SeedFinder::initialize_event_encounters(const char *file_name, size_t encounter_size, EncounterType type, EncounterListsEvents& lists)
+{
+	size_t offset = 0;
+	std::vector<uint8_t> encounter_data = get_resource_file(file_name);
+	PersonalTable9SV& table = PersonalTable9SV::instance();
+	for (size_t i = 0; i < _countof(lists); ++i)
+	{
+		assert(*(uint32_t*)&encounter_data.data()[offset] == i);
+		uint32_t encounter_count = *(uint32_t*)&encounter_data.data()[offset + sizeof(uint32_t)];
+		offset += sizeof(uint32_t) * 2;
+		for (uint32_t j = 0; j < encounter_count; ++j)
+		{
+			auto enc = EncounterTera9(encounter_data.data() + offset, type);
+			enc.fixed_drops = get_fixed_drop_table(enc.fixed_table_id);
+			enc.lottery_drops = get_lottery_drop_table(enc.lottery_table_id, enc.lottery_lookup);
+			enc.personal_info = &table.get_form_entry(enc.species, enc.form);
+			lists[i].push_back(enc);
+			assert(enc.stars > 0 && enc.stars < 8);
+			offset += encounter_size;
+		}
+	}
 }
 
 const RaidFixedRewards* SeedFinder::get_fixed_drop_table(uint64_t table_name)
@@ -136,9 +165,35 @@ void SeedFinder::compute_fast_encounter_lookups()
 
 const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 {
-	if (stars == 6)
-		return get_encounter<true>(seed);
-	return get_encounter<false>(seed);
+	if (event_id < 0)
+	{
+		if (stars == 6)
+			return get_encounter<true>(seed);
+		return get_encounter<false>(seed);
+	}
+	if (stars != 7)
+		return get_encounter_dist(seed);
+	if (!encounters_might[event_id].empty())
+		return &encounters_might[event_id][0];
+	return nullptr;
+}
+
+const EncounterTera9* SeedFinder::get_encounter_dist(uint32_t seed) const
+{
+	for (auto& enc : encounters_dist[event_id])
+	{
+		if (enc.stars != stars)
+			continue;
+		Xoroshiro128Plus gen(seed);
+		gen.next_int(100);
+		auto& rand_rate_data = enc.rand_rate_event[stage][game];
+		if (rand_rate_data.total == 0)
+			continue;
+		uint64_t val = gen.next_int(rand_rate_data.total);
+		if ((uint32_t)((int32_t)val - rand_rate_data.min) < enc.rand_rate)
+			return &enc;
+	}
+	return nullptr;
 }
 
 std::vector<SeedFinder::Reward> SeedFinder::get_all_rewards(uint32_t seed) const
@@ -150,8 +205,9 @@ std::vector<SeedFinder::Reward> SeedFinder::get_all_rewards(uint32_t seed) const
 	for (auto& item : enc->fixed_drops->items)
 		if (item.item_id)
 			rewards.push_back({ item.item_id, item.num });
-	Xoroshiro128Plus gen(seed);
 
+	std::vector<SeedFinder::Reward> lottery;
+	Xoroshiro128Plus gen(seed);
 	int32_t rate_total = enc->lottery_drops->rate_total;
 	int32_t count = get_reward_count((int32_t)gen.next_int(100), enc->stars) + raid_boost;
 	for (int32_t i = 0; i < count; ++i)
@@ -159,9 +215,29 @@ std::vector<SeedFinder::Reward> SeedFinder::get_all_rewards(uint32_t seed) const
 		int32_t roll = (int32_t)gen.next_int((uint64_t)rate_total);
 		auto& item = enc->lottery_drops->items[enc->lottery_lookup[roll]];
 		if (item.item_id)
-			rewards.push_back({ item.item_id, item.num });
+			lottery.push_back({ item.item_id, item.num });
 	}
 
+	static const int32_t rare_rewards[] = { 4, 645, 1606, 1904, 1905, 1906, 1907, 1908, 795 };
+	std::vector<SeedFinder::Reward> rares, commons;
+	for (auto reward : lottery)
+	{
+		bool is_rare = false;
+		for (auto rare_id : rare_rewards)
+		{
+			if (reward.item_id == rare_id)
+			{
+				is_rare = true;
+				break;
+			}
+		}
+		if (is_rare)
+			rares.push_back(reward);
+		else
+			commons.push_back(reward);
+	}
+	rewards.insert(rewards.begin(), rares.begin(), rares.end());
+	rewards.insert(rewards.end(), commons.begin(), commons.end());
 	return rewards;
 }
 
@@ -171,81 +247,138 @@ void SeedFinder::find_seeds_thread()
 	auto thread_data = std::make_unique<ThreadData[]>(thread_count);
 	uint64_t seed_count = max_seed - min_seed + 1ULL;
 	uint64_t seed_chunk = seed_count / thread_count;
+	EncounterType f_type = event_id < 0 ? EncounterType::Gem : EncounterType::Dist;
+	if (stars == 7)
+		f_type = EncounterType::Might;
 	bool f_is6 = stars == 6;
 	bool f_species = species != 0;
 	bool f_shiny = shiny != 0;
 	bool f_iv = use_iv_filters();
 	bool f_advanced = use_advanced_filters();
 	bool f_rewards = use_item_filters();
-	static const LPTHREAD_START_ROUTINE workers[] =
+	static const LPTHREAD_START_ROUTINE workers_gem[] =
 	{
-		worker_thread_wrapper<false, false, false, false, false, false>,
-		worker_thread_wrapper<false, false, false, false, false, true>,
-		worker_thread_wrapper<false, false, false, false, true, false>,
-		worker_thread_wrapper<false, false, false, false, true, true>,
-		worker_thread_wrapper<false, false, false, true, false, false>,
-		worker_thread_wrapper<false, false, false, true, false, true>,
-		worker_thread_wrapper<false, false, false, true, true, false>,
-		worker_thread_wrapper<false, false, false, true, true, true>,
-		worker_thread_wrapper<false, false, true, false, false, false>,
-		worker_thread_wrapper<false, false, true, false, false, true>,
-		worker_thread_wrapper<false, false, true, false, true, false>,
-		worker_thread_wrapper<false, false, true, false, true, true>,
-		worker_thread_wrapper<false, false, true, true, false, false>,
-		worker_thread_wrapper<false, false, true, true, false, true>,
-		worker_thread_wrapper<false, false, true, true, true, false>,
-		worker_thread_wrapper<false, false, true, true, true, true>,
-		worker_thread_wrapper<false, true, false, false, false, false>,
-		worker_thread_wrapper<false, true, false, false, false, true>,
-		worker_thread_wrapper<false, true, false, false, true, false>,
-		worker_thread_wrapper<false, true, false, false, true, true>,
-		worker_thread_wrapper<false, true, false, true, false, false>,
-		worker_thread_wrapper<false, true, false, true, false, true>,
-		worker_thread_wrapper<false, true, false, true, true, false>,
-		worker_thread_wrapper<false, true, false, true, true, true>,
-		worker_thread_wrapper<false, true, true, false, false, false>,
-		worker_thread_wrapper<false, true, true, false, false, true>,
-		worker_thread_wrapper<false, true, true, false, true, false>,
-		worker_thread_wrapper<false, true, true, false, true, true>,
-		worker_thread_wrapper<false, true, true, true, false, false>,
-		worker_thread_wrapper<false, true, true, true, false, true>,
-		worker_thread_wrapper<false, true, true, true, true, false>,
-		worker_thread_wrapper<false, true, true, true, true, true>,
-		worker_thread_wrapper<true, false, false, false, false, false>,
-		worker_thread_wrapper<true, false, false, false, false, true>,
-		worker_thread_wrapper<true, false, false, false, true, false>,
-		worker_thread_wrapper<true, false, false, false, true, true>,
-		worker_thread_wrapper<true, false, false, true, false, false>,
-		worker_thread_wrapper<true, false, false, true, false, true>,
-		worker_thread_wrapper<true, false, false, true, true, false>,
-		worker_thread_wrapper<true, false, false, true, true, true>,
-		worker_thread_wrapper<true, false, true, false, false, false>,
-		worker_thread_wrapper<true, false, true, false, false, true>,
-		worker_thread_wrapper<true, false, true, false, true, false>,
-		worker_thread_wrapper<true, false, true, false, true, true>,
-		worker_thread_wrapper<true, false, true, true, false, false>,
-		worker_thread_wrapper<true, false, true, true, false, true>,
-		worker_thread_wrapper<true, false, true, true, true, false>,
-		worker_thread_wrapper<true, false, true, true, true, true>,
-		worker_thread_wrapper<true, true, false, false, false, false>,
-		worker_thread_wrapper<true, true, false, false, false, true>,
-		worker_thread_wrapper<true, true, false, false, true, false>,
-		worker_thread_wrapper<true, true, false, false, true, true>,
-		worker_thread_wrapper<true, true, false, true, false, false>,
-		worker_thread_wrapper<true, true, false, true, false, true>,
-		worker_thread_wrapper<true, true, false, true, true, false>,
-		worker_thread_wrapper<true, true, false, true, true, true>,
-		worker_thread_wrapper<true, true, true, false, false, false>,
-		worker_thread_wrapper<true, true, true, false, false, true>,
-		worker_thread_wrapper<true, true, true, false, true, false>,
-		worker_thread_wrapper<true, true, true, false, true, true>,
-		worker_thread_wrapper<true, true, true, true, false, false>,
-		worker_thread_wrapper<true, true, true, true, false, true>,
-		worker_thread_wrapper<true, true, true, true, true, false>,
-		worker_thread_wrapper<true, true, true, true, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, false, false, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, false, false, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, false, false, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, false, false, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, false, true, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, false, true, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, false, true, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, false, true, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, true, false, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, true, false, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, true, false, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, true, false, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, true, true, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, true, true, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, true, true, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, false, true, true, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, false, false, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, false, false, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, false, false, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, false, false, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, false, true, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, false, true, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, false, true, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, false, true, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, true, false, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, true, false, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, true, false, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, true, false, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, true, true, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, true, true, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, true, true, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, false, true, true, true, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, false, false, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, false, false, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, false, false, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, false, false, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, false, true, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, false, true, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, false, true, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, false, true, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, true, false, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, true, false, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, true, false, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, true, false, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, true, true, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, true, true, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, true, true, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, false, true, true, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, false, false, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, false, false, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, false, false, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, false, false, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, false, true, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, false, true, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, false, true, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, false, true, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, true, false, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, true, false, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, true, false, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, true, false, true, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, true, true, false, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, true, true, false, true>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, true, true, true, false>,
+		worker_thread_wrapper<EncounterType::Gem, true, true, true, true, true, true>,
 	};
-	int worker_index = ((int)f_is6 << 5) | ((int)f_species << 4) | ((int)f_shiny << 3) | ((int)f_iv << 2) | ((int)f_advanced << 1) | ((int)f_rewards << 0);
-	LPTHREAD_START_ROUTINE proc = workers[worker_index];
+	static const LPTHREAD_START_ROUTINE workers_dist[] =
+	{
+		worker_thread_wrapper<EncounterType::Dist, false, false, false, false, false, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, false, false, false, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, false, false, true, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, false, false, true, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, false, true, false, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, false, true, false, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, false, true, true, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, false, true, true, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, true, false, false, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, true, false, false, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, true, false, true, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, true, false, true, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, true, true, false, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, true, true, false, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, true, true, true, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, false, true, true, true, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, false, false, false, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, false, false, false, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, false, false, true, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, false, false, true, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, false, true, false, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, false, true, false, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, false, true, true, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, false, true, true, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, true, false, false, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, true, false, false, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, true, false, true, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, true, false, true, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, true, true, false, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, true, true, false, true>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, true, true, true, false>,
+		worker_thread_wrapper<EncounterType::Dist, false, true, true, true, true, true>,
+	};
+	LPTHREAD_START_ROUTINE proc = nullptr;
+	switch (f_type)
+	{
+	case EncounterType::Gem:
+	{
+		int worker_index = ((int)f_is6 << 5) | ((int)f_species << 4) | ((int)f_shiny << 3) | ((int)f_iv << 2) | ((int)f_advanced << 1) | ((int)f_rewards << 0);
+		proc = workers_gem[worker_index];
+		break;
+	}
+	case EncounterType::Dist:
+	{
+		int worker_index = ((int)f_species << 4) | ((int)f_shiny << 3) | ((int)f_iv << 2) | ((int)f_advanced << 1) | ((int)f_rewards << 0);
+		proc = workers_dist[worker_index];
+		break;
+	}
+	case EncounterType::Might:
+		proc = f_rewards
+			? worker_thread_wrapper<EncounterType::Might, false, false, false, false, false, true>
+			: worker_thread_wrapper<EncounterType::Might, false, false, false, false, false, false>;
+		break;
+	}
 	time_taken.start();
 	for (uint32_t i = 0; i < thread_count; ++i)
 	{
@@ -356,6 +489,8 @@ bool SeedFinder::use_iv_filters() const
 
 bool SeedFinder::use_pokemon_filters() const
 {
+	if (stars == 7)
+		return false;
 	if (species != 0 || shiny != 0)
 		return true;
 	if (use_iv_filters() || use_advanced_filters())
@@ -376,38 +511,63 @@ bool SeedFinder::use_filters() const
 SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 {
 	SeedInfo info;
-	info.seed = seed;
-	info.stars = stars < 6 ? get_star_count(seed, story_progress) : 6;
-	info.tera_type = (uint8_t)get_tera_type(seed);
 	Xoroshiro128Plus gen(seed);
+	info.seed = seed;
 	info.ec = (uint32_t)gen.next_int();
 	uint32_t TIDSID = (uint32_t)gen.next_int();
 	info.pid = (uint32_t)gen.next_int();
-	info.shiny = (((info.pid >> 16) ^ (info.pid & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
 	const EncounterTera9* enc = get_encounter(seed);
+	if (!enc)
+	{
+		memset(&info, 0, sizeof(info));
+		return info;
+	}
+	if (enc->type == EncounterType::Gem)
+		info.stars = stars < 6 ? get_star_count(seed, stage, event_id, game) : 6;
+	else
+		info.stars = enc->stars;
 	info.species = enc->species;
-	int8_t ivs[6] = { -1, -1, -1, -1, -1, -1 };
-	for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
-	{
-		int32_t index;
-		do
-		{
-			index = (int32_t)gen.next_int(6);
-		} while (ivs[index] != -1);
-		ivs[index] = 31;
-	}
-	for (size_t i = 0; i < _countof(ivs); ++i)
-	{
-		if (ivs[i] == -1)
-			ivs[i] = (int8_t)gen.next_int(32);
-	}
-	memcpy(info.iv, ivs, sizeof(info.iv));
-	info.ability = (uint16_t)get_ability(gen, enc->ability, *enc->personal_info);
-	info.gender = (uint8_t)get_gender(gen, enc->personal_info->gender);
-	info.nature = (uint8_t)get_nature(gen, info.species, enc->form);
 	memcpy(info.moves, enc->moves, sizeof(info.moves));
+	if (enc->type == EncounterType::Might)
+	{
+		assert(enc->iv_fixed);
+		assert(enc->ability == AbilityPermission::OnlyFirst ||
+			   enc->ability == AbilityPermission::OnlySecond ||
+			   enc->ability == AbilityPermission::OnlyHidden);
+		assert(enc->gender >= 0);
+		info.tera_type = (uint8_t)enc->tera_type - 2;
+		info.shiny = false;
+		memcpy(info.iv, enc->iv, sizeof(info.iv));
+		info.ability = (uint16_t)get_ability(gen, enc->ability, *enc->personal_info);
+		info.gender = enc->gender;
+		info.nature = enc->nature;
+	}
+	else
+	{
+		info.tera_type = (uint8_t)get_tera_type(seed);
+		info.shiny = (((info.pid >> 16) ^ (info.pid & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
+		int8_t ivs[6] = { -1, -1, -1, -1, -1, -1 };
+		for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
+		{
+			int32_t index;
+			do
+			{
+				index = (int32_t)gen.next_int(6);
+			} while (ivs[index] != -1);
+			ivs[index] = 31;
+		}
+		for (size_t i = 0; i < _countof(ivs); ++i)
+		{
+			if (ivs[i] == -1)
+				ivs[i] = (int8_t)gen.next_int(32);
+		}
+		memcpy(info.iv, ivs, sizeof(info.iv));
+		info.ability = (uint16_t)get_ability(gen, enc->ability, *enc->personal_info);
+		info.gender = (uint8_t)get_gender(gen, enc->personal_info->gender);
+		info.nature = (uint8_t)get_nature(gen, info.species, enc->form);
+	}
 	if (use_item_filters())
-		info.drops = get_rewards(enc, seed);
+		info.drops = event_id < 0 ? get_rewards<EncounterType::Gem>(enc, seed) : get_rewards<EncounterType::Dist>(enc, seed);
 	else
 		info.drops = 0;
 	return info;
@@ -426,25 +586,51 @@ int32_t SeedFinder::get_toxtricity_nature(Xoroshiro128Plus& gen, uint8_t form)
 	return form_record.table[gen.next_int(form_record.size)];
 }
 
-void SeedFinder::visit_encounters(std::function<EncounterVisitor> visitor)
+void SeedFinder::visit_encounters(int32_t event_id, std::function<EncounterVisitor> visitor)
 {
-	for (auto& enc_vector : encounters)
-		for (auto& enc : enc_vector)
+	if (event_id < 0)
+	{
+		for (auto& enc_vector : encounters)
+			for (auto& enc : enc_vector)
+				visitor(enc);
+	}
+	else
+	{
+		for (auto& enc : encounters_dist[event_id])
 			visitor(enc);
+		for (auto& enc : encounters_might[event_id])
+			visitor(enc);
+	}
 }
 
-int SeedFinder::get_star_count(uint32_t seed, int32_t progress)
+int SeedFinder::get_star_count(uint32_t seed, int32_t progress, int32_t event_id, Game game)
 {
-	Xoroshiro128Plus gen(seed);
-	return get_star_count(gen, progress);
+	if (event_id < 0)
+	{
+		Xoroshiro128Plus gen(seed);
+		return get_star_count(gen, progress);
+	}
+	for (auto& enc : encounters_dist[event_id])
+	{
+		Xoroshiro128Plus gen(seed);
+		gen.next_int(100);
+		auto& rand_rate_data = enc.rand_rate_event[progress][game];
+		if (rand_rate_data.total == 0)
+			continue;
+		uint64_t val = gen.next_int(rand_rate_data.total);
+		if ((uint32_t)((int32_t)val - rand_rate_data.min) < enc.rand_rate)
+			return enc.stars;
+	}
+	return 0;
 }
 
 SeedFinder::BasicParams SeedFinder::get_basic_params() const
 {
 	BasicParams params;
 	params.game = game;
+	params.event_id = event_id;
 	params.stars = stars;
-	params.story_progress = story_progress;
+	params.stage = stage;
 	params.raid_boost = raid_boost;
 	return params;
 }
@@ -452,7 +638,15 @@ SeedFinder::BasicParams SeedFinder::get_basic_params() const
 void SeedFinder::set_basic_params(const BasicParams& params)
 {
 	game = params.game;
+	event_id = params.event_id;
 	stars = params.stars;
-	story_progress = params.story_progress;
+	stage = params.stage;
 	raid_boost = params.raid_boost;
+}
+
+bool SeedFinder::is_mighty_event(int32_t event_id)
+{
+	if (event_id < 0 || event_id >= _countof(encounters_might))
+		return false;
+	return !encounters_might[event_id].empty();
 }

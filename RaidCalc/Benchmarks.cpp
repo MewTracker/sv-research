@@ -18,11 +18,11 @@ void do_benchmarks(SeedFinder& finder)
 __declspec(noinline) void Benchmarks::generate_test_data(SeedFinder& finder, int progress, int raid_boost, bool is6)
 {
     finder.game = GameScarlet;
-    finder.story_progress = progress;
+    finder.stage = progress;
     finder.raid_boost = raid_boost;
     for (uint32_t seed = 0; seed < 100000; ++seed)
     {
-        finder.stars = is6 ? 6 : SeedFinder::get_star_count(seed, progress);
+        finder.stars = is6 ? 6 : SeedFinder::get_star_count(seed, progress, -1, GameScarlet);
         SeedFinder::SeedInfo info = finder.get_seed_info(seed);
         auto rewards = finder.get_all_rewards(seed);
         std::string pokemon;
@@ -85,7 +85,7 @@ __declspec(noinline) void Benchmarks::do_pokemon_bench(SeedFinder& finder)
     for (int i = 0; i < 10; ++i)
     {
         stopwatch.start();
-        finder.worker_thread<true, true, true, true, false, false>(data);
+        finder.worker_thread<EncounterType::Gem, true, true, true, true, false, false>(data);
         stopwatch.stop();
         data.results.clear();
         if (i > 3)
@@ -108,7 +108,7 @@ __declspec(noinline) void Benchmarks::do_rewards_bench(SeedFinder& finder)
     for (int i = 0; i < 10; ++i)
     {
         stopwatch.start();
-        finder.worker_thread<true, false, false, false, false, true>(data);
+        finder.worker_thread<EncounterType::Gem, true, false, false, false, false, true>(data);
         stopwatch.stop();
         data.results.clear();
         if (i > 3)

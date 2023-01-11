@@ -24,7 +24,7 @@
    <item>
     <widget class="QLabel" name="labelCopy">
      <property name="text">
-      <string>© 2022 MewTracker</string>
+      <string>© 2022-2023 MewTracker</string>
      </property>
     </widget>
    </item>

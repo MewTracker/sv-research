@@ -53,30 +53,74 @@ enum class GemType : int8_t
 	Fairy = 19,
 };
 
+enum class EncounterType
+{
+	Gem,
+	Dist,
+	Might,
+};
+
 class EncounterTera9
 {
 public:
-	EncounterTera9(uint8_t *data) : fixed_drops(nullptr), lottery_drops(nullptr), lottery_lookup(nullptr)
+	static const size_t SizeGem = 0x18;
+	static const size_t SizeDist = 0x44;
+	static const size_t SizeMight = 0x4E;
+
+	struct RandRateData
 	{
-		species = *(uint16_t *)data;
+		int16_t min;
+		int16_t total;
+	};
+
+	EncounterTera9(uint8_t *data, EncounterType type) : type(type), fixed_drops(nullptr), lottery_drops(nullptr), lottery_lookup(nullptr)
+	{
+		species = *(uint16_t*)data;
 		form = data[0x02];
 		gender = (int8_t)data[0x03] - 1;
 		ability = get_ability(data[0x04]);
 		flawless_iv_count = data[0x05];
 		shiny = get_shiny(data[0x06]);
 		level = data[0x07];
-		moves[0] = *(uint16_t *)&data[0x08];
-		moves[1] = *(uint16_t *)&data[0x0A];
-		moves[2] = *(uint16_t *)&data[0x0C];
-		moves[3] = *(uint16_t *)&data[0x0E];
+		moves[0] = *(uint16_t*)&data[0x08];
+		moves[1] = *(uint16_t*)&data[0x0A];
+		moves[2] = *(uint16_t*)&data[0x0C];
+		moves[3] = *(uint16_t*)&data[0x0E];
 		tera_type = (GemType)data[0x10];
 		index = data[0x11];
 		stars = data[0x12];
 		rand_rate = data[0x13];
-		rand_rate_min[0] = *(int16_t *)&data[0x14];
-		rand_rate_min[1] = *(int16_t *)&data[0x16];
+
+		switch (type)
+		{
+		case EncounterType::Gem:
+			rand_rate_min[0] = *(int16_t*)&data[0x14];
+			rand_rate_min[1] = *(int16_t*)&data[0x16];
+			break;
+		case EncounterType::Dist:
+		case EncounterType::Might:
+			for (int i = 0; i < 4; ++i)
+			{
+				int offset = i * sizeof(int16_t) * 4;
+				rand_rate_event[i][GameScarlet].min = *(int16_t*)&data[0x14 + offset];
+				rand_rate_event[i][GameViolet].min = *(int16_t*)&data[0x16 + offset];
+				rand_rate_event[i][GameScarlet].total = *(int16_t*)&data[0x18 + offset];
+				rand_rate_event[i][GameViolet].total = *(int16_t*)&data[0x1A + offset];
+			}
+			fixed_table_id = *(uint64_t*)&data[0x34];
+			lottery_table_id = *(uint64_t*)&data[0x3C];
+			if (type == EncounterType::Might)
+			{
+				nature = data[0x44];
+				memcpy(iv, data + 0x45, sizeof(iv));
+				iv_fixed = !!data[0x4B];
+				scale = data[0x4C];
+			}
+			break;
+		}
 	}
 
+	// Common
 	uint16_t species;
 	uint8_t form;
 	int8_t gender;
@@ -89,8 +133,22 @@ public:
 	uint8_t index;
 	uint8_t stars;
 	uint8_t rand_rate;
+
+	// Gem
 	int16_t rand_rate_min[2];
 
+	// Dist/Might
+	RandRateData rand_rate_event[4][2];
+	uint64_t fixed_table_id;
+	uint64_t lottery_table_id;
+
+	// Might
+	uint8_t nature;
+	int8_t iv[6];
+	bool iv_fixed;
+	uint8_t scale;
+
+	EncounterType type;
 	const RaidFixedRewards* fixed_drops;
 	const RaidLotteryRewards* lottery_drops;
 	const uint8_t* lottery_lookup;

@@ -34,7 +34,7 @@ public:
 private:
 	PersonalTable9SV()
 	{
-		auto raw_data = get_resource_file(":/RaidCalc/personal_sv");
+		auto raw_data = get_resource_file(":/resources/personal_sv");
 		for (size_t i = 0; i < raw_data.size() / PersonalInfo9SV::InfoSize; ++i)
 			records.push_back(PersonalInfo9SV(raw_data.data() + i * PersonalInfo9SV::InfoSize));
 	}

@@ -2280,3 +2280,30 @@ static const char* type_names[] =
 	"Dark",
 	"Fairy",
 };
+
+static const char* event_names[] =
+{
+	"Eevee Spotlight",
+	"Charizard the Unrivaled",
+	"Tyranitar and Salamence Spotlight",
+	"Presents from Delibird",
+	"Cinderace the Unrivaled",
+	"Hydreigon and Dragapult Spotlight",
+};
+
+static const char* stage_names_story[] =
+{
+	"None",
+	"3* unlocked",
+	"4* unlocked",
+	"5* unlocked",
+	"6* unlocked",
+};
+
+static const char* stage_names_event[] =
+{
+	"2* unlocked",
+	"3* unlocked",
+	"4* unlocked",
+	"7* unlocked",
+};

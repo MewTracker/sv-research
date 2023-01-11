@@ -12,7 +12,7 @@ struct RaidFixedRewardItemInfo
 struct RaidFixedRewards
 {
     uint64_t table_name;
-    RaidFixedRewardItemInfo items[7];
+    RaidFixedRewardItemInfo items[10];
 };
 
 struct RaidLotteryRewardItemInfo
@@ -27,7 +27,7 @@ struct RaidLotteryRewards
 {
     uint64_t table_name;
     int32_t rate_total;
-    RaidLotteryRewardItemInfo items[19];
+    RaidLotteryRewardItemInfo items[25];
 };
 
 #include "RaidFixedRewards.inc.h"
@@ -42,8 +42,14 @@ struct RewardInfo
 static const RewardInfo reward_info[] =
 {
     { 4, "Poke Ball" },
+    { 46, "Protein" },
+    { 49, "Calcium" },
     { 50, "Rare Candy" },
     { 51, "PP Up" },
+    { 82, "Fire Stone" },
+    { 83, "Thunder Stone" },
+    { 84, "Water Stone" },
+    { 85, "Leaf Stone" },
     { 86, "Tiny Mushroom" },
     { 87, "Big Mushroom" },
     { 88, "Pearl" },
@@ -56,6 +62,7 @@ static const RewardInfo reward_info[] =
     { 151, "Pecha Berry" },
     { 152, "Rawst Berry" },
     { 153, "Aspear Berry" },
+    { 154, "Leppa Berry" },
     { 155, "Oran Berry" },
     { 156, "Persim Berry" },
     { 157, "Lum Berry" },
@@ -71,17 +78,22 @@ static const RewardInfo reward_info[] =
     { 172, "Hondew Berry" },
     { 173, "Grepa Berry" },
     { 174, "Tamato Berry" },
+    { 218, "Soothe Bell" },
+    { 391, "TM64" },
     { 565, "Health Feather" },
     { 566, "Muscle Feather" },
     { 567, "Resist Feather" },
     { 568, "Genius Feather" },
     { 569, "Clever Feather" },
     { 570, "Swift Feather" },
+    { 571, "Pretty Feather" },
     { 580, "Balm Mushroom" },
+    { 581, "Big Nugget" },
     { 582, "Pearl String" },
     { 583, "Comet Shard" },
     { 645, "Ability Capsule" },
     { 795, "Bottle Cap" },
+    { 849, "Ice Stone" },
     { 1124, "Exp. Candy XS" },
     { 1125, "Exp. Candy S" },
     { 1126, "Exp. Candy M" },
@@ -108,11 +120,30 @@ static const RewardInfo reward_info[] =
     { 1249, "Jolly Mint" },
     { 1250, "Naive Mint" },
     { 1606, "Ability Patch" },
+    { 1862, "Normal Tera Shard" },
+    { 1863, "Fire Tera Shard" },
+    { 1864, "Water Tera Shard" },
+    { 1865, "Electric Tera Shard" },
+    { 1866, "Grass Tera Shard" },
+    { 1867, "Ice Tera Shard" },
+    { 1868, "Fighting Tera Shard" },
+    { 1869, "Poison Tera Shard" },
+    { 1870, "Ground Tera Shard" },
+    { 1871, "Flying Tera Shard" },
+    { 1872, "Psychic Tera Shard" },
+    { 1873, "Bug Tera Shard" },
+    { 1874, "Rock Tera Shard" },
+    { 1875, "Ghost Tera Shard" },
+    { 1876, "Dragon Tera Shard" },
+    { 1877, "Dark Tera Shard" },
+    { 1878, "Steel Tera Shard" },
+    { 1879, "Fairy Tera Shard" },
     { 1904, "Sweet Herba Mystica" },
     { 1905, "Salty Herba Mystica" },
     { 1906, "Sour Herba Mystica" },
     { 1907, "Bitter Herba Mystica" },
     { 1908, "Spicy Herba Mystica" },
+    { 2217, "TM157" },
     { 10000, "Material" },
     { 20000, "Tera Shard" },
 };

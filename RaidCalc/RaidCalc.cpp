@@ -1,7 +1,6 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
-#include <set>
-#include <vector>
+#include <QFileDialog>
 #include <algorithm>
 #include "RaidCalc.h"
 #include "PokemonNames.h"
@@ -18,12 +17,19 @@ RaidCalc::RaidCalc(QWidget* parent)
         QMessageBox::critical(this, "Error", "Failed to initialize seed finder.");
         QTimer::singleShot(0, qApp, &QCoreApplication::quit);
     }
-    std::set<uint32_t> encounterable_species;
-    finder.visit_encounters([&](const EncounterTera9& enc) { encounterable_species.insert(enc.species); });
-    std::vector<std::pair<std::string, uint32_t>> species_data;
-    for (auto& species : encounterable_species)
-        species_data.push_back({ pokemon_names[species], species });
-    add_sorted_options(ui.comboBoxSpecies, species_data);
+    ui.comboBoxEvent->addItem("None");
+    for (auto event_name : event_names)
+        ui.comboBoxEvent->addItem(event_name);
+    std::set<uint32_t> encounterables;
+    auto visitor = [&](const EncounterTera9& enc) { encounterables.insert(enc.species); };
+    finder.visit_encounters(-1, visitor);
+    create_species_filters(encounterables, species_filters[0]);
+    for (int32_t i = 0; i < _countof(event_names); ++i)
+    {
+        finder.visit_encounters(i, visitor);
+        create_species_filters(encounterables, species_filters[i + 1]);
+    }
+    add_options(ui.comboBoxSpecies, species_filters[0]);
     add_sorted_options(ui.comboBoxTeraType, type_names, _countof(type_names));
     add_sorted_options(ui.comboBoxAbility, ability_names + 1, _countof(ability_names) - 1);
     add_sorted_options(ui.comboBoxNature, nature_names, _countof(nature_names));
@@ -34,6 +40,7 @@ RaidCalc::RaidCalc(QWidget* parent)
     about = new AboutDialog(this);
     finder_timer = new QTimer(this);
     connect(finder_timer, &QTimer::timeout, this, &RaidCalc::on_finder_timer_timeout);
+    connect(ui.actionExit, &QAction::triggered, qApp, &QCoreApplication::quit);
     SYSTEM_INFO sys_info;
     GetSystemInfo(&sys_info);
     for (uint32_t i = 0; i < sys_info.dwNumberOfProcessors - 1; ++i)
@@ -61,6 +68,14 @@ RaidCalc::~RaidCalc()
 
 }
 
+void RaidCalc::create_species_filters(std::set<uint32_t>& encounterables, std::vector<std::pair<std::string, uint32_t>>& filters)
+{
+    for (auto& species : encounterables)
+        filters.push_back({ pokemon_names[species], species });
+    std::sort(filters.begin(), filters.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+    encounterables.clear();
+}
+
 void RaidCalc::add_sorted_options(QComboBox* combo, const char** names, uint32_t name_count, uint32_t offset)
 {
     std::vector<std::pair<std::string, uint32_t>> options;
@@ -72,17 +87,35 @@ void RaidCalc::add_sorted_options(QComboBox* combo, const char** names, uint32_t
 void RaidCalc::add_sorted_options(QComboBox* combo, std::vector<std::pair<std::string, uint32_t>>& options)
 {
     std::sort(options.begin(), options.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+    add_options(combo, options);
+}
+
+void RaidCalc::add_options(QComboBox* combo, std::vector<std::pair<std::string, uint32_t>>& options)
+{
     combo->addItem("Any", 0U);
     for (auto& pair : options)
         combo->addItem(pair.first.c_str(), pair.second);
+}
+
+void RaidCalc::select_option(QComboBox* combo, uint32_t value)
+{
+    for (int i = 0; i < combo->count(); ++i)
+    {
+        if (combo->itemData(i).toUInt() == value)
+        {
+            combo->setCurrentIndex(i);
+            break;
+        }
+    }
 }
 
 void RaidCalc::toggle_ui(bool enabled)
 {
     for (auto widget : ui.basicGroup->findChildren<QWidget*>())
         widget->setEnabled(enabled);
+    bool is7 = ui.comboBoxStars->currentIndex() == 6;
     for (auto widget : ui.pokemonGroup->findChildren<QWidget*>())
-        widget->setEnabled(enabled);
+        widget->setEnabled(enabled && !is7);
     for (auto widget : ui.itemGroup->findChildren<QWidget*>())
         widget->setEnabled(enabled);
     ui.tableSeeds->setEnabled(enabled);
@@ -98,8 +131,9 @@ void RaidCalc::toggle_ui(bool enabled)
 void RaidCalc::on_buttonFindSeeds_clicked()
 {
     finder.game = (Game)ui.comboBoxGame->currentIndex();
+    finder.event_id = ui.comboBoxEvent->currentIndex() - 1;
     finder.stars = ui.comboBoxStars->currentIndex() + 1;
-    finder.story_progress = ui.comboBoxStory->currentIndex();
+    finder.stage = ui.comboBoxStage->currentIndex();
     finder.raid_boost = ui.spinBoxRaidBoost->value();
     finder.thread_count = ui.comboBoxThreads->currentIndex() + 1;
     if (!hex_to_uint32(ui.editMinSeed->text(), finder.min_seed))
@@ -115,6 +149,11 @@ void RaidCalc::on_buttonFindSeeds_clicked()
     if (finder.max_seed < finder.min_seed)
     {
         QMessageBox::critical(this, "Error", "Max seed cannot be smaller than min seed.");
+        return;
+    }
+    if (finder.stars == 7 && !finder.is_mighty_event(finder.event_id))
+    {
+        QMessageBox::critical(this, "Error", "This event doesn't have any 7* raids.");
         return;
     }
     finder.species = ui.comboBoxSpecies->currentData().toUInt();
@@ -192,6 +231,40 @@ void RaidCalc::on_finder_timer_timeout()
     seedModel.populateModel(finder);
     resultParams = finder.get_basic_params();
     toggle_ui(true);
+    ui.actionExportSeeds->setEnabled(!finder.seeds.empty());
+}
+
+void RaidCalc::on_actionExportSeeds_triggered(bool checked)
+{
+    QString path = QFileDialog::getSaveFileName(this, QString(), QString(), "Comma separated values (*.csv)");
+    if (path.isEmpty())
+        return;
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox::critical(this, "Error", "Failed to open file.");
+        return;
+    }
+    std::string buffer;
+    int rows = seedModel.rowCount();
+    int columns = seedModel.columnCount();
+    for (int i = 0; i < columns; ++i)
+        buffer += seedModel.headerData(i, Qt::Horizontal).toString().toStdString() + ",";
+    buffer[buffer.size() - 1] = '\n';
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < columns; ++j)
+            buffer += seedModel.data(seedModel.index(i, j)).toString().toStdString() + ",";
+        buffer[buffer.size() - 1] = '\n';
+        if (buffer.size() > MaxBufferSize)
+        {
+            file.write(buffer.c_str());
+            buffer.clear();
+        }
+    }
+    if (!buffer.empty())
+        file.write(buffer.c_str());
+    file.close();
 }
 
 void RaidCalc::on_actionSeedViewer_triggered(bool checked)
@@ -217,7 +290,7 @@ void RaidCalc::on_tableSeeds_doubleClicked(const QModelIndex& index)
 
 const RaidCalc::StarsRange& RaidCalc::get_allowed_stars(int progress)
 {
-    static const StarsRange allowed_stars[5] =
+    static const StarsRange allowed_stars_story[5] =
     {
         { 1, 2 },
         { 1, 3 },
@@ -225,10 +298,45 @@ const RaidCalc::StarsRange& RaidCalc::get_allowed_stars(int progress)
         { 3, 5 },
         { 3, 6 },
     };
-    return allowed_stars[progress];
+    static const StarsRange allowed_stars_event[4] =
+    {
+        { 1, 2 },
+        { 1, 3 },
+        { 1, 4 },
+        { 3, 7 },
+    };
+    return ui.comboBoxEvent->currentIndex() == 0 ? allowed_stars_story[progress] : allowed_stars_event[progress];
 }
 
-void RaidCalc::on_comboBoxStory_currentIndexChanged(int index)
+void RaidCalc::on_comboBoxEvent_currentIndexChanged(int index)
+{
+    ui.comboBoxStage->blockSignals(true);
+    ui.comboBoxStage->clear();
+    if (index == 0)
+    {
+        ui.labelStage->setText("Story progress:");
+        for (auto& stage_name : stage_names_story)
+            ui.comboBoxStage->addItem(stage_name);
+    }
+    else
+    {
+        ui.labelStage->setText("Event progress:");
+        for (auto& stage_name : stage_names_event)
+            ui.comboBoxStage->addItem(stage_name);
+    }
+    ui.comboBoxStage->setCurrentIndex(ui.comboBoxStage->count() - 1);
+    ui.comboBoxStage->blockSignals(false);
+    ui.comboBoxStars->blockSignals(true);
+    ui.comboBoxStars->setCurrentIndex(5);
+    ui.comboBoxStars->blockSignals(false);
+    ui.comboBoxSpecies->clear();
+    add_options(ui.comboBoxSpecies, species_filters[index]);
+    ui.comboBoxSpecies->setCurrentIndex(0);
+    for (auto widget : ui.pokemonGroup->findChildren<QWidget*>())
+        widget->setEnabled(true);
+}
+
+void RaidCalc::on_comboBoxStage_currentIndexChanged(int index)
 {
     auto& range = get_allowed_stars(index);
     int stars = ui.comboBoxStars->currentIndex() + 1;
@@ -246,19 +354,55 @@ void RaidCalc::on_comboBoxStory_currentIndexChanged(int index)
 
 void RaidCalc::on_comboBoxStars_currentIndexChanged(int index)
 {
-    int stars = index + 1;
-    int progress = ui.comboBoxStory->currentIndex();
+    fix_progress(index + 1);
+    int event_id = ui.comboBoxEvent->currentIndex() - 1;
+    int stars = ui.comboBoxStars->currentIndex() + 1;
+    bool is7 = stars == 7;
+    if (is7 && finder.is_mighty_event(event_id))
+    {
+        finder.game = (Game)ui.comboBoxGame->currentIndex();
+        finder.event_id = event_id;
+        finder.stars = ui.comboBoxStars->currentIndex() + 1;
+        finder.stage = ui.comboBoxStage->currentIndex();
+        finder.raid_boost = ui.spinBoxRaidBoost->value();
+        SeedFinder::SeedInfo info = finder.get_seed_info(0);
+        select_option(ui.comboBoxSpecies, info.species);
+        select_option(ui.comboBoxTeraType, info.tera_type + 1);
+        select_option(ui.comboBoxAbility, info.ability);
+        select_option(ui.comboBoxNature, info.nature + 1);
+        ui.comboBoxShiny->setCurrentIndex(info.shiny ? 1 : 2);
+        ui.comboBoxGender->setCurrentIndex(info.gender + 1);
+        for (size_t i = 0; i < _countof(min_iv_widgets); ++i)
+            min_iv_widgets[i]->setValue(info.iv[i]);
+        for (size_t i = 0; i < _countof(max_iv_widgets); ++i)
+            max_iv_widgets[i]->setValue(info.iv[i]);
+    }
+    for (auto widget : ui.pokemonGroup->findChildren<QWidget*>())
+        widget->setEnabled(!is7);
+}
+
+void RaidCalc::fix_progress(int stars)
+{
+    int progress = ui.comboBoxStage->currentIndex();
     auto& range = get_allowed_stars(progress);
     if (stars >= range.min_stars && stars <= range.max_stars)
         return;
+    bool fixed_progress = false;
     for (int i = 0; i < 5; ++i)
     {
         auto& candidate = get_allowed_stars(i);
         if (stars >= candidate.min_stars && stars <= candidate.max_stars)
         {
-            ui.comboBoxStory->setCurrentIndex(i);
+            ui.comboBoxStage->setCurrentIndex(i);
+            fixed_progress = true;
             break;
         }
+    }
+    if (!fixed_progress)
+    {
+        ui.comboBoxStars->blockSignals(true);
+        ui.comboBoxStars->setCurrentIndex(range.max_stars - 1);
+        ui.comboBoxStars->blockSignals(false);
     }
     QApplication::beep();
 }

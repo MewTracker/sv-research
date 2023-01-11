@@ -1,7 +1,9 @@
 <RCC>
-    <qresource prefix="/RaidCalc">
-        <file>encounter_gem_paldea.pkl</file>
-        <file>reward_map</file>
-        <file>personal_sv</file>
+    <qresource prefix="/">
+        <file>resources/reward_map</file>
+        <file>resources/personal_sv</file>
+        <file>resources/encounter_gem_paldea.pkl</file>
+        <file>resources/encounter_dist_paldea.pklex</file>
+        <file>resources/encounter_might_paldea.pklex</file>
     </qresource>
 </RCC>

@@ -9,6 +9,9 @@ SeedViewerDialog::SeedViewerDialog(QWidget* parent)
 	is_seed_valid = false;
 	refresh_supressed = false;
 	current_seed = 0;
+	ui.comboBoxEvent->addItem("None");
+	for (auto event_name : event_names)
+		ui.comboBoxEvent->addItem(event_name);
 }
 
 SeedViewerDialog::~SeedViewerDialog()
@@ -21,24 +24,51 @@ void SeedViewerDialog::on_comboBoxGame_currentIndexChanged(int index)
 	refresh_ui();
 }
 
+void SeedViewerDialog::on_comboBoxEvent_currentIndexChanged(int index)
+{
+	if (!refresh_supressed)
+	{
+		ui.comboBoxStage->blockSignals(true);
+		ui.comboBoxStage->clear();
+		if (index == 0)
+		{
+			ui.labelStage->setText("Story progress:");
+			for (auto& stage_name : stage_names_story)
+				ui.comboBoxStage->addItem(stage_name);
+		}
+		else
+		{
+			ui.labelStage->setText("Event progress:");
+			for (auto& stage_name : stage_names_event)
+				ui.comboBoxStage->addItem(stage_name);
+		}
+		ui.comboBoxStage->setCurrentIndex(ui.comboBoxStage->count() - 1);
+		ui.comboBoxStage->blockSignals(false);
+		ui.comboBoxRaidType->blockSignals(true);
+		ui.comboBoxRaidType->setCurrentIndex(1);
+		ui.comboBoxRaidType->blockSignals(false);
+	}
+	refresh_ui();
+}
+
 void SeedViewerDialog::on_comboBoxRaidType_currentIndexChanged(int index)
 {
 	if (!refresh_supressed)
 	{
-		if (index == 1 && ui.comboBoxStory->currentIndex() != 4)
+		if (index == 1 && ui.comboBoxStage->currentIndex() != ui.comboBoxStage->count() - 1)
 		{
-			ui.comboBoxStory->setCurrentIndex(4);
+			ui.comboBoxStage->setCurrentIndex(ui.comboBoxStage->count() - 1);
 			QApplication::beep();
 		}
 	}
 	refresh_ui();
 }
 
-void SeedViewerDialog::on_comboBoxStory_currentIndexChanged(int index)
+void SeedViewerDialog::on_comboBoxStage_currentIndexChanged(int index)
 {
 	if (!refresh_supressed)
 	{
-		if (index != 4 && ui.comboBoxRaidType->currentIndex() == 1)
+		if (index != ui.comboBoxStage->count() - 1 && ui.comboBoxRaidType->currentIndex() == 1)
 		{
 			ui.comboBoxRaidType->setCurrentIndex(0);
 			QApplication::beep();
@@ -60,23 +90,20 @@ void SeedViewerDialog::on_editSeed_textChanged(const QString& text)
 
 void SeedViewerDialog::display_seed(SeedFinder::BasicParams params, uint32_t seed)
 {
+	ui.comboBoxEvent->setCurrentIndex(params.event_id + 1);
 	refresh_supressed = true;
 	ui.comboBoxGame->setCurrentIndex((int)params.game);
-	ui.comboBoxRaidType->setCurrentIndex(params.stars == 6 ? 1 : 0);
-	ui.comboBoxStory->setCurrentIndex(params.story_progress);
+	ui.comboBoxRaidType->setCurrentIndex(params.stars >= 6 ? 1 : 0);
+	ui.comboBoxStage->setCurrentIndex(params.stage);
 	ui.spinBoxRaidBoost->setValue(params.raid_boost);
 	ui.editSeed->setText(format_uint32(seed));
 	refresh_supressed = false;
 	refresh_ui();
 }
 
-void SeedViewerDialog::refresh_ui()
+void SeedViewerDialog::set_invalid_state()
 {
-	if (refresh_supressed)
-		return;
-	if (!is_seed_valid)
-	{
-		QLabel* labels[] = {
+	QLabel* labels[] = {
 			ui.infoSpecies,
 			ui.infoDifficulty,
 			ui.infoEC,
@@ -90,18 +117,33 @@ void SeedViewerDialog::refresh_ui()
 			ui.infoMove2,
 			ui.infoMove3,
 			ui.infoMove4,
-		};
-		for (auto label : labels)
-			label->setText("Invalid");
-		ui.infoIV->setText("0/0/0/0/0/0");
-		ui.listRewards->clear();
+	};
+	for (auto label : labels)
+		label->setText("Invalid");
+	ui.infoIV->setText("0/0/0/0/0/0");
+	ui.listRewards->clear();
+}
+
+void SeedViewerDialog::refresh_ui()
+{
+	if (refresh_supressed)
+		return;
+	if (!is_seed_valid)
+	{
+		set_invalid_state();
 		return;
 	}
 	finder.game = (Game)ui.comboBoxGame->currentIndex();
-	finder.story_progress = ui.comboBoxStory->currentIndex();
+	finder.event_id = ui.comboBoxEvent->currentIndex() - 1;
+	finder.stage = ui.comboBoxStage->currentIndex();
 	finder.raid_boost = ui.spinBoxRaidBoost->value();
-	finder.stars = ui.comboBoxRaidType->currentIndex() == 1 ? 6 : SeedFinder::get_star_count(current_seed, finder.story_progress);
+	finder.stars = ui.comboBoxRaidType->currentIndex() == 1 ? (finder.event_id < 0 ? 6 : 7) : SeedFinder::get_star_count(current_seed, finder.stage, finder.event_id, finder.game);
 	SeedFinder::SeedInfo info = finder.get_seed_info(current_seed);
+	if (info.species == 0)
+	{
+		set_invalid_state();
+		return;
+	}
 	ui.infoSpecies->setText(pokemon_names[info.species]);
 	ui.infoDifficulty->setText(QString("%1 star%2").arg(QString::number(info.stars), info.stars > 1 ? "s" : ""));
 	ui.infoEC->setText(format_uint32(info.ec));
@@ -125,7 +167,7 @@ void SeedViewerDialog::refresh_ui()
 	auto rewards = finder.get_all_rewards(current_seed);
 	for (auto &reward : rewards)
 	{
-		QString item_name("Invalid item");
+		QString item_name = QString("Invalid item (%1)").arg(reward.item_id);
 		for (auto& info : reward_info)
 		{
 			if (info.item_id == reward.item_id)
