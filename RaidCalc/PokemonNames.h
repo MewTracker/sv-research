@@ -2289,6 +2289,7 @@ static const char* event_names[] =
 	"Presents from Delibird",
 	"Cinderace the Unrivaled",
 	"Hydreigon and Dragapult Spotlight",
+	"Drifblim and Mismagius Spotlight",
 };
 
 static const char* stage_names_story[] =
