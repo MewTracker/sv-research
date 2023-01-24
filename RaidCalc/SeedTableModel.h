@@ -3,6 +3,7 @@
 #include <QAbstractTableModel>
 #include "SeedFinder.h"
 #include "PokemonNames.h"
+#include "FormUtils.h"
 #include "Utils.h"
 
 class SeedTableModel : public QAbstractTableModel
@@ -85,7 +86,7 @@ public:
 		case 0:
 			return format_uint32(info.seed);
 		case 1:
-			return pokemon_names[info.species];
+			return FormUtils::get_pokemon_name(info.species, info.form, info.ec).c_str();
 		case 2:
 			return info.shiny ? "Yes" : "No";
 		case 3:

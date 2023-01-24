@@ -153,6 +153,7 @@ public:
 	const RaidLotteryRewards* lottery_drops;
 	const uint8_t* lottery_lookup;
 	PersonalInfo9SV* personal_info;
+	int32_t pv_index;
 
 private:
 	AbilityPermission get_ability(uint8_t value)

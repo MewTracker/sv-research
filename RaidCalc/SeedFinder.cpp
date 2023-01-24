@@ -3,6 +3,7 @@
 #include <cassert>
 #include <memory>
 #include "SeedFinder.h"
+#include "FormUtils.h"
 #include "Utils.h"
 
 SeedFinder::EncounterLists SeedFinder::encounters;
@@ -22,6 +23,7 @@ SeedFinder::SeedFinder() :
 	event_id(-1),
 	stars(0),
 	species(0),
+	form(AnyForm),
 	tera_type(0),
 	ability(0),
 	nature(0),
@@ -36,7 +38,7 @@ SeedFinder::SeedFinder() :
 	memset(min_iv_vec, 0, sizeof(min_iv_vec));
 	memset(max_iv_vec, 0, sizeof(max_iv_vec));
 	target_drops.resize(20000 + 1);
-	target_species.resize(_countof(pokemon_names));
+	target_species.resize(PersonalTable9SV::instance().size());
 }
 
 bool SeedFinder::initialize()
@@ -58,7 +60,8 @@ bool SeedFinder::initialize()
 		auto enc = EncounterTera9(encounter_data.data() + i * EncounterTera9::SizeGem, EncounterType::Gem);
 		enc.fixed_drops = get_fixed_drop_table(rewards[0]);
 		enc.lottery_drops = get_lottery_drop_table(rewards[1], enc.lottery_lookup);
-		enc.personal_info = &table.get_form_entry(enc.species, enc.form);
+		enc.pv_index = table.get_form_index(enc.species, enc.form);
+		enc.personal_info = &table[enc.pv_index];
 		assert(enc.stars > 0 && enc.stars < 7);
 		encounters[enc.stars].push_back(enc);
 	}
@@ -411,7 +414,22 @@ void SeedFinder::find_seeds_thread()
 	for (uint32_t i = 0; i < thread_count; ++i)
 	{
 		auto& data = thread_data[i];
-		seeds.insert(seeds.end(), data.results.begin(), data.results.end());
+		if (form == RareForm || form == CommonForm)
+		{
+			bool find_rare = form == RareForm;
+			for (auto seed : data.results)
+			{
+				Xoroshiro128Plus gen(seed);
+				uint32_t EC = (uint32_t)gen.next_int();
+				bool is_rare = (EC % 100) == 0;
+				if (((int)find_rare ^ (int)is_rare) == 0)
+					seeds.push_back(seed);
+			}
+		}
+		else
+		{
+			seeds.insert(seeds.end(), data.results.begin(), data.results.end());
+		}
 	}
 }
 
@@ -430,7 +448,24 @@ bool SeedFinder::find_seeds()
 	if (species != 0)
 	{
 		memset(target_species.data(), 0, target_species.size());
-		target_species[species] = 1;
+		auto& table = PersonalTable9SV::instance();
+		if (form == AnyForm)
+		{
+			auto forms = FormUtils::get_forms(species);
+			if (!forms.empty())
+			{
+				for (auto species_form : forms)
+					target_species[table.get_form_index(species, species_form)] = 1;
+			}
+			else
+			{
+				target_species[table.get_form_index(species, 0)] = 1;
+			}
+		}
+		else
+		{
+			target_species[table.get_form_index(species, form >= 0 ? form : 0)] = 1;
+		}
 	}
 	else
 	{
@@ -527,6 +562,7 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 	else
 		info.stars = enc->stars;
 	info.species = enc->species;
+	info.form = enc->form;
 	memcpy(info.moves, enc->moves, sizeof(info.moves));
 	if (enc->type == EncounterType::Might)
 	{

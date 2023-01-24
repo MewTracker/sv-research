@@ -5,6 +5,7 @@
 #include "RaidCalc.h"
 #include "PokemonNames.h"
 #include "Benchmarks.h"
+#include "FormUtils.h"
 
 RaidCalc::RaidCalc(QWidget* parent)
     : QMainWindow(parent)
@@ -71,7 +72,36 @@ RaidCalc::~RaidCalc()
 void RaidCalc::create_species_filters(std::set<uint32_t>& encounterables, std::vector<std::pair<std::string, uint32_t>>& filters)
 {
     for (auto& species : encounterables)
-        filters.push_back({ pokemon_names[species], species });
+    {
+        SpeciesFilter filter;
+        filter.value = 0;
+        filter.species = species;
+        filter.any_form = 1;
+        if (FormUtils::has_rare_form(species))
+        {
+            filters.push_back({ std::string(pokemon_names[species]) + " (Any)", filter.value });
+            filter.any_form = 0;
+            filter.common_form = 1;
+            filters.push_back({ std::string(pokemon_names[species]) + " (Common)", filter.value });
+            filter.common_form = 0;
+            filter.rare_form = 1;
+            filters.push_back({ std::string(pokemon_names[species]) + " (Rare)", filter.value });
+            continue;
+        }
+        auto forms = FormUtils::get_forms(species);
+        if (forms.empty())
+        {
+            filters.push_back({ pokemon_names[species], filter.value });
+            continue;
+        }
+        filters.push_back({ std::string(pokemon_names[species]) + " (Any)", filter.value});
+        filter.any_form = 0;
+        for (auto form : forms)
+        {
+            filter.form = form;
+            filters.push_back({ FormUtils::get_pokemon_name(species, form), filter.value });
+        }
+    }
     std::sort(filters.begin(), filters.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
     encounterables.clear();
 }
@@ -156,7 +186,16 @@ void RaidCalc::on_buttonFindSeeds_clicked()
         QMessageBox::critical(this, "Error", "This event doesn't have any 7* raids.");
         return;
     }
-    finder.species = ui.comboBoxSpecies->currentData().toUInt();
+    SpeciesFilter filter;
+    filter.value = ui.comboBoxSpecies->currentData().toUInt();
+    finder.species = filter.species;
+    finder.form = filter.form;
+    if (filter.any_form)
+        finder.form = SeedFinder::AnyForm;
+    else if (filter.rare_form)
+        finder.form = SeedFinder::RareForm;
+    else if (filter.common_form)
+        finder.form = SeedFinder::CommonForm;
     finder.shiny = ui.comboBoxShiny->currentIndex();
     finder.tera_type = ui.comboBoxTeraType->currentData().toUInt();
     finder.ability = ui.comboBoxAbility->currentData().toUInt();

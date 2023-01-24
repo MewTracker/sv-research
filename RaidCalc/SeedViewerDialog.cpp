@@ -1,5 +1,6 @@
 #include "SeedViewerDialog.h"
 #include "PokemonNames.h"
+#include "FormUtils.h"
 #include "Utils.h"
 
 SeedViewerDialog::SeedViewerDialog(QWidget* parent)
@@ -144,7 +145,7 @@ void SeedViewerDialog::refresh_ui()
 		set_invalid_state();
 		return;
 	}
-	ui.infoSpecies->setText(pokemon_names[info.species]);
+	ui.infoSpecies->setText(FormUtils::get_pokemon_name(info.species, info.form, info.ec).c_str());
 	ui.infoDifficulty->setText(QString("%1 star%2").arg(QString::number(info.stars), info.stars > 1 ? "s" : ""));
 	ui.infoEC->setText(format_uint32(info.ec));
 	ui.infoPID->setText(format_uint32(info.pid));

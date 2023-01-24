@@ -45,6 +45,19 @@ private:
         uint8_t max_stars;
     };
 
+    union SpeciesFilter
+    {
+        struct
+        {
+            uint32_t species : 16;
+            uint32_t form : 8;
+            uint32_t any_form : 1;
+            uint32_t rare_form : 1;
+            uint32_t common_form : 1;
+        };
+        uint32_t value;
+    };
+
     void toggle_ui(bool enabled);
     void create_species_filters(std::set<uint32_t>& encounterables, std::vector<std::pair<std::string, uint32_t>>& filters);
     void add_sorted_options(QComboBox* combo, const char** names, uint32_t name_count, uint32_t offset = 1);

@@ -31,6 +31,11 @@ public:
 		return records[index];
 	}
 
+	size_t size() const
+	{
+		return records.size();
+	}
+
 private:
 	PersonalTable9SV()
 	{

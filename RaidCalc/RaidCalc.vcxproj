@@ -121,6 +121,7 @@
     <ClInclude Include="Benchmarks.h" />
     <ClInclude Include="EncounterTera9.h" />
     <QtMoc Include="ItemFilterDialog.h" />
+    <ClInclude Include="FormUtils.h" />
     <ClInclude Include="PersonalInfo9SV.h" />
     <ClInclude Include="PersonalTable9SV.h" />
     <ClInclude Include="PokemonNames.h" />

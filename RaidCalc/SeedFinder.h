@@ -13,6 +13,9 @@ class SeedFinder
 {
 public:
 	using EncounterVisitor = void(const EncounterTera9& enc);
+	static const int8_t AnyForm = -1;
+	static const int8_t RareForm = -2;
+	static const int8_t CommonForm = -3;
 
 	struct SeedInfo
 	{
@@ -23,6 +26,7 @@ public:
 		uint16_t species;
 		uint16_t ability;
 		uint16_t moves[4];
+		uint8_t form;
 		uint8_t iv[6];
 		bool shiny;
 		uint8_t gender;
@@ -76,6 +80,7 @@ public:
 
 	// Query - Pokemon
 	int32_t species;
+	int8_t form;
 	int32_t shiny;
 	int32_t tera_type;
 	int32_t ability;
@@ -436,7 +441,7 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 {
 	if constexpr (f_species)
 	{
-		if (!target_species[enc->species])
+		if (!target_species[enc->pv_index])
 			return false;
 	}
 	Xoroshiro128Plus gen(seed);
