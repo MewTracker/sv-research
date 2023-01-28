@@ -405,7 +405,11 @@ void RaidCalc::on_comboBoxStars_currentIndexChanged(int index)
         finder.stage = ui.comboBoxStage->currentIndex();
         finder.raid_boost = ui.spinBoxRaidBoost->value();
         SeedFinder::SeedInfo info = finder.get_seed_info(0);
-        select_option(ui.comboBoxSpecies, info.species);
+        SpeciesFilter filter;
+        filter.value = 0;
+        filter.species = info.species;
+        filter.any_form = 1;
+        select_option(ui.comboBoxSpecies, filter.value);
         select_option(ui.comboBoxTeraType, info.tera_type + 1);
         select_option(ui.comboBoxAbility, info.ability);
         select_option(ui.comboBoxNature, info.nature + 1);

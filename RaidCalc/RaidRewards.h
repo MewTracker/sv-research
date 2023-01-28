@@ -43,6 +43,7 @@ static const RewardInfo reward_info[] =
 {
     { 4, "Poke Ball" },
     { 46, "Protein" },
+    { 48, "Carbos" },
     { 49, "Calcium" },
     { 50, "Rare Candy" },
     { 51, "PP Up" },
@@ -80,6 +81,7 @@ static const RewardInfo reward_info[] =
     { 174, "Tamato Berry" },
     { 218, "Soothe Bell" },
     { 391, "TM64" },
+    { 418, "TM91" },
     { 565, "Health Feather" },
     { 566, "Muscle Feather" },
     { 567, "Resist Feather" },
