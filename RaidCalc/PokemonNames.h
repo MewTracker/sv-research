@@ -2291,6 +2291,7 @@ static const char* event_names[] =
 	"Hydreigon and Dragapult Spotlight",
 	"Drifblim and Mismagius Spotlight",
 	"Greninja the Unrivaled",
+	"Armarouge and Ceruledge Spotlight",
 };
 
 static const char* stage_names_story[] =

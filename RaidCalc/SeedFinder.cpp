@@ -86,7 +86,8 @@ void SeedFinder::initialize_event_encounters(const char *file_name, size_t encou
 			auto enc = EncounterTera9(encounter_data.data() + offset, type);
 			enc.fixed_drops = get_fixed_drop_table(enc.fixed_table_id);
 			enc.lottery_drops = get_lottery_drop_table(enc.lottery_table_id, enc.lottery_lookup);
-			enc.personal_info = &table.get_form_entry(enc.species, enc.form);
+			enc.pv_index = table.get_form_index(enc.species, enc.form);
+			enc.personal_info = &table[enc.pv_index];
 			lists[i].push_back(enc);
 			assert(enc.stars > 0 && enc.stars < 8);
 			offset += encounter_size;
