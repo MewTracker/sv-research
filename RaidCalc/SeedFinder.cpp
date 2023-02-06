@@ -452,7 +452,7 @@ bool SeedFinder::find_seeds()
 		auto& table = PersonalTable9SV::instance();
 		if (form == AnyForm)
 		{
-			auto forms = FormUtils::get_forms(species);
+			auto forms = FormUtils::get_forms(species, true);
 			if (!forms.empty())
 			{
 				for (auto species_form : forms)

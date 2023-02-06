@@ -107,7 +107,7 @@ public:
 		}
 	}
 
-	static std::vector<uint8_t> get_forms(uint32_t species)
+	static std::vector<uint8_t> get_forms(uint32_t species, bool include_gender_forms = false)
 	{
 		switch (species)
 		{
@@ -117,6 +117,11 @@ public:
 		case Gastrodon:
 		case Toxtricity:
 		case Maushold:
+			return { 0, 1 };
+		case Indeedee:
+		case Oinkologne:
+			if (!include_gender_forms)
+				return {};
 			return { 0, 1 };
 		case Lycanroc:
 		case Tatsugiri:
@@ -147,6 +152,8 @@ private:
 		Gastrodon = 423,
 		Lycanroc = 745,
 		Toxtricity = 849,
+		Indeedee = 876,
+		Oinkologne = 916,
 		Tandemaus = 945,
 		Maushold = 946,
 		Tatsugiri = 952,
