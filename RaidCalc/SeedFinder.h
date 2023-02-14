@@ -519,6 +519,8 @@ FORCEINLINE uint32_t SeedFinder::get_rewards(const EncounterTera9* enc, uint32_t
 		add_fixed_drop(7);
 		add_fixed_drop(8);
 		add_fixed_drop(9);
+		add_fixed_drop(10);
+		add_fixed_drop(11);
 	}
 	#undef add_fixed_drop
 

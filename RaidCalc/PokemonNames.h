@@ -2292,6 +2292,7 @@ static const char* event_names[] =
 	"Drifblim and Mismagius Spotlight",
 	"Greninja the Unrivaled",
 	"Armarouge and Ceruledge Spotlight",
+	"Happy Valentine's Day",
 };
 
 static const char* stage_names_story[] =

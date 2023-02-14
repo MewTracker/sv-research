@@ -98,4 +98,6 @@ if __name__ == "__main__":
     print('Max lottery items columns (events): %d' % max_lottery_columns_events)
     items = list(all_items)
     items.sort()
-    print('int[] possible_rewards = { %s };' % ', '.join([str(item) for item in items[1:]]))
+    items = items[1:]
+    print('Possible rewards: %d' % len(items))
+    print('int[] possible_rewards = { %s };' % ', '.join([str(item) for item in items]))

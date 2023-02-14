@@ -12,7 +12,7 @@ struct RaidFixedRewardItemInfo
 struct RaidFixedRewards
 {
     uint64_t table_name;
-    RaidFixedRewardItemInfo items[10];
+    RaidFixedRewardItemInfo items[12];
 };
 
 struct RaidLotteryRewardItemInfo
@@ -58,6 +58,7 @@ static const RewardInfo reward_info[] =
     { 90, "Stardust" },
     { 91, "Star Piece" },
     { 92, "Nugget" },
+    { 106, "Rare Bone" },
     { 149, "Cheri Berry" },
     { 150, "Chesto Berry" },
     { 151, "Pecha Berry" },
@@ -140,11 +141,23 @@ static const RewardInfo reward_info[] =
     { 1877, "Dark Tera Shard" },
     { 1878, "Steel Tera Shard" },
     { 1879, "Fairy Tera Shard" },
+    { 1892, "Butter" },
+    { 1893, "Peanut Butter" },
+    { 1897, "Yogurt" },
+    { 1898, "Whipped Cream" },
+    { 1899, "Cream Cheese" },
+    { 1900, "Jam" },
+    { 1901, "Marmalade" },
     { 1904, "Sweet Herba Mystica" },
     { 1905, "Salty Herba Mystica" },
     { 1906, "Sour Herba Mystica" },
     { 1907, "Bitter Herba Mystica" },
     { 1908, "Spicy Herba Mystica" },
+    { 1936, "Banana" },
+    { 1937, "Strawberry" },
+    { 1938, "Apple" },
+    { 1939, "Kiwi" },
+    { 1940, "Pineapple" },
     { 2217, "TM157" },
     { 10000, "Material" },
     { 20000, "Tera Shard" },
