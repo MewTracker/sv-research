@@ -33,3 +33,15 @@ QString format_uint32(uint32_t value)
 {
 	return QString("%1").arg(value, 8, 16, QLatin1Char('0')).toUpper();
 }
+
+void select_option(QComboBox *combo, uint32_t value)
+{
+	for (int i = 0; i < combo->count(); ++i)
+	{
+		if (combo->itemData(i).toUInt() == value)
+		{
+			combo->setCurrentIndex(i);
+			break;
+		}
+	}
+}

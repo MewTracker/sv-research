@@ -13,6 +13,7 @@ SeedViewerDialog::SeedViewerDialog(QWidget* parent)
 	ui.comboBoxEvent->addItem("None");
 	for (auto event_name : event_names)
 		ui.comboBoxEvent->addItem(event_name);
+	set_event_group_visible(false);
 }
 
 SeedViewerDialog::~SeedViewerDialog()
@@ -31,17 +32,27 @@ void SeedViewerDialog::on_comboBoxEvent_currentIndexChanged(int index)
 	{
 		ui.comboBoxStage->blockSignals(true);
 		ui.comboBoxStage->clear();
+		ui.comboBoxEventGroup->blockSignals(true);
+		ui.comboBoxEventGroup->clear();
+		ui.comboBoxEventGroup->blockSignals(false);
 		if (index == 0)
 		{
 			ui.labelStage->setText("Story progress:");
 			for (auto& stage_name : stage_names_story)
 				ui.comboBoxStage->addItem(stage_name);
+			set_event_group_visible(false);
 		}
 		else
 		{
 			ui.labelStage->setText("Event progress:");
 			for (auto& stage_name : stage_names_event)
 				ui.comboBoxStage->addItem(stage_name);
+			auto group = SeedFinder::get_event_info(index - 1);
+			ui.comboBoxEventGroup->blockSignals(true);
+			for (auto id : group->dist)
+				ui.comboBoxEventGroup->addItem(QString::number(id), id);
+			ui.comboBoxEventGroup->blockSignals(false);
+			set_event_group_visible(ui.comboBoxEventGroup->count() > 1);
 		}
 		ui.comboBoxStage->setCurrentIndex(ui.comboBoxStage->count() - 1);
 		ui.comboBoxStage->blockSignals(false);
@@ -49,6 +60,11 @@ void SeedViewerDialog::on_comboBoxEvent_currentIndexChanged(int index)
 		ui.comboBoxRaidType->setCurrentIndex(1);
 		ui.comboBoxRaidType->blockSignals(false);
 	}
+	refresh_ui();
+}
+
+void SeedViewerDialog::on_comboBoxEventGroup_currentIndexChanged(int index)
+{
 	refresh_ui();
 }
 
@@ -61,6 +77,7 @@ void SeedViewerDialog::on_comboBoxRaidType_currentIndexChanged(int index)
 			ui.comboBoxStage->setCurrentIndex(ui.comboBoxStage->count() - 1);
 			QApplication::beep();
 		}
+		set_event_group_visible(index != 1 && ui.comboBoxEventGroup->count() > 1);
 	}
 	refresh_ui();
 }
@@ -93,6 +110,7 @@ void SeedViewerDialog::display_seed(SeedFinder::BasicParams params, uint32_t see
 {
 	ui.comboBoxEvent->setCurrentIndex(params.event_id + 1);
 	refresh_supressed = true;
+	select_option(ui.comboBoxEventGroup, params.event_group);
 	ui.comboBoxGame->setCurrentIndex((int)params.game);
 	ui.comboBoxRaidType->setCurrentIndex(params.stars >= 6 ? 1 : 0);
 	ui.comboBoxStage->setCurrentIndex(params.stage);
@@ -136,6 +154,7 @@ void SeedViewerDialog::refresh_ui()
 	}
 	finder.game = (Game)ui.comboBoxGame->currentIndex();
 	finder.event_id = ui.comboBoxEvent->currentIndex() - 1;
+	finder.event_group = ui.comboBoxEventGroup->currentData().toUInt();
 	finder.stage = ui.comboBoxStage->currentIndex();
 	finder.raid_boost = ui.spinBoxRaidBoost->value();
 	finder.stars = ui.comboBoxRaidType->currentIndex() == 1 ? (finder.event_id < 0 ? 6 : 7) : SeedFinder::get_star_count(current_seed, finder.stage, finder.event_id, finder.game);
@@ -181,4 +200,10 @@ void SeedViewerDialog::refresh_ui()
 			item_name += QString(" (x%1)").arg(reward.count);
 		ui.listRewards->addItem(item_name);
 	}
+}
+
+void SeedViewerDialog::set_event_group_visible(bool visibility)
+{
+	ui.labelEventGroup->setVisible(visibility);
+	ui.comboBoxEventGroup->setVisible(visibility);
 }

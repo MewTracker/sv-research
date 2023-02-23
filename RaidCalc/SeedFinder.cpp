@@ -2,6 +2,7 @@
 #include <xmmintrin.h>
 #include <cassert>
 #include <memory>
+#include <set>
 #include "SeedFinder.h"
 #include "FormUtils.h"
 #include "Utils.h"
@@ -13,6 +14,7 @@ std::vector<std::vector<uint8_t>> SeedFinder::fast_lottery_lookup;
 std::vector<std::vector<uint8_t>> SeedFinder::fast_encounter_lookup[2];
 std::vector<uint8_t> SeedFinder::fast_encounter_lookup_dist[2];
 std::vector<uint8_t> SeedFinder::fast_encounter_lookup_might[2];
+SeedFinder::GroupInfo SeedFinder::event_groups[_countof(event_names)];
 
 SeedFinder::SeedFinder() :
 	hFinderThread(NULL),
@@ -21,6 +23,7 @@ SeedFinder::SeedFinder() :
 	min_seed(0),
 	max_seed(0),
 	event_id(-1),
+	event_group(0),
 	stars(0),
 	species(0),
 	form(AnyForm),
@@ -31,7 +34,8 @@ SeedFinder::SeedFinder() :
 	shiny(0),
 	item_filters_active(false),
 	drop_threshold(0),
-	item_filters_count(0)
+	item_filters_count(0),
+	event_rand_rate(0)
 {
 	memset(min_iv, 0, sizeof(min_iv));
 	memset(max_iv, 0, sizeof(max_iv));
@@ -63,11 +67,66 @@ bool SeedFinder::initialize()
 		enc.pv_index = table.get_form_index(enc.species, enc.form);
 		enc.personal_info = &table[enc.pv_index];
 		assert(enc.stars > 0 && enc.stars < 7);
+		assert(enc.tera_type == GemType::Random);
 		encounters[enc.stars].push_back(enc);
 	}
 	compute_fast_encounter_lookups();
 	initialize_event_encounters(":/resources/encounter_dist_paldea.pklex", EncounterTera9::SizeDist, EncounterType::Dist, encounters_dist);
 	initialize_event_encounters(":/resources/encounter_might_paldea.pklex", EncounterTera9::SizeMight, EncounterType::Might, encounters_might);
+	for (int32_t i = 0; i < _countof(event_names); ++i)
+	{
+		GroupInfo &info = event_groups[i];
+		std::set<int32_t> dist_groups;
+		int32_t might_group = -1;
+		visit_encounters(i, [&](const EncounterTera9 &enc) {
+			if (enc.stars == 7)
+			{
+				assert(might_group == -1 || might_group == enc.group);
+				might_group = enc.group;
+			}
+			else
+			{
+				dist_groups.insert(enc.group);
+			}
+		});
+		info.might.push_back(might_group);
+		for (auto group : dist_groups)
+			info.dist.push_back(group);
+	}
+	#ifdef _DEBUG
+	for (int32_t t_event_id = 0; t_event_id < _countof(event_names); ++t_event_id)
+	{
+		for (auto t_group : event_groups[t_event_id].dist)
+		{
+			for (int32_t t_game = GameScarlet; t_game <= GameViolet; ++t_game)
+			{
+				for (int32_t t_stage = 0; t_stage < 4; ++t_stage)
+				{
+					for (int32_t t_stars = 1; t_stars <= 6; ++t_stars)
+					{
+						int16_t total = -1;
+						for (auto &enc : encounters_dist[t_event_id])
+						{
+							if (enc.stars != t_stars || enc.group != t_group)
+								continue;
+							auto &rand_rate_data = enc.rand_rate_event[t_stage][t_game];
+							if (rand_rate_data.total == 0)
+								continue;
+							if (total == -1)
+							{
+								total = rand_rate_data.total;
+							}
+							else if (total != rand_rate_data.total)
+							{
+								qFatal("Rand rate total discrepancy detected: %d != %d", total, rand_rate_data.total);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	#endif
 	return true;
 }
 
@@ -90,6 +149,7 @@ void SeedFinder::initialize_event_encounters(const char *file_name, size_t encou
 			enc.personal_info = &table[enc.pv_index];
 			lists[i].push_back(enc);
 			assert(enc.stars > 0 && enc.stars < 8);
+			assert(enc.tera_type != GemType::Default);
 			offset += encounter_size;
 		}
 	}
@@ -167,6 +227,44 @@ void SeedFinder::compute_fast_encounter_lookups()
 	}
 }
 
+bool SeedFinder::compute_event_encounter_lookups()
+{
+	event_encounter_lookup.clear();
+	event_rand_rate = 0;
+	for (auto& enc : encounters_dist[event_id])
+	{
+		if (enc.stars != stars || enc.group != event_group)
+			continue;
+		auto& rand_rate_data = enc.rand_rate_event[stage][game];
+		if (rand_rate_data.total == 0)
+			continue;
+		event_rand_rate = rand_rate_data.total;
+		break;
+	}
+	if (event_rand_rate == 0)
+		return false;
+	event_encounter_lookup.reserve(event_rand_rate);
+	for (int32_t val = 0; val < event_rand_rate; ++val)
+	{
+		const EncounterTera9* result = nullptr;
+		for (auto &enc : encounters_dist[event_id])
+		{
+			if (enc.stars != stars || enc.group != event_group)
+				continue;
+			auto &rand_rate_data = enc.rand_rate_event[stage][game];
+			if (rand_rate_data.total == 0)
+				continue;
+			if ((uint32_t)((int32_t)val - rand_rate_data.min) < enc.rand_rate)
+			{
+				result = &enc;
+				break;
+			}
+		}
+		event_encounter_lookup.push_back(result);
+	}
+	return true;
+}
+
 const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 {
 	if (event_id < 0)
@@ -184,16 +282,16 @@ const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 
 const EncounterTera9* SeedFinder::get_encounter_dist(uint32_t seed) const
 {
+	Xoroshiro128Plus gen(seed);
+	gen.next_int(100);
 	for (auto& enc : encounters_dist[event_id])
 	{
-		if (enc.stars != stars)
+		if (enc.stars != stars || enc.group != event_group)
 			continue;
-		Xoroshiro128Plus gen(seed);
-		gen.next_int(100);
 		auto& rand_rate_data = enc.rand_rate_event[stage][game];
 		if (rand_rate_data.total == 0)
 			continue;
-		uint64_t val = gen.next_int(rand_rate_data.total);
+		uint64_t val = Xoroshiro128Plus(gen).next_int(rand_rate_data.total);
 		if ((uint32_t)((int32_t)val - rand_rate_data.min) < enc.rand_rate)
 			return &enc;
 	}
@@ -472,6 +570,11 @@ bool SeedFinder::find_seeds()
 	{
 		memset(target_species.data(), 1, target_species.size());
 	}
+	if (event_id >= 0 && stars != 7)
+	{
+		if (!compute_event_encounter_lookups())
+			return true;
+	}
 	hFinderThread = CreateThread(NULL, 0, find_seeds_thread_wrapper, this, 0, NULL);
 	if (!hFinderThread)
 		return false;
@@ -487,6 +590,7 @@ bool SeedFinder::is_search_done()
 		return false;
 	CloseHandle(hFinderThread);
 	hFinderThread = NULL;
+	event_encounter_lookup.clear();
 	return true;
 }
 
@@ -581,7 +685,7 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 	}
 	else
 	{
-		info.tera_type = (uint8_t)get_tera_type(seed);
+		info.tera_type = (uint8_t)get_tera_type(enc, seed);
 		info.shiny = (((info.pid >> 16) ^ (info.pid & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
 		int8_t ivs[6] = { -1, -1, -1, -1, -1, -1 };
 		for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
@@ -666,6 +770,7 @@ SeedFinder::BasicParams SeedFinder::get_basic_params() const
 	BasicParams params;
 	params.game = game;
 	params.event_id = event_id;
+	params.event_group = event_group;
 	params.stars = stars;
 	params.stage = stage;
 	params.raid_boost = raid_boost;
@@ -686,4 +791,11 @@ bool SeedFinder::is_mighty_event(int32_t event_id)
 	if (event_id < 0 || event_id >= _countof(encounters_might))
 		return false;
 	return !encounters_might[event_id].empty();
+}
+
+const SeedFinder::GroupInfo* SeedFinder::get_event_info(int32_t event_id)
+{
+	if (event_id < 0 || event_id >= _countof(event_groups))
+		return nullptr;
+	return &event_groups[event_id];
 }

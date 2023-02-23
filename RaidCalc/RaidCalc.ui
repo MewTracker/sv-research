@@ -29,75 +29,24 @@
          <string>Basic Parameters</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="2" column="1">
-          <widget class="QComboBox" name="comboBoxStage">
-           <property name="currentIndex">
-            <number>4</number>
-           </property>
-           <item>
-            <property name="text">
-             <string>None</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>3* unlocked</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>4* unlocked</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>5* unlocked</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>6* unlocked</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="labelThreads">
-           <property name="text">
-            <string>Threads:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
+         <item row="5" column="1">
           <widget class="QComboBox" name="comboBoxThreads"/>
          </item>
-         <item row="7" column="0" colspan="2">
-          <widget class="QPushButton" name="buttonFindSeeds">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>60</height>
-            </size>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="comboBoxEvent">
+           <property name="maxVisibleItems">
+            <number>20</number>
            </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="labelStage">
            <property name="text">
-            <string>Find Seeds</string>
+            <string>Story progress:</string>
            </property>
           </widget>
          </item>
          <item row="6" column="1">
-          <widget class="QLineEdit" name="editMaxSeed">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>FFFFFFFF</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
           <widget class="QLineEdit" name="editMinSeed">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -110,20 +59,6 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="labelStars">
-           <property name="text">
-            <string>Stars:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="labelMaxSeed">
-           <property name="text">
-            <string>Max seed:</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="labelGame">
            <property name="text">
@@ -131,21 +66,35 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="comboBoxGame">
-           <item>
-            <property name="text">
-             <string>Scarlet</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Violet</string>
-            </property>
-           </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="labelEvent">
+           <property name="text">
+            <string>Event:</string>
+           </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="6" column="0">
+          <widget class="QLabel" name="labelMinSeed">
+           <property name="text">
+            <string>Min seed:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="labelMaxSeed">
+           <property name="text">
+            <string>Max seed:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="labelStars">
+           <property name="text">
+            <string>Stars:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
           <widget class="QComboBox" name="comboBoxStars">
            <property name="currentIndex">
             <number>5</number>
@@ -187,27 +136,96 @@
            </item>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="labelStage">
+         <item row="8" column="0" colspan="2">
+          <widget class="QPushButton" name="buttonFindSeeds">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>60</height>
+            </size>
+           </property>
            <property name="text">
-            <string>Story progress:</string>
+            <string>Find Seeds</string>
            </property>
           </widget>
          </item>
          <item row="5" column="0">
-          <widget class="QLabel" name="labelMinSeed">
+          <widget class="QLabel" name="labelThreads">
            <property name="text">
-            <string>Min seed:</string>
+            <string>Threads:</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
-          <widget class="QComboBox" name="comboBoxEvent"/>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="comboBoxStage">
+           <property name="currentIndex">
+            <number>4</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>None</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>3* unlocked</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>4* unlocked</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>5* unlocked</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>6* unlocked</string>
+            </property>
+           </item>
+          </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="labelEvent">
+         <item row="7" column="1">
+          <widget class="QLineEdit" name="editMaxSeed">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
-            <string>Event:</string>
+            <string>FFFFFFFF</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="comboBoxGame">
+           <item>
+            <property name="text">
+             <string>Scarlet</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Violet</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="labelEventGroup">
+           <property name="text">
+            <string>Event group:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="comboBoxEventGroup">
+           <property name="enabled">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

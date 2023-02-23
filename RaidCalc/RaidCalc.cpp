@@ -47,6 +47,7 @@ RaidCalc::RaidCalc(QWidget* parent)
     for (uint32_t i = 0; i < sys_info.dwNumberOfProcessors - 1; ++i)
         ui.comboBoxThreads->addItem(QString::number(i + 1));
     ui.comboBoxThreads->setCurrentIndex(ui.comboBoxThreads->count() - 1);
+    set_event_group_visible(false);
 
     min_iv_widgets[0] = ui.spinBoxMinHP;
     min_iv_widgets[1] = ui.spinBoxMinAtk;
@@ -127,18 +128,6 @@ void RaidCalc::add_options(QComboBox* combo, std::vector<std::pair<std::string, 
         combo->addItem(pair.first.c_str(), pair.second);
 }
 
-void RaidCalc::select_option(QComboBox* combo, uint32_t value)
-{
-    for (int i = 0; i < combo->count(); ++i)
-    {
-        if (combo->itemData(i).toUInt() == value)
-        {
-            combo->setCurrentIndex(i);
-            break;
-        }
-    }
-}
-
 void RaidCalc::toggle_ui(bool enabled)
 {
     for (auto widget : ui.basicGroup->findChildren<QWidget*>())
@@ -162,6 +151,7 @@ void RaidCalc::on_buttonFindSeeds_clicked()
 {
     finder.game = (Game)ui.comboBoxGame->currentIndex();
     finder.event_id = ui.comboBoxEvent->currentIndex() - 1;
+    finder.event_group = ui.comboBoxEventGroup->currentData().toUInt();
     finder.stars = ui.comboBoxStars->currentIndex() + 1;
     finder.stage = ui.comboBoxStage->currentIndex();
     finder.raid_boost = ui.spinBoxRaidBoost->value();
@@ -181,7 +171,7 @@ void RaidCalc::on_buttonFindSeeds_clicked()
         QMessageBox::critical(this, "Error", "Max seed cannot be smaller than min seed.");
         return;
     }
-    if (finder.stars == 7 && !finder.is_mighty_event(finder.event_id))
+    if (finder.stars == 7 && !SeedFinder::is_mighty_event(finder.event_id))
     {
         QMessageBox::critical(this, "Error", "This event doesn't have any 7* raids.");
         return;
@@ -351,17 +341,23 @@ void RaidCalc::on_comboBoxEvent_currentIndexChanged(int index)
 {
     ui.comboBoxStage->blockSignals(true);
     ui.comboBoxStage->clear();
+    ui.comboBoxEventGroup->clear();
     if (index == 0)
     {
         ui.labelStage->setText("Story progress:");
         for (auto& stage_name : stage_names_story)
             ui.comboBoxStage->addItem(stage_name);
+        set_event_group_visible(false);
     }
     else
     {
         ui.labelStage->setText("Event progress:");
         for (auto& stage_name : stage_names_event)
             ui.comboBoxStage->addItem(stage_name);
+        auto group = SeedFinder::get_event_info(index - 1);
+        for (auto id : group->dist)
+            ui.comboBoxEventGroup->addItem(QString::number(id), id);
+        set_event_group_visible(ui.comboBoxEventGroup->count() > 1);
     }
     ui.comboBoxStage->setCurrentIndex(ui.comboBoxStage->count() - 1);
     ui.comboBoxStage->blockSignals(false);
@@ -397,28 +393,41 @@ void RaidCalc::on_comboBoxStars_currentIndexChanged(int index)
     int event_id = ui.comboBoxEvent->currentIndex() - 1;
     int stars = ui.comboBoxStars->currentIndex() + 1;
     bool is7 = stars == 7;
-    if (is7 && finder.is_mighty_event(event_id))
+    if (is7)
     {
-        finder.game = (Game)ui.comboBoxGame->currentIndex();
-        finder.event_id = event_id;
-        finder.stars = ui.comboBoxStars->currentIndex() + 1;
-        finder.stage = ui.comboBoxStage->currentIndex();
-        finder.raid_boost = ui.spinBoxRaidBoost->value();
-        SeedFinder::SeedInfo info = finder.get_seed_info(0);
-        SpeciesFilter filter;
-        filter.value = 0;
-        filter.species = info.species;
-        filter.any_form = 1;
-        select_option(ui.comboBoxSpecies, filter.value);
-        select_option(ui.comboBoxTeraType, info.tera_type + 1);
-        select_option(ui.comboBoxAbility, info.ability);
-        select_option(ui.comboBoxNature, info.nature + 1);
-        ui.comboBoxShiny->setCurrentIndex(info.shiny ? 1 : 2);
-        ui.comboBoxGender->setCurrentIndex(info.gender + 1);
-        for (size_t i = 0; i < _countof(min_iv_widgets); ++i)
-            min_iv_widgets[i]->setValue(info.iv[i]);
-        for (size_t i = 0; i < _countof(max_iv_widgets); ++i)
-            max_iv_widgets[i]->setValue(info.iv[i]);
+        set_event_group_visible(false);
+        if (SeedFinder::is_mighty_event(event_id))
+        {
+            finder.game = (Game)ui.comboBoxGame->currentIndex();
+            finder.event_id = event_id;
+            finder.event_group = SeedFinder::get_event_info(event_id)->might.front();
+            finder.stars = ui.comboBoxStars->currentIndex() + 1;
+            finder.stage = ui.comboBoxStage->currentIndex();
+            finder.raid_boost = ui.spinBoxRaidBoost->value();
+            SeedFinder::SeedInfo info = finder.get_seed_info(0);
+            SpeciesFilter filter;
+            filter.value = 0;
+            filter.species = info.species;
+            filter.any_form = 1;
+            select_option(ui.comboBoxSpecies, filter.value);
+            select_option(ui.comboBoxTeraType, info.tera_type + 1);
+            select_option(ui.comboBoxAbility, info.ability);
+            select_option(ui.comboBoxNature, info.nature + 1);
+            ui.comboBoxShiny->setCurrentIndex(info.shiny ? 1 : 2);
+            ui.comboBoxGender->setCurrentIndex(info.gender + 1);
+            for (size_t i = 0; i < _countof(min_iv_widgets); ++i)
+                min_iv_widgets[i]->setValue(info.iv[i]);
+            for (size_t i = 0; i < _countof(max_iv_widgets); ++i)
+                max_iv_widgets[i]->setValue(info.iv[i]);
+        }
+        else
+        {
+            on_buttonResetPokemonFilters_clicked();
+        }
+    }
+    else
+    {
+        set_event_group_visible(ui.comboBoxEventGroup->count() > 1);
     }
     for (auto widget : ui.pokemonGroup->findChildren<QWidget*>())
         widget->setEnabled(!is7);
@@ -448,4 +457,10 @@ void RaidCalc::fix_progress(int stars)
         ui.comboBoxStars->blockSignals(false);
     }
     QApplication::beep();
+}
+
+void RaidCalc::set_event_group_visible(bool visibility)
+{
+    ui.labelEventGroup->setVisible(visibility);
+    ui.comboBoxEventGroup->setVisible(visibility);
 }

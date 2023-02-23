@@ -45,9 +45,16 @@ public:
 	{
 		Game game;
 		int32_t event_id;
+		int32_t event_group;
 		int32_t stars;
 		int32_t stage;
 		int32_t raid_boost;
+	};
+
+	struct GroupInfo
+	{
+		std::vector<int32_t> dist;
+		std::vector<int32_t> might;
 	};
 
 	SeedFinder();
@@ -65,6 +72,7 @@ public:
 	static int get_star_count(uint32_t seed, int32_t progress, int32_t event_id, Game game);
 	static void visit_encounters(int32_t event_id, std::function<EncounterVisitor> visitor);
 	static bool is_mighty_event(int32_t event_id);
+	static const GroupInfo* get_event_info(int32_t event_id);
 
 	// Config
 	uint32_t thread_count;
@@ -74,6 +82,7 @@ public:
 	uint32_t min_seed;
 	uint32_t max_seed;
 	int32_t event_id;
+	int32_t event_group;
 	int32_t stars;
 	int32_t stage;
 	int32_t raid_boost;
@@ -120,7 +129,7 @@ private:
 	template<bool f_is6>
 	FORCEINLINE const EncounterTera9* get_encounter(uint32_t seed) const;
 
-	template<bool f_species, bool f_shiny, bool f_iv, bool f_advanced>
+	template<EncounterType f_type, bool f_species, bool f_shiny, bool f_iv, bool f_advanced>
 	FORCEINLINE bool check_pokemon(const EncounterTera9* enc, uint32_t seed) const;
 
 	template<EncounterType f_type>
@@ -140,8 +149,10 @@ private:
 	bool use_item_filters() const;
 	bool use_advanced_filters() const;
 	void find_seeds_thread();
+	bool compute_event_encounter_lookups();
 	const EncounterTera9* get_encounter(uint32_t seed) const;
 	const EncounterTera9* get_encounter_dist(uint32_t seed) const;
+	FORCEINLINE const EncounterTera9* get_encounter_dist_lookup(uint32_t seed) const;
 
 	static void initialize_event_encounters(const char* file_name, size_t encounter_size, EncounterType type, EncounterListsEvents& lists);
 	static DWORD WINAPI find_seeds_thread_wrapper(LPVOID Parameter);
@@ -154,14 +165,17 @@ private:
 	FORCEINLINE static int32_t get_star_count(Xoroshiro128Plus& gen, int32_t progress);
 	FORCEINLINE static int32_t get_reward_count(int32_t random, int32_t stars);
 	FORCEINLINE static uint32_t get_tera_type(uint32_t seed);
+	FORCEINLINE static uint32_t get_tera_type(const EncounterTera9* enc, uint32_t seed);
 	FORCEINLINE static uint32_t get_ability(Xoroshiro128Plus& gen, AbilityPermission permission, PersonalInfo9SV& personal_info);
 	FORCEINLINE static uint32_t get_nature(Xoroshiro128Plus& gen, int32_t species, uint8_t form);
 	FORCEINLINE static uint32_t get_gender(Xoroshiro128Plus& gen, int32_t ratio);
 
 	HANDLE hFinderThread;
 	int32_t item_filters_count;
+	int32_t event_rand_rate;
 	std::vector<int8_t> target_drops;
 	std::vector<int8_t> target_species;
+	std::vector<const EncounterTera9*> event_encounter_lookup;
 	alignas(16) int8_t min_iv_vec[16];
 	alignas(16) int8_t max_iv_vec[16];
 
@@ -172,6 +186,7 @@ private:
 	static std::vector<std::vector<uint8_t>> fast_encounter_lookup[2];
 	static std::vector<uint8_t> fast_encounter_lookup_dist[2];
 	static std::vector<uint8_t> fast_encounter_lookup_might[2];
+	static GroupInfo event_groups[_countof(event_names)];
 };
 
 FORCEINLINE int16_t SeedFinder::get_rate_total_base(int32_t version, size_t star)
@@ -287,6 +302,11 @@ FORCEINLINE int32_t SeedFinder::get_reward_count(int32_t random, int32_t stars)
 FORCEINLINE uint32_t SeedFinder::get_tera_type(uint32_t seed)
 {
 	return (uint32_t)Xoroshiro128Plus(seed).next_int(18);
+}
+
+FORCEINLINE uint32_t SeedFinder::get_tera_type(const EncounterTera9* enc, uint32_t seed)
+{
+	return enc->tera_type != GemType::Random ? (uint32_t)enc->tera_type - 2 : get_tera_type(seed);
 }
 
 FORCEINLINE uint32_t SeedFinder::get_ability(Xoroshiro128Plus& gen, AbilityPermission permission, PersonalInfo9SV& personal_info)
@@ -436,7 +456,14 @@ FORCEINLINE const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 	return &encounters[stars][fast_encounter_lookup[game][stars][speciesroll]];
 }
 
-template<bool f_species, bool f_shiny, bool f_iv, bool f_advanced>
+FORCEINLINE const EncounterTera9* SeedFinder::get_encounter_dist_lookup(uint32_t seed) const
+{
+	Xoroshiro128Plus gen(seed);
+	gen.next_int(100);
+	return event_encounter_lookup[gen.next_int(event_rand_rate)];
+}
+
+template<EncounterType f_type, bool f_species, bool f_shiny, bool f_iv, bool f_advanced>
 FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t seed) const
 {
 	if constexpr (f_species)
@@ -485,7 +512,12 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 		return true;
 	if (tera_type)
 	{
-		if (get_tera_type(seed) != tera_type - 1)
+		int32_t enc_tera_type;
+		if constexpr (f_type == EncounterType::Dist)
+			enc_tera_type = get_tera_type(enc, seed);
+		else
+			enc_tera_type = get_tera_type(seed);
+		if (enc_tera_type != tera_type - 1)
 			return false;
 	}
 	uint32_t current_ability = get_ability(gen, enc->ability, *enc->personal_info);
@@ -560,7 +592,7 @@ void SeedFinder::worker_thread(ThreadData& data)
 		}
 		else if constexpr (f_type == EncounterType::Dist)
 		{
-			enc = get_encounter_dist(seed);
+			enc = get_encounter_dist_lookup(seed);
 			if (!enc)
 				continue;
 		}
@@ -570,7 +602,7 @@ void SeedFinder::worker_thread(ThreadData& data)
 		}
 		if constexpr (f_type != EncounterType::Might && (f_species || f_shiny || f_iv || f_advanced))
 		{
-			if (!check_pokemon<f_species, f_shiny, f_iv, f_advanced>(enc, seed))
+			if (!check_pokemon<f_type, f_species, f_shiny, f_iv, f_advanced>(enc, seed))
 				continue;
 		}
 		if constexpr (f_rewards)

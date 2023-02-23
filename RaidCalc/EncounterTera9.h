@@ -87,7 +87,7 @@ public:
 		moves[2] = *(uint16_t*)&data[0x0C];
 		moves[3] = *(uint16_t*)&data[0x0E];
 		tera_type = (GemType)data[0x10];
-		index = data[0x11];
+		group = data[0x11];
 		stars = data[0x12];
 		rand_rate = data[0x13];
 
@@ -130,7 +130,7 @@ public:
 	uint8_t level;
 	uint16_t moves[4];
 	GemType tera_type;
-	uint8_t index;
+	uint8_t group;
 	uint8_t stars;
 	uint8_t rand_rate;
 

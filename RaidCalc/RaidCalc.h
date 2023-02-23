@@ -63,9 +63,9 @@ private:
     void add_sorted_options(QComboBox* combo, const char** names, uint32_t name_count, uint32_t offset = 1);
     void add_sorted_options(QComboBox* combo, std::vector<std::pair<std::string, uint32_t>>& options);
     void add_options(QComboBox* combo, std::vector<std::pair<std::string, uint32_t>>& options);
-    void select_option(QComboBox* combo, uint32_t value);
     const StarsRange& get_allowed_stars(int progress);
     void fix_progress(int stars);
+    void set_event_group_visible(bool visibility);
 
     Ui::RaidCalcClass ui;
     QSpinBox* min_iv_widgets[6];
