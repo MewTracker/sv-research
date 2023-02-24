@@ -158,6 +158,7 @@ static const RewardInfo reward_info[] =
     { 1938, "Apple" },
     { 1939, "Kiwi" },
     { 1940, "Pineapple" },
+    { 2183, "TM123" },
     { 2217, "TM157" },
     { 10000, "Material" },
     { 20000, "Tera Shard" },

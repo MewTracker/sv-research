@@ -2294,6 +2294,7 @@ static const char* event_names[] =
 	"Armarouge and Ceruledge Spotlight",
 	"Happy Valentine's Day",
 	"Garchomp and Sylveon Spotlight",
+	"Pikachu the Unrivaled",
 };
 
 static const char* stage_names_story[] =
