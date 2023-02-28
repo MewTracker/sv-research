@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-static const char *pokemon_names[] =
+static const char* pokemon_names[] =
 {
 	"---",
 	"Bulbasaur",
@@ -982,14 +982,14 @@ static const char *pokemon_names[] =
 	"Gholdengo",
 	"Great Tusk",
 	"Brute Bonnet",
-	"AKETUBAN",
+	"Walking Wake",
 	"Sandy Shocks",
 	"Scream Tail",
 	"Flutter Mane",
 	"Slither Wing",
 	"Roaring Moon",
 	"Iron Treads",
-	"BKETUBAN",
+	"Iron Leaves",
 	"Iron Moth",
 	"Iron Hands",
 	"Iron Jugulis",
@@ -1053,7 +1053,7 @@ static const char* nature_names[] =
 
 static const char* ability_names[] =
 {
-	"—",
+	"———",
 	"Stench",
 	"Drizzle",
 	"Speed Boost",
@@ -2231,8 +2231,8 @@ static const char* move_names[] =
 	"Aqua Step",
 	"Raging Bull",
 	"Make It Rain",
-	"WAZA_SAIKOBUREIDO",
-	"WAZA_HAIDOROSUTIIMU",
+	"Psyblade",
+	"Hydro Steam",
 	"Ruination",
 	"Collision Course",
 	"Electro Drift",
@@ -2295,6 +2295,7 @@ static const char* event_names[] =
 	"Happy Valentine's Day",
 	"Garchomp and Sylveon Spotlight",
 	"Pikachu the Unrivaled",
+	"Walking Wake and Iron Leaves Spotlight",
 };
 
 static const char* stage_names_story[] =
