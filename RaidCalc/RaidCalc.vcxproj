@@ -105,6 +105,7 @@
     <ClCompile Include="SeedFinder.cpp" />
     <ClCompile Include="SeedViewerDialog.cpp" />
     <ClCompile Include="SettingsDialog.cpp" />
+    <ClCompile Include="SpeciesConverter.cpp" />
     <ClCompile Include="Utils.cpp" />
     <QtRcc Include="RaidCalc.qrc" />
     <QtUic Include="AboutDialog.ui" />
@@ -132,6 +133,7 @@
     <QtMoc Include="SeedTableModel.h" />
     <QtMoc Include="SeedViewerDialog.h" />
     <QtMoc Include="SettingsDialog.h" />
+    <ClInclude Include="SpeciesConverter.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Xoroshiro128Plus.h" />

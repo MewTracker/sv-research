@@ -5,6 +5,7 @@
 #include "Stopwatch.h"
 #include "PokemonNames.h"
 #include "Utils.h"
+#include "SpeciesConverter.h"
 
 #if defined(ENABLE_BENCHMARKS)
 
@@ -122,6 +123,8 @@ __declspec(noinline) void Benchmarks::do_rewards_bench(SeedFinder& finder)
 void Benchmarks::run(SeedFinder& finder)
 {
     // TODO: Better place for this?
+    dump_personal_table();
+    return;
     do_tests(finder);
     return;
 
@@ -153,4 +156,74 @@ void Benchmarks::run(SeedFinder& finder)
     for (int i = 1904; i <= 1908; ++i)
         finder.set_drop_filter(1904, true);
     do_rewards_bench(finder);
+}
+
+void Benchmarks::dump_personal_info(std::string name, PersonalInfo9SV &info)
+{
+    std::string entry(name);
+    entry += ":";
+    entry += std::to_string(info.hp) + ":";
+    entry += std::to_string(info.atk) + ":";
+    entry += std::to_string(info.def) + ":";
+    entry += std::to_string(info.spe) + ":";
+    entry += std::to_string(info.spa) + ":";
+    entry += std::to_string(info.spd) + ":";
+    entry += std::to_string(info.type1) + ":";
+    entry += std::to_string(info.type2) + ":";
+    entry += std::to_string(info.catch_rate) + ":";
+    entry += std::to_string(info.evo_stage) + ":";
+    entry += std::to_string(info.ev_yield) + ":";
+    entry += std::to_string(info.ev_hp) + ":";
+    entry += std::to_string(info.ev_atk) + ":";
+    entry += std::to_string(info.ev_def) + ":";
+    entry += std::to_string(info.ev_spe) + ":";
+    entry += std::to_string(info.ev_spa) + ":";
+    entry += std::to_string(info.ev_spd) + ":";
+    entry += std::to_string(info.gender) + ":";
+    entry += std::to_string(info.hatch_cycles) + ":";
+    entry += std::to_string(info.base_friendship) + ":";
+    entry += std::to_string(info.exp_growth) + ":";
+    entry += std::to_string(info.egg_group1) + ":";
+    entry += std::to_string(info.egg_group2) + ":";
+    entry += std::to_string(info.ability[0]) + ":";
+    entry += std::to_string(info.ability[1]) + ":";
+    entry += std::to_string(info.ability[2]) + ":";
+    entry += std::to_string(info.form_count) + ":";
+    entry += std::to_string(info.color) + ":";
+    entry += std::to_string((int)info.is_present_in_game) + ":";
+    entry += std::to_string(info.dex_group) + ":";
+    entry += std::to_string(info.dex_index) + ":";
+    entry += std::to_string(info.height) + ":";
+    entry += std::to_string(info.weight) + ":";
+    entry += std::to_string(info.regional_flags) + ":";
+    entry += std::to_string((int)info.is_regional_form) + ":";
+    for (auto val : info.tmhm)
+        entry += std::to_string((int)val) + ":";
+    entry.pop_back();
+    printf("%s\n", entry.c_str());
+}
+
+void Benchmarks::dump_personal_table()
+{
+    // PKHeX abandoned internal IDs for national IDs, this isn't desirable for RaidCalc
+    static constexpr bool use_converter = false;
+
+    AllocConsole();
+    (void)freopen("CONIN$", "r", stdin);
+    (void)freopen("CONOUT$", "w", stdout);
+    (void)freopen("CONOUT$", "w", stderr);
+
+    PersonalTable9SV &table = PersonalTable9SV::instance();
+    for (uint16_t i = 0; i < _countof(pokemon_names); ++i)
+    {
+        uint16_t species = use_converter ? SpeciesConverter::get_national(i) : i;
+        PersonalInfo9SV &info = table[species];
+        dump_personal_info(pokemon_names[i], info);
+        for (uint8_t j = 1; j < info.form_count; ++j)
+        {
+            std::string name(pokemon_names[i]);
+            name += "_form" + std::to_string(j);
+            dump_personal_info(name, table.get_form_entry(species, j));
+        }
+    }
 }
