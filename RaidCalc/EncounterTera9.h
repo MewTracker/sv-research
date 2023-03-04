@@ -60,6 +60,17 @@ enum class EncounterType
 	Might,
 };
 
+enum SizeType : uint8_t
+{
+	RANDOM = 0,
+	XS = 1,
+	S = 2,
+	M = 3,
+	L = 4,
+	XL = 5,
+	VALUE = 6,
+};
+
 class EncounterTera9
 {
 public:
@@ -114,7 +125,8 @@ public:
 				nature = data[0x44];
 				memcpy(iv, data + 0x45, sizeof(iv));
 				iv_fixed = !!data[0x4B];
-				scale = data[0x4C];
+				scale_type = data[0x4C];
+				scale = data[0x4D];
 			}
 			break;
 		}
@@ -146,6 +158,7 @@ public:
 	uint8_t nature;
 	int8_t iv[6];
 	bool iv_fixed;
+	uint8_t scale_type;
 	uint8_t scale;
 
 	EncounterType type;

@@ -192,9 +192,26 @@ void RaidCalc::on_buttonFindSeeds_clicked()
     finder.nature = ui.comboBoxNature->currentData().toUInt();
     finder.gender = ui.comboBoxGender->currentIndex();
     for (size_t i = 0; i < _countof(min_iv_widgets); ++i)
+    {
         finder.min_iv[i] = min_iv_widgets[i]->value();
-    for (size_t i = 0; i < _countof(max_iv_widgets); ++i)
         finder.max_iv[i] = max_iv_widgets[i]->value();
+        if (finder.min_iv[i] > finder.max_iv[i])
+        {
+            QMessageBox::critical(this, "Error", "Min IV value must be smaller than max IV value.");
+            return;
+        }
+    }
+    finder.min_height = ui.spinBoxMinHeight->value();
+    finder.max_height = ui.spinBoxMaxHeight->value();
+    finder.min_weight = ui.spinBoxMinWeight->value();
+    finder.max_weight = ui.spinBoxMaxWeight->value();
+    finder.min_scale = ui.spinBoxMinScale->value();
+    finder.max_scale = ui.spinBoxMaxScale->value();
+    if (finder.min_height > finder.max_height || finder.min_weight > finder.max_weight || finder.min_scale > finder.max_scale)
+    {
+        QMessageBox::critical(this, "Error", "Min value must be smaller than max value.");
+        return;
+    }
     finder.item_filters_active = ui.checkboxItemFilters->isChecked();
     finder.drop_threshold = ui.spinBoxMinItemsSum->value();
     itemFilters->update_seed_finder(finder);
@@ -240,6 +257,12 @@ void RaidCalc::on_buttonResetPokemonFilters_clicked()
         widget->setValue(0);
     for (auto& widget : max_iv_widgets)
         widget->setValue(31);
+    ui.spinBoxMinHeight->setValue(0);
+    ui.spinBoxMinWeight->setValue(0);
+    ui.spinBoxMinScale->setValue(0);
+    ui.spinBoxMaxHeight->setValue(255);
+    ui.spinBoxMaxWeight->setValue(255);
+    ui.spinBoxMaxScale->setValue(255);
 }
 
 void RaidCalc::on_buttonMaxIV_clicked()
@@ -419,6 +442,12 @@ void RaidCalc::on_comboBoxStars_currentIndexChanged(int index)
                 min_iv_widgets[i]->setValue(info.iv[i]);
             for (size_t i = 0; i < _countof(max_iv_widgets); ++i)
                 max_iv_widgets[i]->setValue(info.iv[i]);
+            ui.spinBoxMinHeight->setValue(0);
+            ui.spinBoxMinWeight->setValue(0);
+            ui.spinBoxMinScale->setValue(0);
+            ui.spinBoxMaxHeight->setValue(255);
+            ui.spinBoxMaxWeight->setValue(255);
+            ui.spinBoxMaxScale->setValue(255);
         }
         else
         {

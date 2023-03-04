@@ -29,54 +29,10 @@
          <string>Basic Parameters</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="5" column="1">
-          <widget class="QComboBox" name="comboBoxThreads"/>
-         </item>
-         <item row="1" column="1">
-          <widget class="QComboBox" name="comboBoxEvent">
-           <property name="maxVisibleItems">
-            <number>20</number>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="labelStage">
-           <property name="text">
-            <string>Story progress:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QLineEdit" name="editMinSeed">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>00000000</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="labelGame">
            <property name="text">
             <string>Game:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="labelEvent">
-           <property name="text">
-            <string>Event:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="labelMinSeed">
-           <property name="text">
-            <string>Min seed:</string>
            </property>
           </widget>
          </item>
@@ -87,10 +43,51 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="labelStars">
+         <item row="7" column="1">
+          <widget class="QLineEdit" name="editMaxSeed">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
-            <string>Stars:</string>
+            <string>FFFFFFFF</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="comboBoxGame">
+           <item>
+            <property name="text">
+             <string>Scarlet</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Violet</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="labelMinSeed">
+           <property name="text">
+            <string>Min seed:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="comboBoxEvent">
+           <property name="maxVisibleItems">
+            <number>20</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="comboBoxEventGroup">
+           <property name="enabled">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -136,7 +133,21 @@
            </item>
           </widget>
          </item>
-         <item row="8" column="0" colspan="2">
+         <item row="5" column="0">
+          <widget class="QLabel" name="labelThreads">
+           <property name="text">
+            <string>Threads:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="labelStars">
+           <property name="text">
+            <string>Stars:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0" colspan="2">
           <widget class="QPushButton" name="buttonFindSeeds">
            <property name="minimumSize">
             <size>
@@ -146,13 +157,6 @@
            </property>
            <property name="text">
             <string>Find Seeds</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="labelThreads">
-           <property name="text">
-            <string>Threads:</string>
            </property>
           </widget>
          </item>
@@ -188,8 +192,8 @@
            </item>
           </widget>
          </item>
-         <item row="7" column="1">
-          <widget class="QLineEdit" name="editMaxSeed">
+         <item row="6" column="1">
+          <widget class="QLineEdit" name="editMinSeed">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -197,22 +201,15 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>FFFFFFFF</string>
+            <string>00000000</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="comboBoxGame">
-           <item>
-            <property name="text">
-             <string>Scarlet</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Violet</string>
-            </property>
-           </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="labelEvent">
+           <property name="text">
+            <string>Event:</string>
+           </property>
           </widget>
          </item>
          <item row="2" column="0">
@@ -222,12 +219,28 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="QComboBox" name="comboBoxEventGroup">
-           <property name="enabled">
-            <bool>true</bool>
+         <item row="3" column="0">
+          <widget class="QLabel" name="labelStage">
+           <property name="text">
+            <string>Story progress:</string>
            </property>
           </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QComboBox" name="comboBoxThreads"/>
+         </item>
+         <item row="8" column="0">
+          <spacer name="spacer4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>
@@ -238,28 +251,141 @@
          <string>Pokémon Filters</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="1" column="2">
-          <widget class="QLabel" name="labelHP">
+         <item row="1" column="0">
+          <widget class="QLabel" name="labelSpecies">
            <property name="text">
-            <string>HP:</string>
+            <string>Species:</string>
            </property>
           </widget>
          </item>
-         <item row="9" column="0" colspan="2">
-          <widget class="QPushButton" name="buttonResetPokemonFilters">
+         <item row="1" column="6">
+          <widget class="QLabel" name="labelSep1">
            <property name="text">
-            <string>Reset Filters</string>
+            <string>-</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="6">
+          <widget class="QLabel" name="labelSep5">
+           <property name="text">
+            <string>-</string>
            </property>
           </widget>
          </item>
          <item row="7" column="4">
+          <widget class="QLabel" name="labelSpe">
+           <property name="text">
+            <string>Spe:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="5">
+          <widget class="QSpinBox" name="spinBoxMinAtk">
+           <property name="maximum">
+            <number>31</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="3">
+          <widget class="QSpinBox" name="spinBoxMaxScale">
+           <property name="maximum">
+            <number>255</number>
+           </property>
+           <property name="value">
+            <number>255</number>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="labelNature">
+           <property name="text">
+            <string>Nature:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="4">
+          <widget class="QLabel" name="labelSpA">
+           <property name="text">
+            <string>SpA:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="7">
+          <widget class="QSpinBox" name="spinBoxMaxDef">
+           <property name="maximum">
+            <number>31</number>
+           </property>
+           <property name="value">
+            <number>31</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="5">
+          <widget class="QSpinBox" name="spinBoxMinDef">
+           <property name="maximum">
+            <number>31</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="4">
+          <widget class="QLabel" name="labelSpD">
+           <property name="text">
+            <string>SpD:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="4" colspan="4">
+          <widget class="QPushButton" name="buttonMaxIV">
+           <property name="text">
+            <string>Max IV</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="4">
+          <widget class="QLabel" name="labelAtk">
+           <property name="text">
+            <string>Atk:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="6">
           <widget class="QLabel" name="labelSep6">
            <property name="text">
             <string>-</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="5">
+         <item row="7" column="0">
+          <widget class="QLabel" name="labelGender">
+           <property name="text">
+            <string>Gender:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="5">
+          <widget class="QSpinBox" name="spinBoxMinHP">
+           <property name="maximum">
+            <number>31</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="6">
+          <widget class="QLabel" name="labelSep2">
+           <property name="text">
+            <string>-</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="7">
           <widget class="QSpinBox" name="spinBoxMaxAtk">
            <property name="maximum">
             <number>31</number>
@@ -269,22 +395,15 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="4">
-          <widget class="QLabel" name="labelSep4">
+         <item row="0" column="7">
+          <widget class="QLabel" name="labelMaxIV">
            <property name="text">
-            <string>-</string>
+            <string>Max IV</string>
            </property>
           </widget>
          </item>
-         <item row="7" column="2">
-          <widget class="QLabel" name="labelSpe">
-           <property name="text">
-            <string>Spe:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="3">
-          <widget class="QSpinBox" name="spinBoxMinSpA">
+         <item row="7" column="5">
+          <widget class="QSpinBox" name="spinBoxMinSpe">
            <property name="maximum">
             <number>31</number>
            </property>
@@ -293,10 +412,24 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="labelAbility">
+         <item row="5" column="6">
+          <widget class="QLabel" name="labelSep4">
            <property name="text">
-            <string>Ability:</string>
+            <string>-</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0">
+          <widget class="QLabel" name="labelWeight">
+           <property name="text">
+            <string>Weight:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="6">
+          <widget class="QLabel" name="labelSep3">
+           <property name="text">
+            <string>-</string>
            </property>
           </widget>
          </item>
@@ -308,71 +441,13 @@
           </widget>
          </item>
          <item row="4" column="4">
-          <widget class="QLabel" name="labelSep3">
-           <property name="text">
-            <string>-</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2">
-          <widget class="QLabel" name="labelSpA">
-           <property name="text">
-            <string>SpA:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="4">
-          <widget class="QLabel" name="labelSep5">
-           <property name="text">
-            <string>-</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="labelNature">
-           <property name="text">
-            <string>Nature:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="labelSpecies">
-           <property name="text">
-            <string>Species:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QComboBox" name="comboBoxNature"/>
-         </item>
-         <item row="4" column="2">
           <widget class="QLabel" name="labelDef">
            <property name="text">
             <string>Def:</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="3">
-          <widget class="QSpinBox" name="spinBoxMinAtk">
-           <property name="maximum">
-            <number>31</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="3">
-          <widget class="QSpinBox" name="spinBoxMinDef">
-           <property name="maximum">
-            <number>31</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="5">
+         <item row="5" column="7">
           <widget class="QSpinBox" name="spinBoxMaxSpA">
            <property name="maximum">
             <number>31</number>
@@ -382,70 +457,14 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="5">
-          <widget class="QSpinBox" name="spinBoxMaxDef">
-           <property name="maximum">
-            <number>31</number>
-           </property>
-           <property name="value">
-            <number>31</number>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="5">
-          <widget class="QLabel" name="labelMaxIV">
+         <item row="1" column="4">
+          <widget class="QLabel" name="labelHP">
            <property name="text">
-            <string>Max IV</string>
+            <string>HP:</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
-          <widget class="QComboBox" name="comboBoxShiny">
-           <item>
-            <property name="text">
-             <string>Any</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Yes</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>No</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="6" column="5">
-          <widget class="QSpinBox" name="spinBoxMaxSpD">
-           <property name="maximum">
-            <number>31</number>
-           </property>
-           <property name="value">
-            <number>31</number>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QLabel" name="labelAtk">
-           <property name="text">
-            <string>Atk:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QComboBox" name="comboBoxSpecies"/>
-         </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="labelGender">
-           <property name="text">
-            <string>Gender:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="5">
+         <item row="7" column="7">
           <widget class="QSpinBox" name="spinBoxMaxSpe">
            <property name="maximum">
             <number>31</number>
@@ -455,11 +474,29 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
-          <widget class="QComboBox" name="comboBoxAbility"/>
+         <item row="5" column="0">
+          <widget class="QLabel" name="labelAbility">
+           <property name="text">
+            <string>Ability:</string>
+           </property>
+          </widget>
          </item>
-         <item row="1" column="5">
-          <widget class="QSpinBox" name="spinBoxMaxHP">
+         <item row="10" column="1">
+          <widget class="QSpinBox" name="spinBoxMinScale">
+           <property name="maximum">
+            <number>255</number>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QLabel" name="labelHeight">
+           <property name="text">
+            <string>Height:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="7">
+          <widget class="QSpinBox" name="spinBoxMaxSpD">
            <property name="maximum">
             <number>31</number>
            </property>
@@ -468,27 +505,10 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="2">
-          <widget class="QLabel" name="labelSpD">
-           <property name="text">
-            <string>SpD:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="3">
-          <widget class="QSpinBox" name="spinBoxMinSpe">
+         <item row="9" column="1">
+          <widget class="QSpinBox" name="spinBoxMinWeight">
            <property name="maximum">
-            <number>31</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="2" colspan="4">
-          <widget class="QPushButton" name="buttonMaxIV">
-           <property name="text">
-            <string>Max IV</string>
+            <number>255</number>
            </property>
           </widget>
          </item>
@@ -499,7 +519,117 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="1">
+         <item row="1" column="7">
+          <widget class="QSpinBox" name="spinBoxMaxHP">
+           <property name="maximum">
+            <number>31</number>
+           </property>
+           <property name="value">
+            <number>31</number>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QSpinBox" name="spinBoxMinHeight">
+           <property name="maximum">
+            <number>255</number>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="5">
+          <widget class="QSpinBox" name="spinBoxMinSpD">
+           <property name="maximum">
+            <number>31</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="5">
+          <widget class="QSpinBox" name="spinBoxMinSpA">
+           <property name="maximum">
+            <number>31</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5">
+          <widget class="QLabel" name="labelMinIV">
+           <property name="text">
+            <string>Min IV</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
+          <widget class="QLabel" name="labelScale">
+           <property name="text">
+            <string>Scale:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="3">
+          <widget class="QSpinBox" name="spinBoxMaxWeight">
+           <property name="maximum">
+            <number>255</number>
+           </property>
+           <property name="value">
+            <number>255</number>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="3">
+          <widget class="QSpinBox" name="spinBoxMaxHeight">
+           <property name="maximum">
+            <number>255</number>
+           </property>
+           <property name="value">
+            <number>255</number>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="2">
+          <widget class="QLabel" name="labelSep7">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>-</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="2">
+          <widget class="QLabel" name="labelSep8">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>-</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="2">
+          <widget class="QLabel" name="labelSep9">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>-</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1" colspan="3">
           <widget class="QComboBox" name="comboBoxGender">
            <item>
             <property name="text">
@@ -523,62 +653,43 @@
            </item>
           </widget>
          </item>
-         <item row="0" column="3">
-          <widget class="QLabel" name="labelMinIV">
-           <property name="text">
-            <string>Min IV</string>
-           </property>
-          </widget>
+         <item row="6" column="1" colspan="3">
+          <widget class="QComboBox" name="comboBoxNature"/>
          </item>
-         <item row="1" column="4">
-          <widget class="QLabel" name="labelSep1">
-           <property name="text">
-            <string>-</string>
-           </property>
-          </widget>
+         <item row="5" column="1" colspan="3">
+          <widget class="QComboBox" name="comboBoxAbility"/>
          </item>
-         <item row="1" column="3">
-          <widget class="QSpinBox" name="spinBoxMinHP">
-           <property name="maximum">
-            <number>31</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="4">
-          <widget class="QLabel" name="labelSep2">
-           <property name="text">
-            <string>-</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
+         <item row="4" column="1" colspan="3">
           <widget class="QComboBox" name="comboBoxTeraType"/>
          </item>
-         <item row="6" column="3">
-          <widget class="QSpinBox" name="spinBoxMinSpD">
-           <property name="maximum">
-            <number>31</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
+         <item row="3" column="1" colspan="3">
+          <widget class="QComboBox" name="comboBoxShiny">
+           <item>
+            <property name="text">
+             <string>Any</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Yes</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>No</string>
+            </property>
+           </item>
           </widget>
          </item>
-         <item row="8" column="0">
-          <spacer name="spacer4">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
+         <item row="1" column="1" colspan="3">
+          <widget class="QComboBox" name="comboBoxSpecies"/>
+         </item>
+         <item row="11" column="0" colspan="4">
+          <widget class="QPushButton" name="buttonResetPokemonFilters">
+           <property name="text">
+            <string>Reset Filters</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>1</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
         </layout>
        </widget>

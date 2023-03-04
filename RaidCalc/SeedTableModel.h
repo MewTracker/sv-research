@@ -43,7 +43,7 @@ public:
 
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override
 	{
-		return 16;
+		return 19;
 	}
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
@@ -52,7 +52,7 @@ public:
 			return QVariant();
 		if (orientation == Qt::Vertical)
 			return section + 1;
-		if (section >= 16)
+		if (section >= 19)
 			return QVariant();
 		static const char* headers[] =
 		{
@@ -71,6 +71,9 @@ public:
 			"Ability",
 			"Nature",
 			"Gender",
+			"Height",
+			"Weight",
+			"Scale",
 			"Drops",
 		};
 		return headers[section];
@@ -109,6 +112,12 @@ public:
 		case 14:
 			return gender_names[info.gender];
 		case 15:
+			return info.height;
+		case 16:
+			return info.weight;
+		case 17:
+			return info.scale;
+		case 18:
 			return info.drops;
 		default:
 			return QVariant();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>808</width>
-    <height>398</height>
+    <height>457</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -183,89 +183,6 @@
       <string>Pokémon Info</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2" columnminimumwidth="80,100">
-      <item row="3" column="0">
-       <widget class="QLabel" name="labelPID">
-        <property name="text">
-         <string>PID:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelSpecies">
-        <property name="text">
-         <string>Species:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="labelAbility">
-        <property name="text">
-         <string>Ability:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="13" column="1">
-       <widget class="QLabel" name="infoMove3">
-        <property name="text">
-         <string>Invalid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QLabel" name="infoAbility">
-        <property name="text">
-         <string>Invalid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="16" column="0" colspan="2">
-       <widget class="QLabel" name="infoIV">
-        <property name="text">
-         <string>0/0/0/0/0/0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="15" column="0" colspan="2">
-       <widget class="QLabel" name="labelIV">
-        <property name="text">
-         <string>HP/Atk/Def/SpA/SpD/Spe:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="labelTeraType">
-        <property name="text">
-         <string>Tera type:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="17" column="1">
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="12" column="1">
-       <widget class="QLabel" name="infoMove2">
-        <property name="text">
-         <string>Invalid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="labelEC">
-        <property name="text">
-         <string>EC:</string>
-        </property>
-       </widget>
-      </item>
       <item row="6" column="1">
        <widget class="QLabel" name="infoGender">
         <property name="text">
@@ -273,17 +190,10 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLabel" name="infoEC">
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelDifficulty">
         <property name="text">
-         <string>Invalid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLabel" name="infoPID">
-        <property name="text">
-         <string>Invalid</string>
+         <string>Difficulty:</string>
         </property>
        </widget>
       </item>
@@ -301,24 +211,38 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="labelTeraType">
+        <property name="text">
+         <string>Tera type:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelPID">
+        <property name="text">
+         <string>PID:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelSpecies">
+        <property name="text">
+         <string>Species:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLabel" name="infoAbility">
+        <property name="text">
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
       <item row="14" column="1">
        <widget class="QLabel" name="infoMove4">
         <property name="text">
          <string>Invalid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="1">
-       <widget class="QLabel" name="infoMove1">
-        <property name="text">
-         <string>Invalid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <widget class="QLabel" name="labelMoves">
-        <property name="text">
-         <string>Moves:</string>
         </property>
        </widget>
       </item>
@@ -336,10 +260,38 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="labelGender">
+      <item row="3" column="1">
+       <widget class="QLabel" name="infoPID">
         <property name="text">
-         <string>Gender:</string>
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="0">
+       <widget class="QLabel" name="labelHeight">
+        <property name="text">
+         <string>Height:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <widget class="QLabel" name="infoMove1">
+        <property name="text">
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="infoDifficulty">
+        <property name="text">
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="labelMoves">
+        <property name="text">
+         <string>Moves:</string>
         </property>
        </widget>
       </item>
@@ -350,6 +302,41 @@
         </property>
        </widget>
       </item>
+      <item row="15" column="0" colspan="2">
+       <widget class="QLabel" name="labelIV">
+        <property name="text">
+         <string>HP/Atk/Def/SpA/SpD/Spe:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="labelAbility">
+        <property name="text">
+         <string>Ability:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="infoEC">
+        <property name="text">
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="0" colspan="2">
+       <widget class="QLabel" name="infoIV">
+        <property name="text">
+         <string>0/0/0/0/0/0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="1">
+       <widget class="QLabel" name="infoMove2">
+        <property name="text">
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="1">
        <widget class="QLabel" name="infoShiny">
         <property name="text">
@@ -357,15 +344,70 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelDifficulty">
+      <item row="18" column="0">
+       <widget class="QLabel" name="labelWeight">
         <property name="text">
-         <string>Difficulty:</string>
+         <string>Weight:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="infoDifficulty">
+      <item row="20" column="1">
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelEC">
+        <property name="text">
+         <string>EC:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="labelGender">
+        <property name="text">
+         <string>Gender:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="1">
+       <widget class="QLabel" name="infoMove3">
+        <property name="text">
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="19" column="0">
+       <widget class="QLabel" name="labelScale">
+        <property name="text">
+         <string>Scale:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="1">
+       <widget class="QLabel" name="infoHeight">
+        <property name="text">
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="18" column="1">
+       <widget class="QLabel" name="infoWeight">
+        <property name="text">
+         <string>Invalid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="19" column="1">
+       <widget class="QLabel" name="infoScale">
         <property name="text">
          <string>Invalid</string>
         </property>

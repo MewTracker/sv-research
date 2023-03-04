@@ -123,19 +123,22 @@ void SeedViewerDialog::display_seed(SeedFinder::BasicParams params, uint32_t see
 void SeedViewerDialog::set_invalid_state()
 {
 	QLabel* labels[] = {
-			ui.infoSpecies,
-			ui.infoDifficulty,
-			ui.infoEC,
-			ui.infoPID,
-			ui.infoShiny,
-			ui.infoTeraType,
-			ui.infoGender,
-			ui.infoNature,
-			ui.infoAbility,
-			ui.infoMove1,
-			ui.infoMove2,
-			ui.infoMove3,
-			ui.infoMove4,
+		ui.infoSpecies,
+		ui.infoDifficulty,
+		ui.infoEC,
+		ui.infoPID,
+		ui.infoShiny,
+		ui.infoTeraType,
+		ui.infoGender,
+		ui.infoNature,
+		ui.infoAbility,
+		ui.infoMove1,
+		ui.infoMove2,
+		ui.infoMove3,
+		ui.infoMove4,
+		ui.infoHeight,
+		ui.infoWeight,
+		ui.infoScale,
 	};
 	for (auto label : labels)
 		label->setText("Invalid");
@@ -183,6 +186,9 @@ void SeedViewerDialog::refresh_ui()
 	QLabel* moves[] = { ui.infoMove1, ui.infoMove2, ui.infoMove3, ui.infoMove4 };
 	for (size_t i = 0; i < _countof(moves); ++i)
 		moves[i]->setText(move_names[info.moves[i]]);
+	ui.infoHeight->setText(QString::number(info.height));
+	ui.infoWeight->setText(QString::number(info.weight));
+	ui.infoScale->setText(QString::number(info.scale));
 	ui.listRewards->clear();
 	auto rewards = finder.get_all_rewards(current_seed);
 	for (auto &reward : rewards)

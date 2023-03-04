@@ -33,6 +33,9 @@ public:
 		uint8_t nature;
 		uint8_t tera_type;
 		uint8_t stars;
+		uint8_t height;
+		uint8_t weight;
+		uint8_t scale;
 	};
 
 	struct Reward
@@ -97,6 +100,12 @@ public:
 	int32_t gender;
 	int8_t min_iv[6];
 	int8_t max_iv[6];
+	uint8_t min_height;
+	uint8_t max_height;
+	uint8_t min_weight;
+	uint8_t max_weight;
+	uint8_t min_scale;
+	uint8_t max_scale;
 
 	// Query - Items
 	bool item_filters_active;
@@ -148,7 +157,9 @@ private:
 	bool use_pokemon_filters() const;
 	bool use_item_filters() const;
 	bool use_advanced_filters() const;
+	bool use_size_filters() const;
 	void find_seeds_thread();
+	void init_value_map(bool map[256], uint8_t min_val, uint8_t max_val);
 	bool compute_event_encounter_lookups();
 	const EncounterTera9* get_encounter(uint32_t seed) const;
 	const EncounterTera9* get_encounter_dist(uint32_t seed) const;
@@ -173,11 +184,15 @@ private:
 	HANDLE hFinderThread;
 	int32_t item_filters_count;
 	int32_t event_rand_rate;
+	bool size_filters_in_use;
 	std::vector<int8_t> target_drops;
 	std::vector<int8_t> target_species;
 	std::vector<const EncounterTera9*> event_encounter_lookup;
 	alignas(16) int8_t min_iv_vec[16];
 	alignas(16) int8_t max_iv_vec[16];
+	bool height_map[256];
+	bool weight_map[256];
+	bool scale_map[256];
 
 	static EncounterLists encounters;
 	static EncounterListsEvents encounters_dist;
@@ -520,14 +535,26 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 		if (enc_tera_type != tera_type - 1)
 			return false;
 	}
-	uint32_t current_ability = get_ability(gen, enc->ability, *enc->personal_info);
+	PersonalInfo9SV *personal_info = enc->personal_info;
+	uint32_t current_ability = get_ability(gen, enc->ability, *personal_info);
 	if (ability && current_ability != ability)
 		return false;
-	uint32_t current_gender = get_gender(gen, enc->personal_info->gender);
+	uint32_t current_gender = get_gender(gen, personal_info->gender);
 	if (gender && current_gender != gender - 1)
 		return false;
 	uint32_t current_nature = get_nature(gen, enc->species, enc->form);
 	if (nature && current_nature != nature - 1)
+		return false;
+	if (!size_filters_in_use)
+		return true;
+	uint8_t height = gen.next_byte();
+	if (!height_map[height])
+		return false;
+	uint8_t weight = gen.next_byte();
+	if (!weight_map[weight])
+		return false;
+	uint8_t scale = gen.next_byte();
+	if (!scale_map[scale])
 		return false;
 	return true;
 }

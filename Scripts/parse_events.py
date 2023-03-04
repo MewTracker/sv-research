@@ -83,8 +83,8 @@ def parse_event(path):
                 boss['TalentValue']['SPD'],
                 boss['TalentValue']['SPE'],
                 0 if boss['TalentType'] == 0 else 1,
-                boss['ScaleValue'],
-                0)
+                boss['ScaleType'],
+                boss['ScaleValue'])
             event_might += packed
             might_count += 1
         else:

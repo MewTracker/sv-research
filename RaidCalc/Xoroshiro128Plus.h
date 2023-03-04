@@ -130,6 +130,11 @@ public:
         return (range * (n * (*(float *)&inv_64_f))) + bias;
     }
 
+	FORCEINLINE uint8_t next_byte()
+	{
+		return (uint8_t)(next_int(0x81) + next_int(0x80));
+	}
+
 private:
     uint64_t s0, s1;
 };

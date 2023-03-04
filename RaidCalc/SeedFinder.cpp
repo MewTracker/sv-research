@@ -32,15 +32,25 @@ SeedFinder::SeedFinder() :
 	nature(0),
 	gender(0),
 	shiny(0),
+	min_height(0),
+	max_height(255),
+	min_weight(0),
+	max_weight(255),
+	min_scale(0),
+	max_scale(255),
 	item_filters_active(false),
 	drop_threshold(0),
 	item_filters_count(0),
-	event_rand_rate(0)
+	event_rand_rate(0),
+	size_filters_in_use(false)
 {
 	memset(min_iv, 0, sizeof(min_iv));
 	memset(max_iv, 0, sizeof(max_iv));
 	memset(min_iv_vec, 0, sizeof(min_iv_vec));
 	memset(max_iv_vec, 0, sizeof(max_iv_vec));
+	memset(height_map, 0, sizeof(height_map));
+	memset(weight_map, 0, sizeof(weight_map));
+	memset(scale_map, 0, sizeof(scale_map));
 	target_drops.resize(20000 + 1);
 	target_species.resize(PersonalTable9SV::instance().size());
 }
@@ -539,11 +549,21 @@ DWORD WINAPI SeedFinder::find_seeds_thread_wrapper(LPVOID Parameter)
 	return 0;
 }
 
+void SeedFinder::init_value_map(bool map[256], uint8_t min_val, uint8_t max_val)
+{
+	for (size_t i = 0; i < 256; ++i)
+		map[i] = i >= min_val && i <= max_val;
+}
+
 bool SeedFinder::find_seeds()
 {
 	seeds.clear();
 	memcpy(min_iv_vec, min_iv, sizeof(min_iv));
 	memcpy(max_iv_vec, max_iv, sizeof(max_iv));
+	init_value_map(height_map, min_height, max_height);
+	init_value_map(weight_map, min_weight, max_weight);
+	init_value_map(scale_map, min_scale, max_scale);
+	size_filters_in_use = use_size_filters();
 	if (species != 0)
 	{
 		memset(target_species.data(), 0, target_species.size());
@@ -611,9 +631,14 @@ void SeedFinder::set_drop_filter(int item_id, bool value)
 	}
 }
 
+bool SeedFinder::use_size_filters() const
+{
+	return min_height != 0 || max_height != 255 || min_weight != 0 || max_weight != 255 || min_scale != 0 || max_scale != 255;
+}
+
 bool SeedFinder::use_advanced_filters() const
 {
-	return tera_type != 0 || ability != 0 || nature != 0 || gender != 0;
+	return tera_type != 0 || ability != 0 || nature != 0 || gender != 0 || use_size_filters();
 }
 
 bool SeedFinder::use_iv_filters() const
@@ -682,6 +707,35 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 		info.ability = (uint16_t)get_ability(gen, enc->ability, *enc->personal_info);
 		info.gender = enc->gender;
 		info.nature = enc->nature;
+		info.height = gen.next_byte();
+		info.weight = gen.next_byte();
+		switch (enc->scale_type)
+		{
+		case SizeType::RANDOM:
+			info.scale = gen.next_byte();
+			break;
+		case SizeType::XS:
+			info.scale = (uint8_t)gen.next_int(0x10);
+			break;
+		case SizeType::S:
+			info.scale = (uint8_t)(gen.next_int(0x20) + 0x10);
+			break;
+		case SizeType::M:
+			info.scale = (uint8_t)(gen.next_int(0xA0) + 0x30);
+			break;
+		case SizeType::L:
+			info.scale = (uint8_t)(gen.next_int(0x20) + 0xD0);
+			break;
+		case SizeType::XL:
+			info.scale = (uint8_t)(gen.next_int(0x10) + 0xF0);
+			break;
+		case SizeType::VALUE:
+			info.scale = enc->scale;
+			break;
+		default:
+			info.scale = 0;
+			break;
+		}
 	}
 	else
 	{
@@ -706,6 +760,9 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 		info.ability = (uint16_t)get_ability(gen, enc->ability, *enc->personal_info);
 		info.gender = (uint8_t)get_gender(gen, enc->personal_info->gender);
 		info.nature = (uint8_t)get_nature(gen, info.species, enc->form);
+		info.height = gen.next_byte();
+		info.weight = gen.next_byte();
+		info.scale = gen.next_byte();
 	}
 	if (use_item_filters())
 		info.drops = event_id < 0 ? get_rewards<EncounterType::Gem>(enc, seed) : get_rewards<EncounterType::Dist>(enc, seed);
