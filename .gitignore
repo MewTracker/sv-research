@@ -30,3 +30,4 @@
 *.tlog
 *.user
 *.ini
+*.pyc

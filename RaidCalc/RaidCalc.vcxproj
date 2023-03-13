@@ -126,6 +126,7 @@
     <QtMoc Include="EncounterEntryModel.h" />
     <ClInclude Include="EncounterTera9.h" />
     <QtMoc Include="ItemFilterDialog.h" />
+    <ClInclude Include="EventNames.inc.h" />
     <ClInclude Include="FormUtils.h" />
     <ClInclude Include="PersonalInfo9SV.h" />
     <ClInclude Include="PersonalTable9SV.h" />
@@ -133,6 +134,7 @@
     <ClInclude Include="RaidFixedRewards.inc.h" />
     <ClInclude Include="RaidLotteryRewards.inc.h" />
     <ClInclude Include="RaidRewards.h" />
+    <ClInclude Include="RewardInfo.inc.h" />
     <ClInclude Include="SeedFinder.h" />
     <QtMoc Include="SeedTableModel.h" />
     <QtMoc Include="SeedViewerDialog.h" />

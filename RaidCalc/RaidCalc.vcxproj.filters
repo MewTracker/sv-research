@@ -111,6 +111,12 @@
     <ClInclude Include="SpeciesConverter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EventNames.inc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RewardInfo.inc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ItemFilterDialog.ui">

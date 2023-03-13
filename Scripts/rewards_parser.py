@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import os
 import json
+from pathlib import Path
+from unidecode import unidecode
 
 all_items = set()
+
 
 def get_fixed_reward_items(record, max_column_count):
     items = []
@@ -71,33 +74,49 @@ def write_cpp(type_name, variable_name, is_lottery, rows, path):
     return max_column_count
 
 
-if __name__ == "__main__":
-    base_dir = os.path.dirname(os.path.realpath(__file__))
-    events_dir = os.path.join(base_dir, 'events')
-    events = [f.path for f in os.scandir(events_dir) if f.is_dir()]
+def generate_possible_rewards(base_dir):
+    with open(base_dir / 'resources' / 'text_Items_en.txt', encoding='utf-8') as f:
+        item_names = f.readlines()
+    items = list(all_items)
+    items.sort()
+    items = items[1:]
+    header = 'static const RewardInfo reward_info[] =\n{\n'
+    for item_id in items:
+        if item_id == 10000:
+            item_name = 'Material'
+        elif item_id == 20000:
+            item_name = 'Tera Shard'
+        else:
+            item_name = unidecode(item_names[item_id].strip())
+        header += '    { %d, "%s" },\n' % (item_id, item_name)
+    header += '};\n'
+    return header
+
+
+def parse_rewards():
+    base_dir = Path(os.path.dirname(os.path.realpath(__file__)))
+    events_dir = base_dir / 'events'
+    events = [Path(f.path) for f in os.scandir(events_dir) if f.is_dir()]
     events.sort()
-    with open(os.path.join(base_dir, 'base', 'fixed_reward_item_array.json'), 'r') as f:
+    with open(base_dir / 'resources' / 'fixed_reward_item_array.json', 'r') as f:
         fixed = json.load(f)
     max_fixed_columns_base = get_max_used_column_count(fixed, 15)
     for event_path in events:
-        with open(os.path.join(event_path, 'fixed_reward_item_array.json'), 'r') as f:
+        with open(event_path / 'fixed_reward_item_array.json', 'r') as f:
             fixed.extend(json.load(f)['Table'])
-    with open(os.path.join(base_dir, 'base', 'lottery_reward_item_array.json'), 'r') as f:
+    with open(base_dir / 'resources' / 'lottery_reward_item_array.json', 'r') as f:
         lottery = json.load(f)
     max_lottery_columns_base = get_max_used_column_count(lottery, 30)
     for event_path in events:
-        with open(os.path.join(event_path, 'lottery_reward_item_array.json'), 'r') as f:
+        with open(event_path / 'lottery_reward_item_array.json', 'r') as f:
             lottery.extend(json.load(f)['Table'])
 
-    raidcalc_dir = os.path.join(base_dir, '..', 'RaidCalc')
-    max_fixed_columns_events = write_cpp('RaidFixedRewards', 'fixed_rewards', False, fixed, os.path.join(raidcalc_dir, 'RaidFixedRewards.inc.h'))
-    max_lottery_columns_events = write_cpp('RaidLotteryRewards', 'lottery_rewards', True, lottery, os.path.join(raidcalc_dir, 'RaidLotteryRewards.inc.h'))
+    raidcalc_dir = base_dir / '..' / 'RaidCalc'
+    max_fixed_columns_events = write_cpp('RaidFixedRewards', 'fixed_rewards', False, fixed, raidcalc_dir / 'RaidFixedRewards.inc.h')
+    max_lottery_columns_events = write_cpp('RaidLotteryRewards', 'lottery_rewards', True, lottery, raidcalc_dir / 'RaidLotteryRewards.inc.h')
+    with open(raidcalc_dir / 'RewardInfo.inc.h', 'w') as f:
+        f.write(generate_possible_rewards(base_dir))
     print('Max fixed items columns (base): %d' % max_fixed_columns_base)
     print('Max lottery items columns (base): %d' % max_lottery_columns_base)
     print('Max fixed items columns (events): %d' % max_fixed_columns_events)
     print('Max lottery items columns (events): %d' % max_lottery_columns_events)
-    items = list(all_items)
-    items.sort()
-    items = items[1:]
-    print('Possible rewards: %d' % len(items))
-    print('int[] possible_rewards = { %s };' % ', '.join([str(item) for item in items]))

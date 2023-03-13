@@ -5,7 +5,7 @@
 EncounterDatabaseDialog::EncounterDatabaseDialog(QWidget *parent)
 	: QDialog(parent)
 {
-	ui.setupUi(this);
+    ui.setupUi(this);
     std::set<uint32_t> encounterables;
     std::vector<std::pair<std::string, uint32_t>> filters;
     auto visitor = [&](const EncounterTera9 &enc) { encounterables.insert(enc.species); };
