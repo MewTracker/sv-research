@@ -23,11 +23,11 @@ RaidCalc::RaidCalc(QWidget* parent)
         ui.comboBoxEvent->addItem(event_name);
     std::set<uint32_t> encounterables;
     auto visitor = [&](const EncounterTera9& enc) { encounterables.insert(enc.species); };
-    finder.visit_encounters(-1, visitor);
+    SeedFinder::visit_encounters(-1, visitor);
     create_species_filters(encounterables, species_filters[0]);
     for (int32_t i = 0; i < _countof(event_names); ++i)
     {
-        finder.visit_encounters(i, visitor);
+        SeedFinder::visit_encounters(i, visitor);
         create_species_filters(encounterables, species_filters[i + 1]);
     }
     add_options(ui.comboBoxSpecies, species_filters[0]);
@@ -39,9 +39,11 @@ RaidCalc::RaidCalc(QWidget* parent)
     seedViewer = new SeedViewerDialog(this);
     settings = new SettingsDialog(this, ui.tableSeeds);
     about = new AboutDialog(this);
+    encounterDb = new EncounterDatabaseDialog(this);
     finder_timer = new QTimer(this);
     connect(finder_timer, &QTimer::timeout, this, &RaidCalc::on_finder_timer_timeout);
     connect(ui.actionExit, &QAction::triggered, qApp, &QCoreApplication::quit);
+    connect(encounterDb, &EncounterDatabaseDialog::parameterChangeRequested, this, &RaidCalc::on_parameterChangeRequested);
     SYSTEM_INFO sys_info;
     GetSystemInfo(&sys_info);
     for (uint32_t i = 0; i < sys_info.dwNumberOfProcessors - 1; ++i)
@@ -143,6 +145,7 @@ void RaidCalc::toggle_ui(bool enabled)
     {
         itemFilters->hide();
         seedViewer->hide();
+        encounterDb->hide();
         seedModel.clear();
     }
 }
@@ -334,6 +337,11 @@ void RaidCalc::on_actionAbout_triggered(bool checked)
     about->open();
 }
 
+void RaidCalc::on_actionEncounterDatabase_triggered(bool checked)
+{
+    encounterDb->show();
+}
+
 void RaidCalc::on_tableSeeds_doubleClicked(const QModelIndex& index)
 {
     seedViewer->display_seed(resultParams, seedModel.get_seed(index.row()));
@@ -492,4 +500,21 @@ void RaidCalc::set_event_group_visible(bool visibility)
 {
     ui.labelEventGroup->setVisible(visibility);
     ui.comboBoxEventGroup->setVisible(visibility);
+}
+
+void RaidCalc::on_parameterChangeRequested(EncounterEntry entry, int32_t species)
+{
+    ui.comboBoxGame->setCurrentIndex((int)entry.game);
+    ui.comboBoxEvent->setCurrentIndex(entry.event_id < 0 ? 0 : entry.event_id + 1);
+    if (ui.comboBoxEventGroup->isVisible())
+        select_option(ui.comboBoxEventGroup, entry.event_group);
+    ui.comboBoxStars->setCurrentIndex(entry.stars - 1);
+    if (entry.stars != 7)
+    {
+        SpeciesFilter filter;
+        filter.value = 0;
+        filter.species = species;
+        filter.any_form = 1;
+        select_option(ui.comboBoxSpecies, filter.value);
+    }
 }

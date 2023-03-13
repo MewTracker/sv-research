@@ -10,6 +10,7 @@
 #include "SeedTableModel.h"
 #include "SettingsDialog.h"
 #include "AboutDialog.h"
+#include "EncounterDatabaseDialog.h"
 
 class RaidCalc : public QMainWindow
 {
@@ -29,10 +30,12 @@ public slots:
     void on_actionSeedViewer_triggered(bool checked = false);
     void on_actionSettings_triggered(bool checked = false);
     void on_actionAbout_triggered(bool checked = false);
+    void on_actionEncounterDatabase_triggered(bool checked = false);
     void on_tableSeeds_doubleClicked(const QModelIndex& index);
     void on_comboBoxEvent_currentIndexChanged(int index);
     void on_comboBoxStage_currentIndexChanged(int index);
     void on_comboBoxStars_currentIndexChanged(int index);
+    void on_parameterChangeRequested(EncounterEntry entry, int32_t species);
 
 private:
     static const uint64_t MaxSeeds = 10000000ULL;
@@ -74,6 +77,7 @@ private:
     SeedViewerDialog* seedViewer;
     SettingsDialog* settings;
     AboutDialog* about;
+    EncounterDatabaseDialog* encounterDb;
     QTimer* finder_timer;
     SeedTableModel seedModel;
     SeedFinder finder;

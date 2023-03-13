@@ -810,6 +810,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionSeedViewer"/>
+    <addaction name="actionEncounterDatabase"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -857,6 +858,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionEncounterDatabase">
+   <property name="text">
+    <string>Encounter Database</string>
    </property>
   </action>
  </widget>
