@@ -13,4 +13,5 @@ static const char *event_names[] =
     "Garchomp and Sylveon Spotlight",
     "Pikachu the Unrivaled",
     "Walking Wake and Iron Leaves Spotlight",
+    "Decidueye the Unrivaled",
 };
