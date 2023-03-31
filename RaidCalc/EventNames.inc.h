@@ -15,4 +15,5 @@ static const char *event_names[] =
     "Walking Wake and Iron Leaves Spotlight",
     "Decidueye the Unrivaled",
     "Blissey Spotlight",
+    "Samurott the Unrivaled",
 };

@@ -41,6 +41,7 @@ static const RewardInfo reward_info[] =
     { 174, "Tamato Berry" },
     { 218, "Soothe Bell" },
     { 391, "TM64" },
+    { 415, "TM88" },
     { 418, "TM91" },
     { 565, "Health Feather" },
     { 566, "Muscle Feather" },
