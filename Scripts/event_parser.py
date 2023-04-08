@@ -12,13 +12,23 @@ STAGE_STARS = (
 )
 
 
+def get_info(x):
+    if 'RaidEnemyInfo' in x:
+        return x['RaidEnemyInfo']
+    elif 'Info' in x:
+        return x['Info']
+    else:
+        raise ValueError('Invalid enemy info')
+
+
 def parse_event(path):
+    is_might_event = 'Unrivaled' in path.name
     dist_count = 0
     might_count = 0
     event_dist = bytes()
     event_might = bytes()
     with open(path / 'raid_enemy_array.json', 'r') as f:
-        enemies = [x['RaidEnemyInfo'] for x in json.load(f)['Table']]
+        enemies = [get_info(x) for x in json.load(f)['Table']]
 
     weight_total_s = [[0 for _ in range(4)] for _ in range(11)]
     weight_total_v = [[0 for _ in range(4)] for _ in range(11)]
@@ -27,6 +37,9 @@ def parse_event(path):
             continue
         id = enemy['DeliveryGroupID']
         difficulty = enemy['Difficulty']
+        # This is a hack to support overlapping events
+        if not is_might_event and difficulty == 7:
+            continue
         for stage in range(4):
             if difficulty not in STAGE_STARS[stage]:
                 continue
@@ -41,6 +54,16 @@ def parse_event(path):
         if enemy['Rate'] == 0:
             continue
         boss = enemy['BossPokePara']
+        difficulty = enemy['Difficulty']
+        # This is a hack to support overlapping events
+        if not is_might_event and difficulty == 7:
+            continue
+        if difficulty != 7 and boss['Seikaku'] != 0:
+            raise ValueError("Unexpected nature")
+        if difficulty != 7 and boss['ScaleType'] not in [0, 6]:
+            raise ValueError("Unexpected scale type")
+        if boss['TalentType'] == 0:
+            raise ValueError('Unexpected talent type')
         packed = pack('<HBBBBBBHHHHBBBB',
              boss['DevId'],
              boss['FormId'],
@@ -58,7 +81,6 @@ def parse_event(path):
              enemy['Difficulty'],
              enemy['Rate'])
         id = enemy['DeliveryGroupID']
-        difficulty = enemy['Difficulty']
         for stage in range(4):
             if difficulty not in STAGE_STARS[stage]:
                 packed += pack('<HHHH', 0, 0, 0, 0)
@@ -73,18 +95,18 @@ def parse_event(path):
             if enemy['RomVer'] != 1:
                 weight_min_v[id][stage] += enemy['Rate']
         packed += pack('<QQ', enemy['DropTableFix'], enemy['DropTableRandom'])
+        packed += pack('<BBBBBBBBBB',
+                       25 if boss['Seikaku'] == 0 else boss['Seikaku'] - 1,
+                       boss['TalentValue']['HP'],
+                       boss['TalentValue']['ATK'],
+                       boss['TalentValue']['DEF'],
+                       boss['TalentValue']['SPA'],
+                       boss['TalentValue']['SPD'],
+                       boss['TalentValue']['SPE'],
+                       1 if boss['TalentType'] == 2 else 0,
+                       boss['ScaleType'],
+                       boss['ScaleValue'])
         if difficulty == 7:
-            packed += pack('<BBBBBBBBBB',
-                25 if boss['Seikaku'] == 0 else boss['Seikaku'] - 1,
-                boss['TalentValue']['HP'],
-                boss['TalentValue']['ATK'],
-                boss['TalentValue']['DEF'],
-                boss['TalentValue']['SPA'],
-                boss['TalentValue']['SPD'],
-                boss['TalentValue']['SPE'],
-                0 if boss['TalentType'] == 0 else 1,
-                boss['ScaleType'],
-                boss['ScaleValue'])
             event_might += packed
             might_count += 1
         else:

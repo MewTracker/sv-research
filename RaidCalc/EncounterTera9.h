@@ -75,8 +75,7 @@ class EncounterTera9
 {
 public:
 	static const size_t SizeGem = 0x18;
-	static const size_t SizeDist = 0x44;
-	static const size_t SizeMight = 0x4E;
+	static const size_t SizeDistOrMight = 0x4E;
 
 	struct RandRateData
 	{
@@ -120,14 +119,11 @@ public:
 			}
 			fixed_table_id = *(uint64_t*)&data[0x34];
 			lottery_table_id = *(uint64_t*)&data[0x3C];
-			if (type == EncounterType::Might)
-			{
-				nature = data[0x44];
-				memcpy(iv, data + 0x45, sizeof(iv));
-				iv_fixed = !!data[0x4B];
-				scale_type = data[0x4C];
-				scale = data[0x4D];
-			}
+			nature = data[0x44];
+			memcpy(iv, data + 0x45, sizeof(iv));
+			iv_fixed = !!data[0x4B];
+			scale_type = data[0x4C];
+			scale = data[0x4D];
 			break;
 		}
 	}
@@ -153,8 +149,6 @@ public:
 	RandRateData rand_rate_event[4][2];
 	uint64_t fixed_table_id;
 	uint64_t lottery_table_id;
-
-	// Might
 	uint8_t nature;
 	int8_t iv[6];
 	bool iv_fixed;

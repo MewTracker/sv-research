@@ -165,7 +165,7 @@ private:
 	const EncounterTera9* get_encounter_dist(uint32_t seed) const;
 	FORCEINLINE const EncounterTera9* get_encounter_dist_lookup(uint32_t seed) const;
 
-	static void initialize_event_encounters(const char* file_name, size_t encounter_size, EncounterType type, EncounterListsEvents& lists);
+	static void initialize_event_encounters(const char* file_name, EncounterType type, EncounterListsEvents& lists);
 	static DWORD WINAPI find_seeds_thread_wrapper(LPVOID Parameter);
 	static void compute_fast_lottery_lookups();
 	static void compute_fast_encounter_lookups();
@@ -500,20 +500,31 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 	int8_t ivs[16] = { -1, -1, -1, -1, -1, -1 };
 	if constexpr (f_iv || f_advanced)
 	{
-		for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
+		do
 		{
-			int32_t index;
-			do
+			if constexpr (f_type == EncounterType::Dist)
 			{
-				index = (int32_t)gen.next_int(6);
-			} while (ivs[index] != -1);
-			ivs[index] = 31;
-		}
-		for (size_t i = 0; i < 6; ++i)
-		{
-			if (ivs[i] == -1)
-				ivs[i] = (int8_t)gen.next_int(32);
-		}
+				if (enc->iv_fixed)
+				{
+					memcpy(ivs, enc->iv, sizeof(ivs));
+					break;
+				}
+			}
+			for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
+			{
+				int32_t index;
+				do
+				{
+					index = (int32_t)gen.next_int(6);
+				} while (ivs[index] != -1);
+				ivs[index] = 31;
+			}
+			for (size_t i = 0; i < 6; ++i)
+			{
+				if (ivs[i] == -1)
+					ivs[i] = (int8_t)gen.next_int(32);
+			}
+		} while (false);
 	}
 	if constexpr (f_iv)
 	{
@@ -553,7 +564,11 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 	uint8_t weight = gen.next_byte();
 	if (!weight_map[weight])
 		return false;
-	uint8_t scale = gen.next_byte();
+	uint8_t scale;
+	if constexpr (f_type == EncounterType::Dist)
+		scale = enc->scale_type == SizeType::RANDOM ? gen.next_byte() : enc->scale;
+	else
+		scale = gen.next_byte();
 	if (!scale_map[scale])
 		return false;
 	return true;

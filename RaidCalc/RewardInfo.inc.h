@@ -1,11 +1,14 @@
 static const RewardInfo reward_info[] =
 {
     { 4, "Poke Ball" },
+    { 45, "HP Up" },
     { 46, "Protein" },
+    { 47, "Iron" },
     { 48, "Carbos" },
     { 49, "Calcium" },
     { 50, "Rare Candy" },
     { 51, "PP Up" },
+    { 52, "Zinc" },
     { 82, "Fire Stone" },
     { 83, "Thunder Stone" },
     { 84, "Water Stone" },
@@ -40,6 +43,8 @@ static const RewardInfo reward_info[] =
     { 173, "Grepa Berry" },
     { 174, "Tamato Berry" },
     { 218, "Soothe Bell" },
+    { 229, "Everstone" },
+    { 280, "Destiny Knot" },
     { 391, "TM64" },
     { 415, "TM88" },
     { 418, "TM91" },

@@ -81,8 +81,8 @@ bool SeedFinder::initialize()
 		encounters[enc.stars].push_back(enc);
 	}
 	compute_fast_encounter_lookups();
-	initialize_event_encounters(":/resources/encounter_dist_paldea.pklex", EncounterTera9::SizeDist, EncounterType::Dist, encounters_dist);
-	initialize_event_encounters(":/resources/encounter_might_paldea.pklex", EncounterTera9::SizeMight, EncounterType::Might, encounters_might);
+	initialize_event_encounters(":/resources/encounter_dist_paldea.pklex", EncounterType::Dist, encounters_dist);
+	initialize_event_encounters(":/resources/encounter_might_paldea.pklex", EncounterType::Might, encounters_might);
 	for (int32_t i = 0; i < _countof(event_names); ++i)
 	{
 		GroupInfo &info = event_groups[i];
@@ -140,7 +140,7 @@ bool SeedFinder::initialize()
 	return true;
 }
 
-void SeedFinder::initialize_event_encounters(const char *file_name, size_t encounter_size, EncounterType type, EncounterListsEvents& lists)
+void SeedFinder::initialize_event_encounters(const char *file_name, EncounterType type, EncounterListsEvents& lists)
 {
 	size_t offset = 0;
 	std::vector<uint8_t> encounter_data = get_resource_file(file_name);
@@ -160,7 +160,7 @@ void SeedFinder::initialize_event_encounters(const char *file_name, size_t encou
 			lists[i].push_back(enc);
 			assert(enc.stars > 0 && enc.stars < 8);
 			assert(enc.tera_type != GemType::Default);
-			offset += encounter_size;
+			offset += EncounterTera9::SizeDistOrMight;
 		}
 	}
 }
@@ -742,19 +742,26 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 		info.tera_type = (uint8_t)get_tera_type(enc, seed);
 		info.shiny = (((info.pid >> 16) ^ (info.pid & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
 		int8_t ivs[6] = { -1, -1, -1, -1, -1, -1 };
-		for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
+		if (enc->iv_fixed)
 		{
-			int32_t index;
-			do
-			{
-				index = (int32_t)gen.next_int(6);
-			} while (ivs[index] != -1);
-			ivs[index] = 31;
+			memcpy(ivs, enc->iv, sizeof(ivs));
 		}
-		for (size_t i = 0; i < _countof(ivs); ++i)
+		else
 		{
-			if (ivs[i] == -1)
-				ivs[i] = (int8_t)gen.next_int(32);
+			for (uint8_t i = 0; i < enc->flawless_iv_count; ++i)
+			{
+				int32_t index;
+				do
+				{
+					index = (int32_t)gen.next_int(6);
+				} while (ivs[index] != -1);
+				ivs[index] = 31;
+			}
+			for (size_t i = 0; i < _countof(ivs); ++i)
+			{
+				if (ivs[i] == -1)
+					ivs[i] = (int8_t)gen.next_int(32);
+			}
 		}
 		memcpy(info.iv, ivs, sizeof(info.iv));
 		info.ability = (uint16_t)get_ability(gen, enc->ability, *enc->personal_info);
@@ -762,7 +769,7 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 		info.nature = (uint8_t)get_nature(gen, info.species, enc->form);
 		info.height = gen.next_byte();
 		info.weight = gen.next_byte();
-		info.scale = gen.next_byte();
+		info.scale = enc->scale_type == SizeType::RANDOM ? gen.next_byte() : enc->scale;
 	}
 	if (use_item_filters())
 		info.drops = event_id < 0 ? get_rewards<EncounterType::Gem>(enc, seed) : get_rewards<EncounterType::Dist>(enc, seed);
