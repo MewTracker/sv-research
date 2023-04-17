@@ -100,6 +100,8 @@ public:
 		group = data[0x11];
 		stars = data[0x12];
 		rand_rate = data[0x13];
+		scale_type = SizeType::RANDOM;
+		scale = 0;
 
 		switch (type)
 		{
@@ -141,6 +143,8 @@ public:
 	uint8_t group;
 	uint8_t stars;
 	uint8_t rand_rate;
+	uint8_t scale_type;
+	uint8_t scale;
 
 	// Gem
 	int16_t rand_rate_min[2];
@@ -152,8 +156,6 @@ public:
 	uint8_t nature;
 	int8_t iv[6];
 	bool iv_fixed;
-	uint8_t scale_type;
-	uint8_t scale;
 
 	EncounterType type;
 	const RaidFixedRewards* fixed_drops;
