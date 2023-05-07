@@ -102,6 +102,7 @@
     <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="Benchmarks.cpp" />
     <ClCompile Include="EncounterDatabaseDialog.cpp" />
+    <ClCompile Include="ExportDialog.cpp" />
     <ClCompile Include="ItemFilterDialog.cpp" />
     <ClCompile Include="SeedFinder.cpp" />
     <ClCompile Include="SeedViewerDialog.cpp" />
@@ -111,6 +112,7 @@
     <QtRcc Include="RaidCalc.qrc" />
     <QtUic Include="AboutDialog.ui" />
     <QtUic Include="EncounterDatabaseDialog.ui" />
+    <QtUic Include="ExportDialog.ui" />
     <QtUic Include="ItemFilterDialog.ui" />
     <QtUic Include="RaidCalc.ui" />
     <QtMoc Include="RaidCalc.h" />
@@ -127,6 +129,7 @@
     <ClInclude Include="EncounterTera9.h" />
     <QtMoc Include="ItemFilterDialog.h" />
     <ClInclude Include="EventNames.inc.h" />
+    <QtMoc Include="ExportDialog.h" />
     <ClInclude Include="FormUtils.h" />
     <ClInclude Include="PersonalInfo9SV.h" />
     <ClInclude Include="PersonalTable9SV.h" />

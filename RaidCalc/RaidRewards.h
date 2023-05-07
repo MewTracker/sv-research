@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
+#include <string>
 
 struct RaidFixedRewardItemInfo
 {
@@ -39,3 +41,33 @@ struct RewardInfo
 #include "RaidFixedRewards.inc.h"
 #include "RaidLotteryRewards.inc.h"
 #include "RewardInfo.inc.h"
+
+class ItemDatabase
+{
+public:
+    ItemDatabase(const ItemDatabase &) = delete;
+    ItemDatabase &operator=(const ItemDatabase &) = delete;
+
+    static ItemDatabase &instance()
+    {
+        static ItemDatabase db;
+        return db;
+    }
+
+    std::string get_item_name(int32_t item_id)
+    {
+        auto it = items.find(item_id);
+        if (it == items.end())
+            return "Invalid item (" + std::to_string(item_id) + ")";
+        return it->second;
+    }
+
+private:
+    ItemDatabase()
+    {
+        for (auto item : reward_info)
+            items[item.item_id] = item.name;
+    }
+
+    std::map<int32_t, std::string> items;
+};

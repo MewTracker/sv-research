@@ -845,6 +845,7 @@ void SeedFinder::set_basic_params(const BasicParams& params)
 {
 	game = params.game;
 	event_id = params.event_id;
+	event_group = params.event_group;
 	stars = params.stars;
 	stage = params.stage;
 	raid_boost = params.raid_boost;

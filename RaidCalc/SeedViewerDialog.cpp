@@ -190,18 +190,11 @@ void SeedViewerDialog::refresh_ui()
 	ui.infoWeight->setText(QString::number(info.weight));
 	ui.infoScale->setText(QString::number(info.scale));
 	ui.listRewards->clear();
+	ItemDatabase &itemDb = ItemDatabase::instance();
 	auto rewards = finder.get_all_rewards(current_seed);
 	for (auto &reward : rewards)
 	{
-		QString item_name = QString("Invalid item (%1)").arg(reward.item_id);
-		for (auto& info : reward_info)
-		{
-			if (info.item_id == reward.item_id)
-			{
-				item_name = info.name;
-				break;
-			}
-		}
+		QString item_name = itemDb.get_item_name(reward.item_id).c_str();
 		if (reward.count > 1)
 			item_name += QString(" (x%1)").arg(reward.count);
 		ui.listRewards->addItem(item_name);

@@ -40,6 +40,7 @@ RaidCalc::RaidCalc(QWidget* parent)
     settings = new SettingsDialog(this, ui.tableSeeds);
     about = new AboutDialog(this);
     encounterDb = new EncounterDatabaseDialog(this);
+    exportOptions = new ExportDialog(this, &seedModel);
     finder_timer = new QTimer(this);
     connect(finder_timer, &QTimer::timeout, this, &RaidCalc::on_finder_timer_timeout);
     connect(ui.actionExit, &QAction::triggered, qApp, &QCoreApplication::quit);
@@ -291,35 +292,8 @@ void RaidCalc::on_finder_timer_timeout()
 
 void RaidCalc::on_actionExportSeeds_triggered(bool checked)
 {
-    QString path = QFileDialog::getSaveFileName(this, QString(), QString(), "Comma separated values (*.csv)");
-    if (path.isEmpty())
-        return;
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        QMessageBox::critical(this, "Error", "Failed to open file.");
-        return;
-    }
-    std::string buffer;
-    int rows = seedModel.rowCount();
-    int columns = seedModel.columnCount();
-    for (int i = 0; i < columns; ++i)
-        buffer += seedModel.headerData(i, Qt::Horizontal).toString().toStdString() + ",";
-    buffer[buffer.size() - 1] = '\n';
-    for (int i = 0; i < rows; ++i)
-    {
-        for (int j = 0; j < columns; ++j)
-            buffer += seedModel.data(seedModel.index(i, j)).toString().toStdString() + ",";
-        buffer[buffer.size() - 1] = '\n';
-        if (buffer.size() > MaxBufferSize)
-        {
-            file.write(buffer.c_str());
-            buffer.clear();
-        }
-    }
-    if (!buffer.empty())
-        file.write(buffer.c_str());
-    file.close();
+    exportOptions->set_params(resultParams);
+    exportOptions->open();
 }
 
 void RaidCalc::on_actionSeedViewer_triggered(bool checked)

@@ -11,6 +11,7 @@
 #include "SettingsDialog.h"
 #include "AboutDialog.h"
 #include "EncounterDatabaseDialog.h"
+#include "ExportDialog.h"
 
 class RaidCalc : public QMainWindow
 {
@@ -40,7 +41,6 @@ public slots:
 private:
     static const uint64_t MaxSeeds = 10000000ULL;
     static const uint64_t SeedCountWarningThreshold = 100000;
-    static const size_t MaxBufferSize = 1000000;
 
     struct StarsRange
     {
@@ -78,6 +78,7 @@ private:
     SettingsDialog* settings;
     AboutDialog* about;
     EncounterDatabaseDialog* encounterDb;
+    ExportDialog* exportOptions;
     QTimer* finder_timer;
     SeedTableModel seedModel;
     SeedFinder finder;
