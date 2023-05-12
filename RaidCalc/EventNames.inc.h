@@ -19,4 +19,5 @@ static const char *event_names[] =
     "Ditto Spotlight",
     "Typhlosion the Unrivaled",
     "Inteleon the Unrivaled",
+    "Chesnaught the Unrivaled",
 };
