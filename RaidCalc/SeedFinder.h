@@ -493,6 +493,11 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 	if constexpr (f_shiny)
 	{
 		bool is_shiny = (((PID >> 16) ^ (PID & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
+		if constexpr (f_type == EncounterType::Dist)
+		{
+			static const bool shiny_rates[] = { true, false };
+			is_shiny &= shiny_rates[static_cast<int>(enc->shiny)];
+		}
 		bool cond_shiny[] = { is_shiny, true, false };
 		if (is_shiny != cond_shiny[shiny])
 			return false;

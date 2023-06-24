@@ -78,6 +78,7 @@ bool SeedFinder::initialize()
 		enc.personal_info = &table[enc.pv_index];
 		assert(enc.stars > 0 && enc.stars < 7);
 		assert(enc.tera_type == GemType::Random);
+		assert(enc.shiny == Shiny::Random);
 		encounters[enc.stars].push_back(enc);
 	}
 	compute_fast_encounter_lookups();
@@ -160,6 +161,8 @@ void SeedFinder::initialize_event_encounters(const char *file_name, EncounterTyp
 			lists[i].push_back(enc);
 			assert(enc.stars > 0 && enc.stars < 8);
 			assert(enc.tera_type != GemType::Default);
+			assert(enc.stars == 7 || enc.shiny == Shiny::Random || enc.shiny == Shiny::Never);
+			assert(enc.stars != 7 || enc.shiny == Shiny::Never);
 			offset += EncounterTera9::SizeDistOrMight;
 		}
 	}
