@@ -22,4 +22,5 @@ static const char *event_names[] =
     "Chesnaught the Unrivaled",
     "Great Tusk and Iron Treads Spotlight",
     "Gimmighoul Spotlight",
+    "Delphox the Unrivaled",
 };
