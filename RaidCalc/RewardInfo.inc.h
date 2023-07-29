@@ -46,6 +46,7 @@ static const RewardInfo reward_info[] =
     { 229, "Everstone" },
     { 280, "Destiny Knot" },
     { 391, "TM64" },
+    { 393, "TM66" },
     { 415, "TM88" },
     { 418, "TM91" },
     { 565, "Health Feather" },

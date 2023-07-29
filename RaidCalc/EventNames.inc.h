@@ -23,4 +23,5 @@ static const char *event_names[] =
     "Great Tusk and Iron Treads Spotlight",
     "Gimmighoul Spotlight",
     "Delphox the Unrivaled",
+    "Rillaboom the Unrivaled",
 };
