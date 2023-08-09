@@ -24,4 +24,5 @@ static const char *event_names[] =
     "Gimmighoul Spotlight",
     "Delphox the Unrivaled",
     "Rillaboom the Unrivaled",
+    "Prepare the Offense",
 };
