@@ -25,4 +25,6 @@ static const char *event_names[] =
     "Delphox the Unrivaled",
     "Rillaboom the Unrivaled",
     "Prepare the Offense",
+    "A Show of Supporters",
+    "Mewtwo the Unrivaled",
 };
