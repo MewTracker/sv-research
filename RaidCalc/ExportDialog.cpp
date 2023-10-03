@@ -143,6 +143,8 @@ void ExportDialog::exportJson(bool includeRewards)
     QJsonObject root, meta;
     SeedFinder::BasicParams params = finder.get_basic_params();
     meta["game"] = params.game == GameScarlet ? "Scarlet" : "Violet";
+    meta["map_id"] = params.map_id;
+    meta["map_name"] = params.map_id >= 0 ? map_names[params.map_id] : "";
     meta["event_id"] = params.event_id;
     meta["event_name"] = params.event_id >= 0 ? event_names[params.event_id] : "";
     meta["stars"] = params.stars;

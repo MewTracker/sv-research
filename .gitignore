@@ -31,3 +31,4 @@
 *.user
 *.ini
 *.pyc
+pv_*.txt

@@ -7,11 +7,11 @@
 #include "FormUtils.h"
 #include "Utils.h"
 
-SeedFinder::EncounterLists SeedFinder::encounters;
+SeedFinder::EncounterLists SeedFinder::encounters[2];
 SeedFinder::EncounterListsEvents SeedFinder::encounters_dist;
 SeedFinder::EncounterListsEvents SeedFinder::encounters_might;
 std::vector<std::vector<uint8_t>> SeedFinder::fast_lottery_lookup;
-std::vector<std::vector<uint8_t>> SeedFinder::fast_encounter_lookup[2];
+std::vector<std::vector<uint8_t>> SeedFinder::fast_encounter_lookup[4];
 std::vector<uint8_t> SeedFinder::fast_encounter_lookup_dist[2];
 std::vector<uint8_t> SeedFinder::fast_encounter_lookup_might[2];
 SeedFinder::GroupInfo SeedFinder::event_groups[_countof(event_names)];
@@ -22,6 +22,7 @@ SeedFinder::SeedFinder() :
 	game(GameScarlet),
 	min_seed(0),
 	max_seed(0),
+	map_id(0),
 	event_id(-1),
 	event_group(0),
 	stars(0),
@@ -42,6 +43,7 @@ SeedFinder::SeedFinder() :
 	drop_threshold(0),
 	item_filters_count(0),
 	event_rand_rate(0),
+	game_map_index(0),
 	size_filters_in_use(false)
 {
 	memset(min_iv, 0, sizeof(min_iv));
@@ -57,39 +59,20 @@ SeedFinder::SeedFinder() :
 
 bool SeedFinder::initialize()
 {
-	std::vector<uint8_t> encounter_data = get_resource_file(":/resources/encounter_gem_paldea.pkl");
-	std::vector<uint8_t> reward_map = get_resource_file(":/resources/reward_map");
-	if (encounter_data.empty() || reward_map.empty())
-		return false;
-	size_t encounter_count = encounter_data.size() / EncounterTera9::SizeGem;
-	size_t rewards_count = reward_map.size() / 0x10;
-	if (encounter_count != rewards_count)
-		return false;
 	compute_fast_lottery_lookups();
-	encounters.resize(7);
-	uint64_t* rewards = (uint64_t*)reward_map.data();
-	PersonalTable9SV& table = PersonalTable9SV::instance();
-	for (size_t i = 0; i < encounter_count; ++i, rewards += 2)
+	if (!initialize_encounters(":/resources/encounter_gem_paldea.pklex", encounters[0], MapPaldea) ||
+		!initialize_encounters(":/resources/encounter_gem_kitakami.pklex", encounters[1], MapKitakami) ||
+		!initialize_event_encounters(":/resources/encounter_dist_paldea.pklex", EncounterType::Dist, encounters_dist) ||
+		!initialize_event_encounters(":/resources/encounter_might_paldea.pklex", EncounterType::Might, encounters_might))
 	{
-		auto enc = EncounterTera9(encounter_data.data() + i * EncounterTera9::SizeGem, EncounterType::Gem);
-		enc.fixed_drops = get_fixed_drop_table(rewards[0]);
-		enc.lottery_drops = get_lottery_drop_table(rewards[1], enc.lottery_lookup);
-		enc.pv_index = table.get_form_index(enc.species, enc.form);
-		enc.personal_info = &table[enc.pv_index];
-		assert(enc.stars > 0 && enc.stars < 7);
-		assert(enc.tera_type == GemType::Random);
-		assert(enc.shiny == Shiny::Random);
-		encounters[enc.stars].push_back(enc);
+		return false;
 	}
-	compute_fast_encounter_lookups();
-	initialize_event_encounters(":/resources/encounter_dist_paldea.pklex", EncounterType::Dist, encounters_dist);
-	initialize_event_encounters(":/resources/encounter_might_paldea.pklex", EncounterType::Might, encounters_might);
 	for (int32_t i = 0; i < _countof(event_names); ++i)
 	{
 		GroupInfo &info = event_groups[i];
 		std::set<int32_t> dist_groups;
 		int32_t might_group = -1;
-		visit_encounters(i, [&](const EncounterTera9 &enc) {
+		visit_encounters(i, [&](const EncounterTera9 &enc, Map map) {
 			if (enc.stars == 7)
 			{
 				assert(might_group == -1 || might_group == enc.group);
@@ -141,10 +124,37 @@ bool SeedFinder::initialize()
 	return true;
 }
 
-void SeedFinder::initialize_event_encounters(const char *file_name, EncounterType type, EncounterListsEvents& lists)
+bool SeedFinder::initialize_encounters(const char *file_name, EncounterLists &lists, Map map)
 {
-	size_t offset = 0;
 	std::vector<uint8_t> encounter_data = get_resource_file(file_name);
+	if (encounter_data.empty())
+		return false;
+	lists.resize(7);
+	PersonalTable9SV &table = PersonalTable9SV::instance();
+	size_t encounter_count = encounter_data.size() / EncounterTera9::SizeGem;
+	for (size_t i = 0; i < encounter_count; ++i)
+	{
+		auto enc = EncounterTera9(encounter_data.data() + i * EncounterTera9::SizeGem, EncounterType::Gem);
+		enc.fixed_drops = get_fixed_drop_table(enc.fixed_table_id);
+		enc.lottery_drops = get_lottery_drop_table(enc.lottery_table_id, enc.lottery_lookup);
+		enc.pv_index = table.get_form_index(enc.species, enc.form);
+		enc.personal_info = &table[enc.pv_index];
+		assert(enc.fixed_drops && enc.lottery_drops);
+		assert(enc.stars > 0 && enc.stars < 7);
+		assert(enc.tera_type == GemType::Random);
+		assert(enc.shiny == Shiny::Random);
+		lists[enc.stars].push_back(enc);
+	}
+	compute_fast_encounter_lookups(lists, map);
+	return true;
+}
+
+bool SeedFinder::initialize_event_encounters(const char *file_name, EncounterType type, EncounterListsEvents& lists)
+{
+	std::vector<uint8_t> encounter_data = get_resource_file(file_name);
+	if (encounter_data.empty())
+		return false;
+	size_t offset = 0;
 	PersonalTable9SV& table = PersonalTable9SV::instance();
 	for (size_t i = 0; i < _countof(lists); ++i)
 	{
@@ -158,14 +168,16 @@ void SeedFinder::initialize_event_encounters(const char *file_name, EncounterTyp
 			enc.lottery_drops = get_lottery_drop_table(enc.lottery_table_id, enc.lottery_lookup);
 			enc.pv_index = table.get_form_index(enc.species, enc.form);
 			enc.personal_info = &table[enc.pv_index];
-			lists[i].push_back(enc);
+			assert(enc.fixed_drops && enc.lottery_drops);
 			assert(enc.stars > 0 && enc.stars < 8);
 			assert(enc.tera_type != GemType::Default);
 			assert(enc.stars == 7 || enc.shiny == Shiny::Random || enc.shiny == Shiny::Never);
 			assert(enc.stars != 7 || enc.shiny == Shiny::Never);
+			lists[i].push_back(enc);
 			offset += EncounterTera9::SizeDistOrMight;
 		}
 	}
+	return true;
 }
 
 const RaidFixedRewards* SeedFinder::get_fixed_drop_table(uint64_t table_name)
@@ -213,20 +225,21 @@ void SeedFinder::compute_fast_lottery_lookups()
 	}
 }
 
-void SeedFinder::compute_fast_encounter_lookups()
+void SeedFinder::compute_fast_encounter_lookups(EncounterLists &lists, Map map)
 {
 	for (int32_t ver = GameScarlet; ver <= GameViolet; ++ver)
 	{
-		auto& lookup = fast_encounter_lookup[ver];
-		lookup.resize(encounters.size());
-		for (size_t stars = 1; stars < encounters.size(); ++stars)
+		int32_t index = get_game_map_id(ver, map);
+		auto& lookup = fast_encounter_lookup[index];
+		lookup.resize(lists.size());
+		for (size_t stars = 1; stars < lists.size(); ++stars)
 		{
-			uint64_t total = get_rate_total_base(ver, stars);
+			uint64_t total = get_rate_total_base(index, stars);
 			for (uint64_t speciesroll = 0; speciesroll < total; ++speciesroll)
 			{
-				for (size_t i = 0; i < encounters[stars].size(); ++i)
+				for (size_t i = 0; i < lists[stars].size(); ++i)
 				{
-					EncounterTera9& enc = encounters[stars][i];
+					EncounterTera9& enc = lists[stars][i];
 					int16_t minimum = enc.rand_rate_min[ver];
 					if (minimum >= 0 && (uint32_t)((int32_t)speciesroll - minimum) < enc.rand_rate)
 					{
@@ -282,9 +295,16 @@ const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 {
 	if (event_id < 0)
 	{
-		if (stars == 6)
-			return get_encounter<true>(seed);
-		return get_encounter<false>(seed);
+		Xoroshiro128Plus gen(seed);
+		if (stars != 6)
+		{
+			if (get_star_count(gen, stage) != stars)
+				return nullptr;
+		}
+		int32_t index = get_game_map_id(game, map_id);
+		uint64_t total = get_rate_total_base(index, stars);
+		uint64_t speciesroll = gen.next_int(total);
+		return &encounters[map_id][stars][fast_encounter_lookup[index][stars][speciesroll]];
 	}
 	if (stars != 7)
 		return get_encounter_dist(seed);
@@ -566,6 +586,7 @@ bool SeedFinder::find_seeds()
 	init_value_map(height_map, min_height, max_height);
 	init_value_map(weight_map, min_weight, max_weight);
 	init_value_map(scale_map, min_scale, max_scale);
+	game_map_index = get_game_map_id(game, map_id);
 	size_filters_in_use = use_size_filters();
 	if (species != 0)
 	{
@@ -798,16 +819,21 @@ void SeedFinder::visit_encounters(int32_t event_id, std::function<EncounterVisit
 {
 	if (event_id < 0)
 	{
-		for (auto& enc_vector : encounters)
-			for (auto& enc : enc_vector)
-				visitor(enc);
+		for (int32_t map = 0; map < _countof(encounters); ++map)
+		{
+			for (auto &enc_vector : encounters[map])
+			{
+				for (auto &enc : enc_vector)
+					visitor(enc, (Map)map);
+			}
+		}
 	}
 	else
 	{
 		for (auto& enc : encounters_dist[event_id])
-			visitor(enc);
+			visitor(enc, MapInvalid);
 		for (auto& enc : encounters_might[event_id])
-			visitor(enc);
+			visitor(enc, MapInvalid);
 	}
 }
 
@@ -836,6 +862,7 @@ SeedFinder::BasicParams SeedFinder::get_basic_params() const
 {
 	BasicParams params;
 	params.game = game;
+	params.map_id = event_id < 0 ? map_id : -1;
 	params.event_id = event_id;
 	params.event_group = event_group;
 	params.stars = stars;
@@ -847,6 +874,7 @@ SeedFinder::BasicParams SeedFinder::get_basic_params() const
 void SeedFinder::set_basic_params(const BasicParams& params)
 {
 	game = params.game;
+	map_id = params.map_id;
 	event_id = params.event_id;
 	event_group = params.event_group;
 	stars = params.stars;

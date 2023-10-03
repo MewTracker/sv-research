@@ -7,6 +7,7 @@
 struct EncounterEntry
 {
 	Game game;
+	int32_t map_id;
 	int32_t event_id;
 	int32_t event_group;
 	int32_t stars;
@@ -46,7 +47,7 @@ public:
 
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override
 	{
-		return 5;
+		return 6;
 	}
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
@@ -55,7 +56,7 @@ public:
 			return QVariant();
 		if (orientation == Qt::Vertical)
 			return section + 1;
-		if (section >= 5)
+		if (section >= 6)
 			return QVariant();
 		static const char *headers[] =
 		{
@@ -64,6 +65,7 @@ public:
 			"Event group",
 			"Stars",
 			"Tera Type",
+			"Map",
 		};
 		return headers[section];
 	}
@@ -85,6 +87,8 @@ public:
 			return entry.stars;
 		case 4:
 			return entry.tera_type != GemType::Random ? type_names[static_cast<int8_t>(entry.tera_type) - 2] : "Random";
+		case 5:
+			return entry.map_id < 0 ? "N/A" : map_names[entry.map_id];
 		default:
 			return QVariant();
 		}

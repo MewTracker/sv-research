@@ -19,6 +19,7 @@ void do_benchmarks(SeedFinder& finder)
 __declspec(noinline) void Benchmarks::generate_test_data(SeedFinder& finder, int progress, int raid_boost, bool is6)
 {
     finder.game = GameScarlet;
+    finder.map_id = MapPaldea;
     finder.stage = progress;
     finder.raid_boost = raid_boost;
     for (uint32_t seed = 0; seed < 100000; ++seed)
@@ -129,6 +130,7 @@ void Benchmarks::run(SeedFinder& finder)
     return;
 
     finder.game = GameScarlet;
+    finder.map_id = MapPaldea;
     finder.stars = 6;
     finder.thread_count = 1;
     finder.min_seed = 0;
@@ -197,8 +199,8 @@ void Benchmarks::dump_personal_info(std::string name, PersonalInfo9SV &info)
     entry += std::to_string(info.weight) + ":";
     entry += std::to_string(info.regional_flags) + ":";
     entry += std::to_string((int)info.is_regional_form) + ":";
-    for (auto val : info.tmhm)
-        entry += std::to_string((int)val) + ":";
+    //for (auto val : info.tmhm)
+    //    entry += std::to_string((int)val) + ":";
     entry.pop_back();
     printf("%s\n", entry.c_str());
 }

@@ -13,8 +13,8 @@ enum GenderRatio : uint8_t
 class PersonalInfo9SV
 {
 public:
-	static const uint32_t InfoSize = 0x44;
-	static const uint32_t CountTM = 172;
+	static const uint32_t InfoSize = 0x4C;
+	static const uint32_t CountTM = 202;
 
 	PersonalInfo9SV(uint8_t* data)
 	{
@@ -59,6 +59,8 @@ public:
         regional_form_index = *(uint16_t*)&data[0x2A];
         for (size_t i = 0; i < _countof(tmhm); ++i)
             tmhm[i] = (data[0x2C + (i >> 3)] >> (i & 7)) & 1;
+        kitakami_dex = data[0x4A];
+        blurberry_dex = data[0x4B];
 	}
 
     int form_index(uint16_t species, uint8_t form)
@@ -117,4 +119,6 @@ public:
     bool is_regional_form;
     uint16_t regional_form_index;
     bool tmhm[CountTM];
+    uint8_t kitakami_dex;
+    uint8_t blurberry_dex;
 };

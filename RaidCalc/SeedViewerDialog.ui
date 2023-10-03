@@ -32,56 +32,21 @@
       <string>Raid parameters</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelEvent">
-        <property name="text">
-         <string>Event:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="labelStage">
-        <property name="text">
-         <string>Story progress:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QLabel" name="labelRaidType">
-        <property name="text">
-         <string>Raid type:</string>
-        </property>
-       </widget>
-      </item>
       <item row="6" column="0">
-       <widget class="QLabel" name="labelSeed">
-        <property name="text">
-         <string>Seed:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
        <widget class="QLabel" name="labelRaidBoost">
         <property name="text">
          <string>Raid boost:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QComboBox" name="comboBoxGame">
-        <item>
-         <property name="text">
-          <string>Scarlet</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Violet</string>
-         </property>
-        </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="labelStage">
+        <property name="text">
+         <string>Story progress:</string>
+        </property>
        </widget>
       </item>
-      <item row="7" column="2">
+      <item row="8" column="2">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -94,7 +59,7 @@
         </property>
        </spacer>
       </item>
-      <item row="4" column="2">
+      <item row="5" column="2">
        <widget class="QComboBox" name="comboBoxStage">
         <item>
          <property name="text">
@@ -123,7 +88,69 @@
         </item>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelEvent">
+        <property name="text">
+         <string>Event:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QLineEdit" name="editSeed">
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QSpinBox" name="spinBoxRaidBoost">
+        <property name="maximum">
+         <number>3</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="comboBoxGame">
+        <item>
+         <property name="text">
+          <string>Scarlet</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Violet</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelEventGroup">
+        <property name="text">
+         <string>Event group:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QLabel" name="labelRaidType">
+        <property name="text">
+         <string>Raid type:</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="2">
+       <widget class="QComboBox" name="comboBoxEventGroup"/>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="labelSeed">
+        <property name="text">
+         <string>Seed:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
        <widget class="QComboBox" name="comboBoxRaidType">
         <item>
          <property name="text">
@@ -137,19 +164,6 @@
         </item>
        </widget>
       </item>
-      <item row="6" column="2">
-       <widget class="QLineEdit" name="editSeed">
-        <property name="baseSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QComboBox" name="comboBoxEvent"/>
-      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="labelGame">
         <property name="text">
@@ -157,22 +171,29 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="2">
-       <widget class="QSpinBox" name="spinBoxRaidBoost">
-        <property name="maximum">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="labelEventGroup">
-        <property name="text">
-         <string>Event group:</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="2">
-       <widget class="QComboBox" name="comboBoxEventGroup"/>
+       <widget class="QComboBox" name="comboBoxEvent"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelMap">
+        <property name="text">
+         <string>Map:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QComboBox" name="comboBoxMap">
+        <item>
+         <property name="text">
+          <string>Paldea</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Kitakami (Teal Mask)</string>
+         </property>
+        </item>
+       </widget>
       </item>
      </layout>
     </widget>

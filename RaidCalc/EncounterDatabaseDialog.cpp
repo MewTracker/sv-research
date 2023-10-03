@@ -8,7 +8,7 @@ EncounterDatabaseDialog::EncounterDatabaseDialog(QWidget *parent)
     ui.setupUi(this);
     std::set<uint32_t> encounterables;
     std::vector<std::pair<std::string, uint32_t>> filters;
-    auto visitor = [&](const EncounterTera9 &enc) { encounterables.insert(enc.species); };
+    auto visitor = [&](const EncounterTera9 &enc, Map map) { encounterables.insert(enc.species); };
     SeedFinder::visit_encounters(-1, visitor);
     for (int32_t i = 0; i < _countof(event_names); ++i)
         SeedFinder::visit_encounters(i, visitor);
@@ -29,7 +29,7 @@ void EncounterDatabaseDialog::on_comboBoxSpecies_currentIndexChanged(int index)
 {
     int32_t species = ui.comboBoxSpecies->currentData().toInt();
     int32_t event_id = -1;
-    auto visitor = [&](const EncounterTera9 &enc)
+    auto visitor = [&](const EncounterTera9 &enc, Map map)
     {
         if (enc.species != species)
             return;
@@ -60,6 +60,7 @@ void EncounterDatabaseDialog::on_comboBoxSpecies_currentIndexChanged(int index)
             }
             EncounterEntry entry;
             entry.game = (Game)ver;
+            entry.map_id = map;
             entry.event_id = event_id;
             entry.event_group = event_id < 0 ? -1 : enc.group;
             entry.stars = enc.stars;

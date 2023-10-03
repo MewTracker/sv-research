@@ -12,7 +12,7 @@
 class SeedFinder
 {
 public:
-	using EncounterVisitor = void(const EncounterTera9& enc);
+	using EncounterVisitor = void(const EncounterTera9& enc, Map map);
 	static const int8_t AnyForm = -1;
 	static const int8_t RareForm = -2;
 	static const int8_t CommonForm = -3;
@@ -47,6 +47,7 @@ public:
 	struct BasicParams
 	{
 		Game game;
+		int32_t map_id;
 		int32_t event_id;
 		int32_t event_group;
 		int32_t stars;
@@ -84,6 +85,7 @@ public:
 	Game game;
 	uint32_t min_seed;
 	uint32_t max_seed;
+	int32_t map_id;
 	int32_t event_id;
 	int32_t event_group;
 	int32_t stars;
@@ -165,10 +167,11 @@ private:
 	const EncounterTera9* get_encounter_dist(uint32_t seed) const;
 	FORCEINLINE const EncounterTera9* get_encounter_dist_lookup(uint32_t seed) const;
 
-	static void initialize_event_encounters(const char* file_name, EncounterType type, EncounterListsEvents& lists);
+	static bool initialize_encounters(const char *file_name, EncounterLists &lists, Map map);
+	static bool initialize_event_encounters(const char* file_name, EncounterType type, EncounterListsEvents& lists);
 	static DWORD WINAPI find_seeds_thread_wrapper(LPVOID Parameter);
 	static void compute_fast_lottery_lookups();
-	static void compute_fast_encounter_lookups();
+	static void compute_fast_encounter_lookups(EncounterLists &lists, Map map);
 	static const RaidFixedRewards* get_fixed_drop_table(uint64_t table_name);
 	static const RaidLotteryRewards* get_lottery_drop_table(uint64_t table_name, const uint8_t*& fast_lookup);
 	static int32_t get_toxtricity_nature(Xoroshiro128Plus& gen, uint8_t form);
@@ -180,10 +183,12 @@ private:
 	FORCEINLINE static uint32_t get_ability(Xoroshiro128Plus& gen, AbilityPermission permission, PersonalInfo9SV& personal_info);
 	FORCEINLINE static uint32_t get_nature(Xoroshiro128Plus& gen, int32_t species, uint8_t form);
 	FORCEINLINE static uint32_t get_gender(Xoroshiro128Plus& gen, int32_t ratio);
+	FORCEINLINE static int32_t get_game_map_id(int32_t game_version, int32_t map);
 
 	HANDLE hFinderThread;
 	int32_t item_filters_count;
 	int32_t event_rand_rate;
+	int32_t game_map_index;
 	bool size_filters_in_use;
 	std::vector<int8_t> target_drops;
 	std::vector<int8_t> target_species;
@@ -194,25 +199,27 @@ private:
 	bool weight_map[256];
 	bool scale_map[256];
 
-	static EncounterLists encounters;
+	static EncounterLists encounters[2];
 	static EncounterListsEvents encounters_dist;
 	static EncounterListsEvents encounters_might;
 	static std::vector<std::vector<uint8_t>> fast_lottery_lookup;
-	static std::vector<std::vector<uint8_t>> fast_encounter_lookup[2];
+	static std::vector<std::vector<uint8_t>> fast_encounter_lookup[4];
 	static std::vector<uint8_t> fast_encounter_lookup_dist[2];
 	static std::vector<uint8_t> fast_encounter_lookup_might[2];
 	static GroupInfo event_groups[_countof(event_names)];
 };
 
-FORCEINLINE int16_t SeedFinder::get_rate_total_base(int32_t version, size_t star)
+FORCEINLINE int16_t SeedFinder::get_rate_total_base(int32_t index, size_t star)
 {
-	static const int16_t rates[2][7] =
+	static const int16_t rates[4][7] =
 	{
 		{ 0, 5800, 5300, 7400, 8800, 9100, 6500 },
 		{ 0, 5800, 5300, 7400, 8700, 9100, 6500 },
+		{ 0, 1500, 1500, 2500, 2100, 2250, 2475 },
+		{ 0, 1500, 1500, 2500, 2100, 2250, 2574 },
 	};
 	assert(star > 0 && star < _countof(rates[0]));
-	return rates[version][star];
+	return rates[index][star];
 };
 
 FORCEINLINE int32_t SeedFinder::get_star_count(Xoroshiro128Plus& gen, int32_t progress)
@@ -457,6 +464,11 @@ FORCEINLINE uint32_t SeedFinder::get_gender(Xoroshiro128Plus& gen, int32_t ratio
 	return ratio_lookup_gender[ratio_lookup_index[ratio]][rand100];
 }
 
+FORCEINLINE int32_t SeedFinder::get_game_map_id(int32_t game_version, int32_t map)
+{
+	return 2 * map + game_version;
+}
+
 template<bool f_is6>
 FORCEINLINE const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 {
@@ -466,9 +478,9 @@ FORCEINLINE const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 		if (get_star_count(gen, stage) != stars)
 			return nullptr;
 	}
-	uint64_t total = get_rate_total_base(game, stars);
+	uint64_t total = get_rate_total_base(game_map_index, stars);
 	uint64_t speciesroll = gen.next_int(total);
-	return &encounters[stars][fast_encounter_lookup[game][stars][speciesroll]];
+	return &encounters[map_id][stars][fast_encounter_lookup[game_map_index][stars][speciesroll]];
 }
 
 FORCEINLINE const EncounterTera9* SeedFinder::get_encounter_dist_lookup(uint32_t seed) const

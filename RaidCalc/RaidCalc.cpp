@@ -22,7 +22,7 @@ RaidCalc::RaidCalc(QWidget* parent)
     for (auto event_name : event_names)
         ui.comboBoxEvent->addItem(event_name);
     std::set<uint32_t> encounterables;
-    auto visitor = [&](const EncounterTera9& enc) { encounterables.insert(enc.species); };
+    auto visitor = [&](const EncounterTera9& enc, Map map) { encounterables.insert(enc.species); };
     SeedFinder::visit_encounters(-1, visitor);
     create_species_filters(encounterables, species_filters[0]);
     for (int32_t i = 0; i < _countof(event_names); ++i)
@@ -154,6 +154,7 @@ void RaidCalc::toggle_ui(bool enabled)
 void RaidCalc::on_buttonFindSeeds_clicked()
 {
     finder.game = (Game)ui.comboBoxGame->currentIndex();
+    finder.map_id = ui.comboBoxMap->currentIndex();
     finder.event_id = ui.comboBoxEvent->currentIndex() - 1;
     finder.event_group = ui.comboBoxEventGroup->currentData().toUInt();
     finder.stars = ui.comboBoxStars->currentIndex() + 1;
@@ -349,6 +350,8 @@ void RaidCalc::on_comboBoxEvent_currentIndexChanged(int index)
     ui.comboBoxEventGroup->clear();
     if (index == 0)
     {
+        ui.labelMap->setVisible(true);
+        ui.comboBoxMap->setVisible(true);
         ui.labelStage->setText("Story progress:");
         for (auto& stage_name : stage_names_story)
             ui.comboBoxStage->addItem(stage_name);
@@ -356,6 +359,8 @@ void RaidCalc::on_comboBoxEvent_currentIndexChanged(int index)
     }
     else
     {
+        ui.labelMap->setVisible(false);
+        ui.comboBoxMap->setVisible(false);
         ui.labelStage->setText("Event progress:");
         for (auto& stage_name : stage_names_event)
             ui.comboBoxStage->addItem(stage_name);
@@ -404,6 +409,7 @@ void RaidCalc::on_comboBoxStars_currentIndexChanged(int index)
         if (SeedFinder::is_mighty_event(event_id))
         {
             finder.game = (Game)ui.comboBoxGame->currentIndex();
+            finder.map_id = ui.comboBoxMap->currentIndex();
             finder.event_id = event_id;
             finder.event_group = SeedFinder::get_event_info(event_id)->might.front();
             finder.stars = ui.comboBoxStars->currentIndex() + 1;

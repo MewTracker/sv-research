@@ -1015,6 +1015,22 @@ static const char* pokemon_names[] =
 	"Kingambit",
 	"Clodsire",
 	"Annihilape",
+	"Ogerpon",
+	"Dipplin",
+	"",
+	"Okidogi",
+	"Munkidori",
+	"Fezandipiti",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"Poltchageist",
+	"Sinistcha",
+	"",
 };
 
 static const char* gender_names[] =
@@ -1354,6 +1370,19 @@ static const char* ability_names[] =
 	"Armor Tail",
 	"Earth Eater",
 	"Mycelium Might",
+	"Hospitality",
+	"Mind’s Eye",
+	"Embody Aspect",
+	"Embody Aspect",
+	"Embody Aspect",
+	"Embody Aspect",
+	"Toxic Chain",
+	"Supersweet Syrup",
+	"",
+	"",
+	"",
+	"",
+	"",
 };
 
 static const char* move_names[] =
@@ -2259,6 +2288,26 @@ static const char* move_names[] =
 	"Noxious Torque",
 	"Combat Torque",
 	"Magical Torque",
+	"Blood Moon",
+	"Matcha Gotcha",
+	"Syrup Bomb",
+	"Ivy Cudgel",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
 };
 
 static const char* type_names[] =
@@ -2298,4 +2347,10 @@ static const char* stage_names_event[] =
 	"3* unlocked",
 	"4* unlocked",
 	"7* unlocked",
+};
+
+static const char *map_names[] =
+{
+	"Paldea",
+	"Kitakami (Teal Mask)",
 };

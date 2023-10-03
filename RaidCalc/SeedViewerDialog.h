@@ -16,6 +16,7 @@ public:
 
 public slots:
 	void on_comboBoxGame_currentIndexChanged(int index);
+	void on_comboBoxMap_currentIndexChanged(int index);
 	void on_comboBoxEvent_currentIndexChanged(int index);
 	void on_comboBoxEventGroup_currentIndexChanged(int index);
 	void on_comboBoxRaidType_currentIndexChanged(int index);
