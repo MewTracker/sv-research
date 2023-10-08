@@ -28,4 +28,5 @@ static const char *event_names[] =
     "A Show of Supporters",
     "Mewtwo the Unrivaled",
     "Slither Wing and Iron Moth Spotlight",
+    "Decidueye the Unrivaled (Hisuian)",
 };
