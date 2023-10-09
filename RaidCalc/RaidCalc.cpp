@@ -98,7 +98,8 @@ void RaidCalc::create_species_filters(std::set<uint32_t>& encounterables, std::v
             filters.push_back({ pokemon_names[species], filter.value });
             continue;
         }
-        filters.push_back({ std::string(pokemon_names[species]) + " (Any)", filter.value});
+        if (forms.size() > 1)
+            filters.push_back({ std::string(pokemon_names[species]) + " (Any)", filter.value});
         filter.any_form = 0;
         for (auto form : forms)
         {
@@ -126,6 +127,8 @@ void RaidCalc::add_sorted_options(QComboBox* combo, std::vector<std::pair<std::s
 
 void RaidCalc::add_options(QComboBox* combo, std::vector<std::pair<std::string, uint32_t>>& options)
 {
+    if (options.empty())
+        return;
     combo->addItem("Any", 0U);
     for (auto& pair : options)
         combo->addItem(pair.first.c_str(), pair.second);

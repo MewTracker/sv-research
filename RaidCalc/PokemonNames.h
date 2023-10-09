@@ -1030,7 +1030,6 @@ static const char* pokemon_names[] =
 	"",
 	"Poltchageist",
 	"Sinistcha",
-	"",
 };
 
 static const char* gender_names[] =

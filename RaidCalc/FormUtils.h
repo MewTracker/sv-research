@@ -56,6 +56,18 @@ public:
 			};
 			return shellos_forms[form];
 		}
+		case Basculin:
+		{
+			if (form != 2) // Restrict to obtainable form
+				return "";
+			static const char* basculin_forms[] =
+			{
+				"Red",
+				"Blue",
+				"White",
+			};
+			return basculin_forms[form];
+		}
 		case Lycanroc:
 		{
 			if (form > 2)
@@ -102,6 +114,17 @@ public:
 			};
 			return tatsugiri_forms[form];
 		}
+		case Sinistcha:
+		{
+			if (form > 1)
+				return "";
+			static const char* sinistcha_forms[] =
+			{
+				"Unremarkable Form",
+				"Masterpiece Form",
+			};
+			return sinistcha_forms[form];
+		}
 		default:
 			return "";
 		}
@@ -117,15 +140,19 @@ public:
 		case Gastrodon:
 		case Toxtricity:
 		case Maushold:
+		case Sinistcha:
 			return { 0, 1 };
 		case Indeedee:
 		case Oinkologne:
+		case Basculegion:
 			if (!include_gender_forms)
 				return {};
 			return { 0, 1 };
 		case Lycanroc:
 		case Tatsugiri:
 			return { 0, 1, 2 };
+		case Basculin:
+			return { 2 };
 		default:
 			return {};
 		}
@@ -150,12 +177,15 @@ private:
 		Dunsparce = 206,
 		Shellos = 422,
 		Gastrodon = 423,
+		Basculin = 550,
 		Lycanroc = 745,
 		Toxtricity = 849,
 		Indeedee = 876,
+		Basculegion = 902,
 		Oinkologne = 916,
 		Tandemaus = 945,
 		Maushold = 946,
 		Tatsugiri = 952,
+		Sinistcha = 1025,
 	};
 };
