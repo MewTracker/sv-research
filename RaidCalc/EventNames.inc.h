@@ -30,4 +30,5 @@ static const char *event_names[] =
     "Slither Wing and Iron Moth Spotlight",
     "Decidueye the Unrivaled (Hisuian)",
     "Mismagius Spotlight",
+    "Typhlosion the Unrivaled (Hisuian)",
 };
