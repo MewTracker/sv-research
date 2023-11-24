@@ -173,6 +173,7 @@ bool SeedFinder::initialize_event_encounters(const char *file_name, EncounterTyp
 			assert(enc.tera_type != GemType::Default);
 			assert(enc.stars == 7 || enc.shiny == Shiny::Random || enc.shiny == Shiny::Never);
 			assert(enc.stars != 7 || enc.shiny == Shiny::Never);
+			assert(enc.stars != 7 || (enc.ability != AbilityPermission::Any12H && enc.ability != AbilityPermission::Any12));
 			lists[i].push_back(enc);
 			offset += EncounterTera9::SizeDistOrMight;
 		}
@@ -493,6 +494,13 @@ void SeedFinder::find_seeds_thread()
 		worker_thread_wrapper<EncounterType::Dist, false, true, true, true, true, false>,
 		worker_thread_wrapper<EncounterType::Dist, false, true, true, true, true, true>,
 	};
+	static const LPTHREAD_START_ROUTINE workers_might[] =
+	{
+		worker_thread_wrapper<EncounterType::Might, false, false, false, false, false, false>,
+		worker_thread_wrapper<EncounterType::Might, false, false, false, false, false, true>,
+		worker_thread_wrapper<EncounterType::Might, false, false, false, false, true, false>,
+		worker_thread_wrapper<EncounterType::Might, false, false, false, false, true, true>,
+	};
 	LPTHREAD_START_ROUTINE proc = nullptr;
 	switch (f_type)
 	{
@@ -509,10 +517,11 @@ void SeedFinder::find_seeds_thread()
 		break;
 	}
 	case EncounterType::Might:
-		proc = f_rewards
-			? worker_thread_wrapper<EncounterType::Might, false, false, false, false, false, true>
-			: worker_thread_wrapper<EncounterType::Might, false, false, false, false, false, false>;
+	{
+		int worker_index = ((int)size_filters_in_use << 1) | ((int)f_rewards << 0);
+		proc = workers_might[worker_index];
 		break;
+	}
 	}
 	time_taken.start();
 	for (uint32_t i = 0; i < thread_count; ++i)
@@ -733,33 +742,7 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 		info.nature = enc->nature;
 		info.height = gen.next_byte();
 		info.weight = gen.next_byte();
-		switch (enc->scale_type)
-		{
-		case SizeType::RANDOM:
-			info.scale = gen.next_byte();
-			break;
-		case SizeType::XS:
-			info.scale = (uint8_t)gen.next_int(0x10);
-			break;
-		case SizeType::S:
-			info.scale = (uint8_t)(gen.next_int(0x20) + 0x10);
-			break;
-		case SizeType::M:
-			info.scale = (uint8_t)(gen.next_int(0xA0) + 0x30);
-			break;
-		case SizeType::L:
-			info.scale = (uint8_t)(gen.next_int(0x20) + 0xD0);
-			break;
-		case SizeType::XL:
-			info.scale = (uint8_t)(gen.next_int(0x10) + 0xF0);
-			break;
-		case SizeType::VALUE:
-			info.scale = enc->scale;
-			break;
-		default:
-			info.scale = 0;
-			break;
-		}
+		info.scale = get_scale(gen, enc);
 	}
 	else
 	{

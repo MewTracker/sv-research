@@ -64,6 +64,20 @@ RaidCalc::RaidCalc(QWidget* parent)
     max_iv_widgets[3] = ui.spinBoxMaxSpA;
     max_iv_widgets[4] = ui.spinBoxMaxSpD;
     max_iv_widgets[5] = ui.spinBoxMaxSpe;
+    widgets_might = {
+        ui.labelHeight,
+        ui.spinBoxMinHeight,
+        ui.labelSep7,
+        ui.spinBoxMaxHeight,
+        ui.labelWeight,
+        ui.spinBoxMinWeight,
+        ui.labelSep8,
+        ui.spinBoxMaxWeight,
+        ui.labelScale,
+        ui.spinBoxMinScale,
+        ui.labelSep9,
+        ui.spinBoxMaxScale,
+    };
 
     do_benchmarks(finder);
 }
@@ -136,12 +150,12 @@ void RaidCalc::add_options(QComboBox* combo, std::vector<std::pair<std::string, 
 
 void RaidCalc::toggle_ui(bool enabled)
 {
-    for (auto widget : ui.basicGroup->findChildren<QWidget*>())
+    for (auto widget : ui.basicGroup->findChildren<QWidget*>(Qt::FindDirectChildrenOnly))
         widget->setEnabled(enabled);
     bool is7 = ui.comboBoxStars->currentIndex() == 6;
-    for (auto widget : ui.pokemonGroup->findChildren<QWidget*>())
-        widget->setEnabled(enabled && !is7);
-    for (auto widget : ui.itemGroup->findChildren<QWidget*>())
+    for (auto widget : ui.pokemonGroup->findChildren<QWidget*>(Qt::FindDirectChildrenOnly))
+        widget->setEnabled(enabled && (widgets_might.find(widget) != widgets_might.end() || !is7));
+    for (auto widget : ui.itemGroup->findChildren<QWidget*>(Qt::FindDirectChildrenOnly))
         widget->setEnabled(enabled);
     ui.tableSeeds->setEnabled(enabled);
     ui.menuBar->setEnabled(enabled);
@@ -380,7 +394,7 @@ void RaidCalc::on_comboBoxEvent_currentIndexChanged(int index)
     ui.comboBoxSpecies->clear();
     add_options(ui.comboBoxSpecies, species_filters[index]);
     ui.comboBoxSpecies->setCurrentIndex(0);
-    for (auto widget : ui.pokemonGroup->findChildren<QWidget*>())
+    for (auto widget : ui.pokemonGroup->findChildren<QWidget*>(Qt::FindDirectChildrenOnly))
         widget->setEnabled(true);
 }
 
@@ -449,8 +463,8 @@ void RaidCalc::on_comboBoxStars_currentIndexChanged(int index)
     {
         set_event_group_visible(ui.comboBoxEventGroup->count() > 1);
     }
-    for (auto widget : ui.pokemonGroup->findChildren<QWidget*>())
-        widget->setEnabled(!is7);
+    for (auto widget : ui.pokemonGroup->findChildren<QWidget *>(Qt::FindDirectChildrenOnly))
+        widget->setEnabled(widgets_might.find(widget) != widgets_might.end() || !is7);
 }
 
 void RaidCalc::fix_progress(int stars)

@@ -84,4 +84,5 @@ private:
     SeedFinder finder;
     SeedFinder::BasicParams resultParams;
     std::vector<std::pair<std::string, uint32_t>> species_filters[_countof(event_names) + 1];
+    std::set<QWidget*> widgets_might;
 };

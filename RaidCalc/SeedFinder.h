@@ -184,6 +184,7 @@ private:
 	FORCEINLINE static uint32_t get_nature(Xoroshiro128Plus& gen, int32_t species, uint8_t form);
 	FORCEINLINE static uint32_t get_gender(Xoroshiro128Plus& gen, int32_t ratio);
 	FORCEINLINE static int32_t get_game_map_id(int32_t game_version, int32_t map);
+	FORCEINLINE static uint8_t get_scale(Xoroshiro128Plus &gen, const EncounterTera9 *enc);
 
 	HANDLE hFinderThread;
 	int32_t item_filters_count;
@@ -469,6 +470,20 @@ FORCEINLINE int32_t SeedFinder::get_game_map_id(int32_t game_version, int32_t ma
 	return 2 * map + game_version;
 }
 
+FORCEINLINE uint8_t SeedFinder::get_scale(Xoroshiro128Plus &gen, const EncounterTera9 *enc)
+{
+	static const uint64_t ceilings[] = { 0x00, 0x10, 0x20, 0xA0, 0x20, 0x10 };
+	static const uint8_t offsets[] = { 0x00, 0x00, 0x10, 0x30, 0xD0, 0xF0 };
+	uint8_t scale_type = enc->scale_type;
+	assert(scale_type <= (uint8_t)SizeType::VALUE);
+	if (scale_type == SizeType::RANDOM)
+		return gen.next_byte();
+	else if (scale_type == SizeType::VALUE)
+		return enc->scale;
+	else
+		return (uint8_t)(gen.next_int(ceilings[scale_type]) + offsets[scale_type]);
+}
+
 template<bool f_is6>
 FORCEINLINE const EncounterTera9* SeedFinder::get_encounter(uint32_t seed) const
 {
@@ -502,6 +517,19 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 	uint32_t EC = (uint32_t)gen.next_int();
 	uint32_t TIDSID = (uint32_t)gen.next_int();
 	uint32_t PID = (uint32_t)gen.next_int();
+	if constexpr (f_type == EncounterType::Might && f_advanced)
+	{
+		uint8_t height = gen.next_byte();
+		if (!height_map[height])
+			return false;
+		uint8_t weight = gen.next_byte();
+		if (!weight_map[weight])
+			return false;
+		uint8_t scale = get_scale(gen, enc);
+		if (!scale_map[scale])
+			return false;
+		return true;
+	}
 	if constexpr (f_shiny)
 	{
 		bool is_shiny = (((PID >> 16) ^ (PID & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
@@ -659,7 +687,8 @@ void SeedFinder::worker_thread(ThreadData& data)
 		{
 			enc = &encounters_might[event_id][0];
 		}
-		if constexpr (f_type != EncounterType::Might && (f_species || f_shiny || f_iv || f_advanced))
+		if constexpr ((f_type != EncounterType::Might && (f_species || f_shiny || f_iv || f_advanced)) ||
+					  (f_type == EncounterType::Might && f_advanced))
 		{
 			if (!check_pokemon<f_type, f_species, f_shiny, f_iv, f_advanced>(enc, seed))
 				continue;

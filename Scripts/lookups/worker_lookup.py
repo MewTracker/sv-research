@@ -11,4 +11,8 @@ if __name__ == "__main__":
     for worker in product(['false', 'true'], repeat=5):
         lookup += '    worker_thread_wrapper<EncounterType::Dist, false, %s>,\n' % ', '.join(worker)
     lookup += '};\n'
+    lookup += 'static const LPTHREAD_START_ROUTINE workers_might[] =\n{\n'
+    for worker in product(['false', 'true'], repeat=2):
+        lookup += '    worker_thread_wrapper<EncounterType::Might, false, false, false, false, %s>,\n' % ', '.join(worker)
+    lookup += '};\n'
     print(lookup)
