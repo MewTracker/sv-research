@@ -32,4 +32,5 @@ static const char *event_names[] =
     "Mismagius Spotlight",
     "Typhlosion the Unrivaled (Hisuian)",
     "Eevee the Unrivaled",
+    "Samurott the Unrivaled (Hisuian)",
 };
