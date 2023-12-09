@@ -143,6 +143,7 @@ bool SeedFinder::initialize_encounters(const char *file_name, EncounterLists &li
 		assert(enc.stars > 0 && enc.stars < 7);
 		assert(enc.tera_type == GemType::Random);
 		assert(enc.shiny == Shiny::Random);
+		assert(enc.nature == _countof(nature_names));
 		lists[enc.stars].push_back(enc);
 	}
 	compute_fast_encounter_lookups(lists, map);
@@ -172,6 +173,8 @@ bool SeedFinder::initialize_event_encounters(const char *file_name, EncounterTyp
 			assert(enc.stars > 0 && enc.stars < 8);
 			assert(enc.tera_type != GemType::Default);
 			assert(enc.stars == 7 || enc.shiny == Shiny::Random || enc.shiny == Shiny::Never);
+			assert(enc.stars != 7 || enc.gender >= 0);
+			assert(enc.stars != 7 || enc.nature != _countof(nature_names));
 			assert(enc.stars != 7 || enc.shiny == Shiny::Never);
 			assert(enc.stars != 7 || (enc.ability != AbilityPermission::Any12H && enc.ability != AbilityPermission::Any12));
 			lists[i].push_back(enc);
@@ -734,6 +737,7 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 			   enc->ability == AbilityPermission::OnlySecond ||
 			   enc->ability == AbilityPermission::OnlyHidden);
 		assert(enc->gender >= 0);
+		assert(enc->nature != _countof(nature_names));
 		info.tera_type = (uint8_t)enc->tera_type - 2;
 		info.shiny = false;
 		memcpy(info.iv, enc->iv, sizeof(info.iv));
@@ -773,7 +777,7 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 		memcpy(info.iv, ivs, sizeof(info.iv));
 		info.ability = (uint16_t)get_ability(gen, enc->ability, *enc->personal_info);
 		info.gender = (uint8_t)get_gender(gen, enc->personal_info->gender);
-		info.nature = (uint8_t)get_nature(gen, info.species, enc->form);
+		info.nature = (uint8_t)get_nature(gen, enc);
 		info.height = gen.next_byte();
 		info.weight = gen.next_byte();
 		info.scale = enc->scale_type == SizeType::RANDOM ? gen.next_byte() : enc->scale;

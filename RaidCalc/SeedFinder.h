@@ -181,7 +181,8 @@ private:
 	FORCEINLINE static uint32_t get_tera_type(uint32_t seed);
 	FORCEINLINE static uint32_t get_tera_type(const EncounterTera9* enc, uint32_t seed);
 	FORCEINLINE static uint32_t get_ability(Xoroshiro128Plus& gen, AbilityPermission permission, PersonalInfo9SV& personal_info);
-	FORCEINLINE static uint32_t get_nature(Xoroshiro128Plus& gen, int32_t species, uint8_t form);
+	FORCEINLINE static uint32_t get_nature(Xoroshiro128Plus &gen, const EncounterTera9* enc);
+	FORCEINLINE static uint32_t get_nature_unsafe(Xoroshiro128Plus &gen, const EncounterTera9* enc);
 	FORCEINLINE static uint32_t get_gender(Xoroshiro128Plus& gen, int32_t ratio);
 	FORCEINLINE static int32_t get_game_map_id(int32_t game_version, int32_t map);
 	FORCEINLINE static uint8_t get_scale(Xoroshiro128Plus &gen, const EncounterTera9 *enc);
@@ -350,9 +351,18 @@ FORCEINLINE uint32_t SeedFinder::get_ability(Xoroshiro128Plus& gen, AbilityPermi
 	return personal_info.ability[ability_index >> 1];
 }
 
-FORCEINLINE uint32_t SeedFinder::get_nature(Xoroshiro128Plus& gen, int32_t species, uint8_t form)
+FORCEINLINE uint32_t SeedFinder::get_nature(Xoroshiro128Plus& gen, const EncounterTera9 *enc)
 {
-	return (uint32_t)(species == ToxtricityId ? get_toxtricity_nature(gen, form) : (int32_t)gen.next_int(25));
+	if (enc->nature != _countof(nature_names))
+		return enc->nature;
+	if (enc->species == ToxtricityId)
+		return (uint32_t)get_toxtricity_nature(gen, enc->form);
+	return (uint32_t)gen.next_int(25);
+}
+
+FORCEINLINE uint32_t SeedFinder::get_nature_unsafe(Xoroshiro128Plus &gen, const EncounterTera9 *enc)
+{
+	return (uint32_t)(enc->species == ToxtricityId ? get_toxtricity_nature(gen, enc->form) : (int32_t)gen.next_int(25));
 }
 
 FORCEINLINE uint32_t SeedFinder::get_gender(Xoroshiro128Plus& gen, int32_t ratio)
@@ -598,7 +608,11 @@ FORCEINLINE bool SeedFinder::check_pokemon(const EncounterTera9* enc, uint32_t s
 	uint32_t current_gender = get_gender(gen, personal_info->gender);
 	if (gender && current_gender != gender - 1)
 		return false;
-	uint32_t current_nature = get_nature(gen, enc->species, enc->form);
+	uint32_t current_nature;
+	if constexpr (f_type == EncounterType::Dist)
+		current_nature = get_nature(gen, enc);
+	else
+		current_nature = get_nature_unsafe(gen, enc);
 	if (nature && current_nature != nature - 1)
 		return false;
 	if (!size_filters_in_use)

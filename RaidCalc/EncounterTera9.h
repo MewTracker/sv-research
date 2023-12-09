@@ -3,6 +3,7 @@
 #include <cstdint>
 #include "RaidRewards.h"
 #include "PersonalInfo9SV.h"
+#include "PokemonNames.h"
 
 enum Game
 {
@@ -117,6 +118,7 @@ public:
 			rand_rate_min[1] = *(int16_t*)&data[0x16];
 			fixed_table_id = *(uint64_t*)&data[0x18];
 			lottery_table_id = *(uint64_t*)&data[0x20];
+			nature = _countof(nature_names);
 			break;
 		case EncounterType::Dist:
 		case EncounterType::Might:

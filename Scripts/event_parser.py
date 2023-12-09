@@ -58,7 +58,7 @@ def parse_event(path):
         # This is a hack to support overlapping events
         if not is_might_event and difficulty == 7:
             continue
-        if difficulty != 7 and boss['Seikaku'] != 0:
+        if difficulty == 7 and boss['Seikaku'] == 0:
             raise ValueError("Unexpected nature")
         if difficulty != 7 and boss['ScaleType'] not in [0, 6]:
             raise ValueError("Unexpected scale type")
