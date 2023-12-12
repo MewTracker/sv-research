@@ -691,7 +691,7 @@ bool SeedFinder::use_iv_filters() const
 bool SeedFinder::use_pokemon_filters() const
 {
 	if (stars == 7)
-		return false;
+		return use_size_filters();
 	if (species != 0 || shiny != 0)
 		return true;
 	if (use_iv_filters() || use_advanced_filters())
