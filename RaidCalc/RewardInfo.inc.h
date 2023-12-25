@@ -49,6 +49,7 @@ static const RewardInfo reward_info[] =
     { 280, "Destiny Knot" },
     { 342, "TM15" },
     { 357, "TM30" },
+    { 379, "TM52" },
     { 391, "TM64" },
     { 393, "TM66" },
     { 401, "TM74" },

@@ -34,4 +34,5 @@ static const char *event_names[] =
     "Eevee the Unrivaled",
     "Samurott the Unrivaled (Hisuian)",
     "Dialga and Palkia Spotlight",
+    "Iron Bundle the Unrivaled",
 };
