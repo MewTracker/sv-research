@@ -1,7 +1,9 @@
 #include <cstdlib>
 #include "SpeciesConverter.h"
 
-int8_t SpeciesConverter::table_national_to_internal[94] =
+static constexpr int8_t UNK = 111;
+
+int8_t SpeciesConverter::table_national_to_internal[109] =
 {
       1,   1,   1,   1,  33,  33,  33,  21,  21,  44,
      44,   7,   7,   7,  29,  31,  31,  31,  68,  68,
@@ -12,10 +14,11 @@ int8_t SpeciesConverter::table_national_to_internal[94] =
     -46, -26,  31,  29, -53, -65,  25,  -6,  -3,  -7,
      -4,  -4,  -8,  -4,   1,  -3,  -3,  -6,  -4, -47,
     -47, -47, -23, -23,  -5,  -7,  -9,  -7, -20, -13,
-     -9,  -9, -29, -23,
+     -9,  -9, -29, -23,   1,  12,  12,   0,   0,   0,
+     -6,   5,  -6,  -3,  -3,  -2,  -4,  -3,  -3,
 };
 
-int8_t SpeciesConverter::table_internal_to_national[94] =
+int8_t SpeciesConverter::table_internal_to_national[109] =
 {
      65,  -1,  -1,  -1,  -1,  31,  31,  47,  47,  29,
      29,  53,  31,  31,  46,  44,  30,  30,  -7,  -7,
@@ -26,7 +29,8 @@ int8_t SpeciesConverter::table_internal_to_national[94] =
      23,   6,   7,  29,   8,   3,   4,   4,  20,   4,
      23,   6,   3,   3,   4,  -1,  13,   9,   7,   5,
       7,   9,   9, -43, -43, -43, -68, -68, -68, -58,
-    -58, -25, -29, -31,
+    -58, -25, -29, -31,   6,  -1,   6,   0,   0,   0,
+      3,   3,   4,   2,   3,   3,  -5, -12, -12,
 };
 
 uint16_t SpeciesConverter::get_internal(uint16_t species)

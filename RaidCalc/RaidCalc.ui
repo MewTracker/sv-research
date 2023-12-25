@@ -261,6 +261,11 @@
              <string>Kitakami (Teal Mask)</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>Blueberry (Indigo Disk)</string>
+            </property>
+           </item>
           </widget>
          </item>
         </layout>

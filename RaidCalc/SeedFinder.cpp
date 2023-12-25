@@ -7,13 +7,13 @@
 #include "FormUtils.h"
 #include "Utils.h"
 
-SeedFinder::EncounterLists SeedFinder::encounters[2];
+SeedFinder::EncounterLists SeedFinder::encounters[3];
 SeedFinder::EncounterListsEvents SeedFinder::encounters_dist;
 SeedFinder::EncounterListsEvents SeedFinder::encounters_might;
 std::vector<std::vector<uint8_t>> SeedFinder::fast_lottery_lookup;
-std::vector<std::vector<uint8_t>> SeedFinder::fast_encounter_lookup[4];
-std::vector<uint8_t> SeedFinder::fast_encounter_lookup_dist[2];
-std::vector<uint8_t> SeedFinder::fast_encounter_lookup_might[2];
+std::vector<std::vector<uint8_t>> SeedFinder::fast_encounter_lookup[6];
+std::vector<uint8_t> SeedFinder::fast_encounter_lookup_dist[3];
+std::vector<uint8_t> SeedFinder::fast_encounter_lookup_might[3];
 SeedFinder::GroupInfo SeedFinder::event_groups[_countof(event_names)];
 
 SeedFinder::SeedFinder() :
@@ -62,6 +62,7 @@ bool SeedFinder::initialize()
 	compute_fast_lottery_lookups();
 	if (!initialize_encounters(":/resources/encounter_gem_paldea.pklex", encounters[0], MapPaldea) ||
 		!initialize_encounters(":/resources/encounter_gem_kitakami.pklex", encounters[1], MapKitakami) ||
+		!initialize_encounters(":/resources/encounter_gem_blueberry.pklex", encounters[2], MapBlueberry) ||
 		!initialize_event_encounters(":/resources/encounter_dist_paldea.pklex", EncounterType::Dist, encounters_dist) ||
 		!initialize_event_encounters(":/resources/encounter_might_paldea.pklex", EncounterType::Might, encounters_might))
 	{

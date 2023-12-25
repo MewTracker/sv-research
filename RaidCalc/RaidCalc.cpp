@@ -436,7 +436,10 @@ void RaidCalc::on_comboBoxStars_currentIndexChanged(int index)
             SpeciesFilter filter;
             filter.value = 0;
             filter.species = info.species;
-            filter.any_form = 1;
+            if (FormUtils::get_forms(info.species).empty())
+                filter.any_form = 1;
+            else
+                filter.form = info.form;
             select_option(ui.comboBoxSpecies, filter.value);
             select_option(ui.comboBoxTeraType, info.tera_type + 1);
             select_option(ui.comboBoxAbility, info.ability);

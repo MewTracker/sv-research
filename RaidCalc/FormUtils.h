@@ -125,6 +125,38 @@ public:
 			};
 			return sinistcha_forms[form];
 		}
+		case Sandshrew:
+		case Vulpix:
+		case Ninetales:
+		case Diglett:
+		case Dugtrio:
+		case Geodude:
+		case Golem:
+		case Grimer:
+		case Muk:
+		case Exeggutor:
+			if (form != 1)
+				return "";
+			return "Alolan";
+		case Slowpoke:
+		case Slowking:
+			if (form != 1)
+				return "";
+			return "Galarian";
+		case Slowbro:
+			if (form != 2)
+				return "";
+			return "Galarian";
+		case Typhlosion:
+		case Samurott:
+		case Decidueye:
+			if (form != 1)
+				return "";
+			return "Hisuian";
+		case Wooper:
+			if (form != 1)
+				return "";
+			return "Paldean";
 		default:
 			return "";
 		}
@@ -136,18 +168,37 @@ public:
 		{
 		case Tauros:
 			return { 1, 2, 3 };
+		case Sandshrew:
+		case Vulpix:
+		case Ninetales:
+		case Diglett:
+		case Dugtrio:
+		case Geodude:
+		case Golem:
+		case Slowpoke:
+		case Grimer:
+		case Muk:
+		case Exeggutor:
+		case Typhlosion:
+		case Wooper:
+		case Slowking:
 		case Shellos:
 		case Gastrodon:
+		case Samurott:
+		case Decidueye:
 		case Toxtricity:
 		case Maushold:
 		case Sinistcha:
 			return { 0, 1 };
+		case Meowstic:
 		case Indeedee:
 		case Oinkologne:
 		case Basculegion:
 			if (!include_gender_forms)
 				return {};
 			return { 0, 1 };
+		case Slowbro:
+			return { 0, 2 };
 		case Lycanroc:
 		case Tatsugiri:
 			return { 0, 1, 2 };
@@ -173,11 +224,29 @@ public:
 private:
 	enum FormSpecies
 	{
+		Sandshrew = 27,
+		Vulpix = 37,
+		Ninetales = 38,
+		Diglett = 50,
+		Dugtrio = 51,
+		Geodude = 74,
+		Golem = 76,
+		Slowpoke = 79,
+		Slowbro = 80,
+		Grimer = 88,
+		Muk = 89,
+		Exeggutor = 103,
 		Tauros = 128,
+		Typhlosion = 157,
+		Wooper = 194,
+		Slowking = 199,
 		Dunsparce = 206,
 		Shellos = 422,
 		Gastrodon = 423,
+		Samurott = 503,
 		Basculin = 550,
+		Meowstic = 678,
+		Decidueye = 724,
 		Lycanroc = 745,
 		Toxtricity = 849,
 		Indeedee = 876,

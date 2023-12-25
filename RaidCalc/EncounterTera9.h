@@ -16,6 +16,7 @@ enum Map
 	MapInvalid = -1,
 	MapPaldea,
 	MapKitakami,
+	MapBlueberry,
 };
 
 enum class AbilityPermission
@@ -59,6 +60,7 @@ enum class GemType : int8_t
 	Dragon = 17,
 	Dark = 18,
 	Fairy = 19,
+	Stellar = 20,
 };
 
 enum class EncounterType
@@ -105,6 +107,7 @@ public:
 		moves[2] = *(uint16_t*)&data[0x0C];
 		moves[3] = *(uint16_t*)&data[0x0E];
 		tera_type = (GemType)data[0x10];
+		assert(static_cast<int8_t>(tera_type) < static_cast<int8_t>(GemType::Stellar));
 		group = data[0x11];
 		stars = data[0x12];
 		rand_rate = data[0x13];

@@ -1,6 +1,8 @@
 #include <QtGlobal>
 #include <cstdio>
 #include <string>
+#include <map>
+#include <set>
 #include "Benchmarks.h"
 #include "Stopwatch.h"
 #include "PokemonNames.h"
@@ -124,7 +126,8 @@ __declspec(noinline) void Benchmarks::do_rewards_bench(SeedFinder& finder)
 void Benchmarks::run(SeedFinder& finder)
 {
     // TODO: Better place for this?
-    dump_personal_table();
+    dump_forms();
+    //dump_personal_table();
     return;
     do_tests(finder);
     return;
@@ -227,5 +230,27 @@ void Benchmarks::dump_personal_table()
             name += "_form" + std::to_string(j);
             dump_personal_info(name, table.get_form_entry(species, j));
         }
+    }
+}
+
+void Benchmarks::dump_forms()
+{
+    std::map<uint16_t, std::set<uint8_t>> forms;
+    auto visitor = [&](const EncounterTera9 &enc, Map map) { forms[enc.species].insert(enc.form); };
+    SeedFinder::visit_encounters(-1, visitor);
+    for (int32_t i = 0; i < _countof(event_names); ++i)
+        SeedFinder::visit_encounters(i, visitor);
+    auto &table = PersonalTable9SV::instance();
+    for (auto &pair : forms)
+    {
+        auto &personal = table[pair.first];
+        //if (personal.form_count == 1)
+        if (pair.second.size() == 1)
+            continue;
+        std::string form_string;
+        for (auto form : pair.second)
+            form_string += std::to_string(form) + ",";
+        form_string.pop_back();
+        qInfo("%s(%d,%d): %s", pokemon_names[pair.first], pair.first, personal.form_count, form_string.c_str());
     }
 }

@@ -3,6 +3,7 @@
         <file>resources/personal_sv</file>
         <file>resources/encounter_gem_paldea.pklex</file>
         <file>resources/encounter_gem_kitakami.pklex</file>
+		<file>resources/encounter_gem_blueberry.pklex</file>
         <file>resources/encounter_dist_paldea.pklex</file>
         <file>resources/encounter_might_paldea.pklex</file>
     </qresource>

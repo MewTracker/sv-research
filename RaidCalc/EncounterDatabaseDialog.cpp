@@ -38,7 +38,7 @@ void EncounterDatabaseDialog::on_comboBoxSpecies_currentIndexChanged(int index)
             switch (enc.type)
             {
             case EncounterType::Gem:
-                if (enc.rand_rate_min[ver] <= 0)
+                if (enc.rand_rate_min[ver] < 0)
                     continue;
                 break;
             case EncounterType::Dist:

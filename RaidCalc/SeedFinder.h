@@ -201,24 +201,26 @@ private:
 	bool weight_map[256];
 	bool scale_map[256];
 
-	static EncounterLists encounters[2];
+	static EncounterLists encounters[3];
 	static EncounterListsEvents encounters_dist;
 	static EncounterListsEvents encounters_might;
 	static std::vector<std::vector<uint8_t>> fast_lottery_lookup;
-	static std::vector<std::vector<uint8_t>> fast_encounter_lookup[4];
-	static std::vector<uint8_t> fast_encounter_lookup_dist[2];
-	static std::vector<uint8_t> fast_encounter_lookup_might[2];
+	static std::vector<std::vector<uint8_t>> fast_encounter_lookup[6];
+	static std::vector<uint8_t> fast_encounter_lookup_dist[3];
+	static std::vector<uint8_t> fast_encounter_lookup_might[3];
 	static GroupInfo event_groups[_countof(event_names)];
 };
 
 FORCEINLINE int16_t SeedFinder::get_rate_total_base(int32_t index, size_t star)
 {
-	static const int16_t rates[4][7] =
+	static const int16_t rates[6][7] =
 	{
 		{ 0, 5800, 5300, 7400, 8800, 9100, 6500 },
 		{ 0, 5800, 5300, 7400, 8700, 9100, 6500 },
 		{ 0, 1500, 1500, 2500, 2100, 2250, 2475 },
 		{ 0, 1500, 1500, 2500, 2100, 2250, 2574 },
+		{ 0, 1100, 1100, 2000, 1900, 2100, 2600 },
+		{ 0, 1100, 1100, 2000, 1900, 2100, 2600 },
 	};
 	assert(star > 0 && star < _countof(rates[0]));
 	return rates[index][star];
