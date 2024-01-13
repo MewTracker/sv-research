@@ -35,4 +35,5 @@ static const char *event_names[] =
     "Samurott the Unrivaled (Hisuian)",
     "Dialga and Palkia Spotlight",
     "Iron Bundle the Unrivaled",
+    "Blaziken the Unrivaled",
 };
