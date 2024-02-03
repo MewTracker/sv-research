@@ -125,7 +125,31 @@ public:
 			};
 			return sinistcha_forms[form];
 		}
+		case Minior:
+		{
+			if (form != 7) // Restrict to obtainable form
+				return "";
+			static const char *minior_forms[] =
+			{
+				"Red Meteor",
+				"Orange Meteor",
+				"Yellow Meteor",
+				"Green Meteor",
+				"Blue Meteor",
+				"Indigo Meteor",
+				"Violet Meteor",
+				"Red Core",
+				"Orange Core",
+				"Yellow Core",
+				"Green Core",
+				"Blue Core",
+				"Indigo Core",
+				"Violet Core",
+			};
+			return minior_forms[form];
+		}
 		case Sandshrew:
+		case Sandslash:
 		case Vulpix:
 		case Ninetales:
 		case Diglett:
@@ -204,6 +228,10 @@ public:
 			return { 0, 1, 2 };
 		case Basculin:
 			return { 2 };
+		case Sandslash:
+			return { 1 };
+		case Minior:
+			return { 7 };
 		default:
 			return {};
 		}
@@ -225,6 +253,7 @@ private:
 	enum FormSpecies
 	{
 		Sandshrew = 27,
+		Sandslash = 28,
 		Vulpix = 37,
 		Ninetales = 38,
 		Diglett = 50,
@@ -248,6 +277,7 @@ private:
 		Meowstic = 678,
 		Decidueye = 724,
 		Lycanroc = 745,
+		Minior = 774,
 		Toxtricity = 849,
 		Indeedee = 876,
 		Basculegion = 902,
