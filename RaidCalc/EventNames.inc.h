@@ -36,4 +36,5 @@ static const char *event_names[] =
     "Dialga and Palkia Spotlight",
     "Iron Bundle the Unrivaled",
     "Blaziken the Unrivaled",
+    "Flutter Mane and Iron Jugulis Spotlight",
 };
