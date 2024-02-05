@@ -37,4 +37,5 @@ static const char *event_names[] =
     "Iron Bundle the Unrivaled",
     "Blaziken the Unrivaled",
     "Flutter Mane and Iron Jugulis Spotlight",
+    "Empoleon the Unrivaled",
 };
