@@ -39,4 +39,5 @@ static const char *event_names[] =
     "Flutter Mane and Iron Jugulis Spotlight",
     "Empoleon the Unrivaled",
     "Valentines Day 2024",
+    "Hard to Find Pokemon",
 };
