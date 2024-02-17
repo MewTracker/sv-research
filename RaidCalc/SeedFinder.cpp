@@ -725,7 +725,7 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 		return info;
 	}
 	if (enc->type == EncounterType::Gem)
-		info.stars = stars < 6 ? get_star_count(seed, stage, event_id, game) : 6;
+		info.stars = stars < 6 ? get_star_count(seed, stage, event_id, event_group, game) : 6;
 	else
 		info.stars = enc->stars;
 	info.species = enc->species;
@@ -825,21 +825,23 @@ void SeedFinder::visit_encounters(int32_t event_id, std::function<EncounterVisit
 	}
 }
 
-int SeedFinder::get_star_count(uint32_t seed, int32_t progress, int32_t event_id, Game game)
+int SeedFinder::get_star_count(uint32_t seed, int32_t progress, int32_t event_id, int32_t event_group, Game game)
 {
 	if (event_id < 0)
 	{
 		Xoroshiro128Plus gen(seed);
 		return get_star_count(gen, progress);
 	}
+	Xoroshiro128Plus gen(seed);
+	gen.next_int(100);
 	for (auto& enc : encounters_dist[event_id])
 	{
-		Xoroshiro128Plus gen(seed);
-		gen.next_int(100);
+		if (enc.group != event_group)
+			continue;
 		auto& rand_rate_data = enc.rand_rate_event[progress][game];
 		if (rand_rate_data.total == 0)
 			continue;
-		uint64_t val = gen.next_int(rand_rate_data.total);
+		uint64_t val = Xoroshiro128Plus(gen).next_int(rand_rate_data.total);
 		if ((uint32_t)((int32_t)val - rand_rate_data.min) < enc.rand_rate)
 			return enc.stars;
 	}

@@ -38,4 +38,5 @@ static const char *event_names[] =
     "Blaziken the Unrivaled",
     "Flutter Mane and Iron Jugulis Spotlight",
     "Empoleon the Unrivaled",
+    "Valentines Day 2024",
 };

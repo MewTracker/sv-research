@@ -73,7 +73,7 @@ public:
 	void set_basic_params(const BasicParams& params);
 
 	static bool initialize();
-	static int get_star_count(uint32_t seed, int32_t progress, int32_t event_id, Game game);
+	static int get_star_count(uint32_t seed, int32_t progress, int32_t event_id, int32_t event_group, Game game);
 	static void visit_encounters(int32_t event_id, std::function<EncounterVisitor> visitor);
 	static bool is_mighty_event(int32_t event_id);
 	static const GroupInfo* get_event_info(int32_t event_id);

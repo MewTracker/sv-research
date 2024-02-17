@@ -26,7 +26,7 @@ __declspec(noinline) void Benchmarks::generate_test_data(SeedFinder& finder, int
     finder.raid_boost = raid_boost;
     for (uint32_t seed = 0; seed < 100000; ++seed)
     {
-        finder.stars = is6 ? 6 : SeedFinder::get_star_count(seed, progress, -1, GameScarlet);
+        finder.stars = is6 ? 6 : SeedFinder::get_star_count(seed, progress, -1, 0, GameScarlet);
         SeedFinder::SeedInfo info = finder.get_seed_info(seed);
         auto rewards = finder.get_all_rewards(seed);
         std::string pokemon;

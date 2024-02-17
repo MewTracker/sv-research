@@ -171,7 +171,7 @@ void SeedViewerDialog::refresh_ui()
 	finder.event_group = ui.comboBoxEventGroup->currentData().toUInt();
 	finder.stage = ui.comboBoxStage->currentIndex();
 	finder.raid_boost = ui.spinBoxRaidBoost->value();
-	finder.stars = ui.comboBoxRaidType->currentIndex() == 1 ? (finder.event_id < 0 ? 6 : 7) : SeedFinder::get_star_count(current_seed, finder.stage, finder.event_id, finder.game);
+	finder.stars = ui.comboBoxRaidType->currentIndex() == 1 ? (finder.event_id < 0 ? 6 : 7) : SeedFinder::get_star_count(current_seed, finder.stage, finder.event_id, finder.event_group, finder.game);
 	SeedFinder::SeedInfo info = finder.get_seed_info(current_seed);
 	if (info.species == 0)
 	{
