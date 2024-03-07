@@ -41,4 +41,5 @@ static const char *event_names[] =
     "Valentines Day 2024",
     "Hard to Find Pokemon",
     "Venusaur the Unrivaled",
+    "Blastoise the Unrivaled",
 };
