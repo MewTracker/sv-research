@@ -43,4 +43,5 @@ static const char *event_names[] =
     "Venusaur the Unrivaled",
     "Blastoise the Unrivaled",
     "Charizard the Unrivaled (rerun)",
+    "Brute Bonnet and Iron Hands Spotlight",
 };
