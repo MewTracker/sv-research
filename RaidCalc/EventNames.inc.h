@@ -42,4 +42,5 @@ static const char *event_names[] =
     "Hard to Find Pokemon",
     "Venusaur the Unrivaled",
     "Blastoise the Unrivaled",
+    "Charizard the Unrivaled (rerun)",
 };
