@@ -52,6 +52,7 @@ static const RewardInfo reward_info[] =
     { 379, "TM52" },
     { 391, "TM64" },
     { 393, "TM66" },
+    { 398, "TM71" },
     { 401, "TM74" },
     { 402, "TM75" },
     { 415, "TM88" },
