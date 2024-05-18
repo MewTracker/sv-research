@@ -45,4 +45,5 @@ static const char *event_names[] =
     "Charizard the Unrivaled (rerun)",
     "Brute Bonnet and Iron Hands Spotlight",
     "Meganium the Unrivaled",
+    "Walking Wake and Iron Leaves Spotlight (rerun)",
 };
