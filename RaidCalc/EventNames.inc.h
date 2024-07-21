@@ -48,4 +48,5 @@ static const char *event_names[] =
     "Walking Wake and Iron Leaves Spotlight (rerun)",
     "Primarina the Unrivaled",
     "Sandy Shocks and Iron Thorns Spotlight",
+    "Swampert the Unrivaled",
 };
