@@ -49,4 +49,5 @@ static const char *event_names[] =
     "Primarina the Unrivaled",
     "Sandy Shocks and Iron Thorns Spotlight",
     "Swampert the Unrivaled",
+    "Emboar the Unrivaled",
 };
