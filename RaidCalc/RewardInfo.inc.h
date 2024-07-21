@@ -152,6 +152,7 @@ static const RewardInfo reward_info[] =
     { 2224, "TM164" },
     { 2229, "TM169" },
     { 2274, "TM214" },
+    { 2282, "TM222" },
     { 10000, "Material" },
     { 20000, "Tera Shard" },
 };
