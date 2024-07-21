@@ -51,4 +51,5 @@ static const char *event_names[] =
     "Swampert the Unrivaled",
     "Emboar the Unrivaled",
     "Sceptile the Unrivaled",
+    "Pikachu the Unrivaled (rerun)",
 };
