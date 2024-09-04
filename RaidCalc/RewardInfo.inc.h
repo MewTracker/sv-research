@@ -152,6 +152,7 @@ static const RewardInfo reward_info[] =
     { 2219, "TM159" },
     { 2224, "TM164" },
     { 2229, "TM169" },
+    { 2260, "TM200" },
     { 2274, "TM214" },
     { 2282, "TM222" },
     { 10000, "Material" },
