@@ -55,4 +55,5 @@ static const char *event_names[] =
     "Dondozo the Unrivaled",
     "Gimmighoul Spotlight (rerun)",
     "Dragonite the Unrivaled",
+    "Inceneroar the Unrivaled",
 };
