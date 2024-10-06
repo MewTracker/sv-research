@@ -56,4 +56,5 @@ static const char *event_names[] =
     "Gimmighoul Spotlight (rerun)",
     "Dragonite the Unrivaled",
     "Inceneroar the Unrivaled",
+    "Serperior the Unrivaled",
 };
