@@ -136,6 +136,7 @@ static const RewardInfo reward_info[] =
     { 1940, "Pineapple" },
     { 2160, "TM100" },
     { 2167, "TM107" },
+    { 2172, "TM112" },
     { 2174, "TM114" },
     { 2182, "TM122" },
     { 2183, "TM123" },

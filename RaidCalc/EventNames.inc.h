@@ -57,4 +57,5 @@ static const char *event_names[] =
     "Dragonite the Unrivaled",
     "Inceneroar the Unrivaled",
     "Serperior the Unrivaled",
+    "Infernape the Unrivaled",
 };
