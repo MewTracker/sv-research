@@ -59,4 +59,5 @@ static const char *event_names[] =
     "Serperior the Unrivaled",
     "Infernape the Unrivaled",
     "Hard to Find Pokemon (rerun)",
+    "Gengar Spotlight",
 };
