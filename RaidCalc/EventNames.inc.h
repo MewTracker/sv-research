@@ -58,4 +58,5 @@ static const char *event_names[] =
     "Inceneroar the Unrivaled",
     "Serperior the Unrivaled",
     "Infernape the Unrivaled",
+    "Hard to Find Pokemon (rerun)",
 };
