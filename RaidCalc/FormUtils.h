@@ -58,7 +58,7 @@ public:
 		}
 		case Basculin:
 		{
-			if (form != 2) // Restrict to obtainable form
+			if (form != 0 && form != 2)
 				return "";
 			static const char* basculin_forms[] =
 			{
@@ -127,7 +127,7 @@ public:
 		}
 		case Minior:
 		{
-			if (form != 7) // Restrict to obtainable form
+			if (form != 7)
 				return "";
 			static const char *minior_forms[] =
 			{
@@ -222,12 +222,11 @@ public:
 				return {};
 			return { 0, 1 };
 		case Slowbro:
+		case Basculin:
 			return { 0, 2 };
 		case Lycanroc:
 		case Tatsugiri:
 			return { 0, 1, 2 };
-		case Basculin:
-			return { 2 };
 		case Sandslash:
 			return { 1 };
 		case Minior:
