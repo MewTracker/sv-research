@@ -10,7 +10,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
       with:
         msbuild-architecture: x64
         vs-version: '[17,]'
@@ -46,7 +46,7 @@ jobs:
       run: windeployqt --release --no-svg --no-translations --no-system-d3d-compiler --no-opengl-sw x64\Release
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: RaidCalc
         path: |
