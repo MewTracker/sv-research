@@ -62,4 +62,5 @@ static const char *event_names[] =
     "Gengar Spotlight",
     "Feraligatr the Unrivaled",
     "Torterra the Unrivaled",
+    "Worthy Corviknight and Bellibolt",
 };
