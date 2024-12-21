@@ -64,4 +64,5 @@ static const char *event_names[] =
     "Torterra the Unrivaled",
     "Worthy Corviknight and Bellibolt",
     "Worthy Azumarill and Clodsire",
+    "Worthy Annihilape and Kingambit",
 };
