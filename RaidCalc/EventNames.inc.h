@@ -65,4 +65,5 @@ static const char *event_names[] =
     "Worthy Corviknight and Bellibolt",
     "Worthy Azumarill and Clodsire",
     "Worthy Annihilape and Kingambit",
+    "Shiny Rayquaza Appears",
 };

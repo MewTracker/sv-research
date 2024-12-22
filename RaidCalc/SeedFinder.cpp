@@ -173,7 +173,7 @@ bool SeedFinder::initialize_event_encounters(const char *file_name, EncounterTyp
 			assert(enc.fixed_drops && enc.lottery_drops);
 			assert(enc.stars > 0 && enc.stars < 8);
 			assert(enc.tera_type != GemType::Default);
-			assert(enc.stars == 7 || enc.shiny == Shiny::Random || enc.shiny == Shiny::Never);
+			assert(enc.stars == 7 || enc.shiny == Shiny::Random || enc.shiny == Shiny::Never || enc.shiny == Shiny::Always);
 			assert(enc.stars != 7 || enc.gender >= 0);
 			assert(enc.stars != 7 || enc.nature != _countof(nature_names));
 			assert(enc.stars != 7 || enc.shiny == Shiny::Never);
@@ -753,6 +753,8 @@ SeedFinder::SeedInfo SeedFinder::get_seed_info(uint32_t seed) const
 	{
 		info.tera_type = (uint8_t)get_tera_type(enc, seed);
 		info.shiny = (((info.pid >> 16) ^ (info.pid & 0xFFFF)) >> 4) == (((TIDSID >> 16) ^ (TIDSID & 0xFFFF)) >> 4);
+		bool shiny_rates[] = { info.shiny, false, true };
+		info.shiny = shiny_rates[static_cast<int>(enc->shiny)];
 		int8_t ivs[6] = { -1, -1, -1, -1, -1, -1 };
 		if (enc->iv_fixed)
 		{
