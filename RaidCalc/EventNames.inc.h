@@ -67,4 +67,5 @@ static const char *event_names[] =
     "Worthy Annihilape and Kingambit",
     "Shiny Rayquaza Appears",
     "Alolan Exeggutor Spotlight",
+    "Scream Tail and Iron Bundle Spotlight",
 };
