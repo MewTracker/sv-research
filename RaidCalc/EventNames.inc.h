@@ -68,4 +68,5 @@ static const char *event_names[] =
     "Shiny Rayquaza Appears",
     "Alolan Exeggutor Spotlight",
     "Scream Tail and Iron Bundle Spotlight",
+    "Milcery Spotlight",
 };
