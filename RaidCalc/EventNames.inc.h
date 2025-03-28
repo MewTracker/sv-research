@@ -71,4 +71,5 @@ static const char *event_names[] =
     "Milcery Spotlight",
     "Meowscarada the Unrivaled",
     "Skeledirge the Unrivaled",
+    "Quaquaval the Unrivaled",
 };
