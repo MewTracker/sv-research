@@ -70,4 +70,5 @@ static const char *event_names[] =
     "Scream Tail and Iron Bundle Spotlight",
     "Milcery Spotlight",
     "Meowscarada the Unrivaled",
+    "Skeledirge the Unrivaled",
 };
