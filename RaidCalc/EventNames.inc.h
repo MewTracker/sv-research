@@ -74,4 +74,5 @@ static const char *event_names[] =
     "Quaquaval the Unrivaled",
     "Tyranitar the Unrivaled",
     "Salamence the Unrivaled",
+    "Metagross the Unrivaled",
 };

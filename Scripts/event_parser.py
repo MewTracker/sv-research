@@ -5,6 +5,8 @@ from struct import *
 from pathlib import Path
 
 IRON_BUNDLE = 992
+METAGROSS = 376
+GENDERLESS = [IRON_BUNDLE, METAGROSS]
 STAGE_STARS = (
     (1, 2),
     (1, 2, 3),
@@ -66,7 +68,7 @@ def parse_event(path):
         if boss['TalentType'] == 0:
             raise ValueError('Unexpected talent type')
         # Hacks for pseudo-fixed genders
-        sex = boss['Sex'] if boss['DevId'] != IRON_BUNDLE else 3
+        sex = boss['Sex'] if boss['DevId'] not in GENDERLESS else 3
         packed = pack('<HBBBBBBHHHHBBBB',
              boss['DevId'],
              boss['FormId'],
