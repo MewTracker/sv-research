@@ -85,4 +85,5 @@ static const char *event_names[] =
     "Shiny Chi-Yu Spotlight",
     "Iron Valiant the Unrivaled and Roaring Moon the Unrivaled",
     "Hydreigon the Unrivaled",
+    "Goodra the Unrivaled",
 };
