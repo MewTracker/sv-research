@@ -86,4 +86,5 @@ static const char *event_names[] =
     "Iron Valiant the Unrivaled and Roaring Moon the Unrivaled",
     "Hydreigon the Unrivaled",
     "Goodra the Unrivaled",
+    "Dragapult the Unrivaled",
 };
